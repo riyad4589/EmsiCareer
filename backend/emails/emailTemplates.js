@@ -125,3 +125,76 @@ export function rejectionAccountTemplate(name, emailEdu){
 </body>
 </html>`
 }
+
+
+
+export const createNewOfferEmailTemplate = (name, offer) => {
+  return `
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle offre d'emploi disponible</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #3ab957; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+    <img src="https://alpharepgroup.com/emsi/images/ajax-document-loader.png" alt="EMSI Logo" style="width: 250px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+    <h1 style="color: white; margin: 0; font-size: 28px;">📢 Nouvelle offre !</h1>
+  </div>
+  <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <p style="font-size: 18px; color: #005baa;"><strong>Bonjour ${name}</strong></p>
+    <p>Excellente nouvelle ! Une nouvelle offre d'emploi vient d'être publiée sur EMSI Career par <strong>${offer.author?.companyName || "un recruteur EMSI"}</strong>.</p>
+   
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #005baa;">
+      <p style="font-size: 16px; margin: 0; color: #005baa;"><strong>💼 Détails de l'offre :</strong></p>
+      
+      <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa; width: 35%;">📌 Titre :</td>
+          <td style="padding: 8px 0;">${offer.titre}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">📍 Localisation :</td>
+          <td style="padding: 8px 0;">${offer.localisation}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">📝 Type de contrat :</td>
+          <td style="padding: 8px 0;">${offer.typeContrat}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🎯 Compétences :</td>
+          <td style="padding: 8px 0;">${offer.competencesRequises}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">⏳ Date limite :</td>
+          <td style="padding: 8px 0;">${offer.dateExpiration}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🏢 Entreprise :</td>
+          <td style="padding: 8px 0;">${offer.author?.companyName}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🌐 Secteur :</td>
+          <td style="padding: 8px 0;">${offer.author?.industry}}</td>
+        </tr>
+      </table>
+    </div>
+    
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <p style="font-size: 16px; margin: 0 0 15px 0; color: #1565c0;"><strong>🎯 Ne manquez pas cette opportunité :</strong></p>
+      <a href="{{offerUrl}}" style="background-color: #005baa; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Voir l'offre et postuler</a>
+    </div>
+    
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+      <p style="font-size: 14px; margin: 0; color: #856404;"><strong>💡 Conseil :</strong> Postulez rapidement ! Les meilleures offres sont souvent pourvues en premier.</p>
+    </div>
+    
+    <p>Nous vous souhaitons beaucoup de succès dans votre recherche d'emploi !</p>
+   
+    <p>Cordialement,<br><strong>L'équipe Carrière EMSI</strong></p>
+  </div>
+</body>
+</html>
+  `;
+};

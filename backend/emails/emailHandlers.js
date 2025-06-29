@@ -6,6 +6,8 @@ import { mailtrapClient,sender } from "../lib/mailtrap.js";
 import { createPendingValidationEmailTemplate } from "./emailTemplates.js"
 import { validationAccountleaureatTemplate } from "./emailTemplates.js"
 import { rejectionAccountTemplate } from "./emailTemplates.js"
+import { createNewOfferEmailTemplate } from "./emailTemplates.js";
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -150,3 +152,27 @@ export const sendRejectionEmail = async (emailPersonelle, name, emailEdu) => {
 	}
 };
 
+
+export const sendNewOfferEmailToLaureat = async (laureat, offer) => {
+  const targetEmail = laureat.emailPersonelle;
+
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    console.warn(`❌ Email invalide pour ${laureat.name}`);
+    return;
+  }
+
+
+  try {
+    const response = await mailtrapClient.send({
+      from: sender,
+      to: [{ email: targetEmail }],
+      subject: `📢 Nouvelle offre : ${offer.titre}`,
+      html: createNewOfferEmailTemplate(laureat.name, offer),
+      category: "new-offer"
+    });
+
+    console.log(`📬 Email envoyé à ${laureat.name} (${targetEmail})`);
+  } catch (error) {
+    console.error("Erreur lors de l’envoi de l’email : ", error.message);
+  }
+};
