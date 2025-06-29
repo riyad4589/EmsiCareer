@@ -44,6 +44,21 @@ export const getSuggestedConnections = async (req, res) => {
 	}
 };
 
+export const getProfile = async (req, res) => {
+	try {
+		const user = await User.findById(req.user._id).select("-password");
+		
+		if (!user) {
+			return res.status(404).json({ message: "Utilisateur non trouvé" });
+		}
+
+		res.json(user);
+	} catch (error) {
+		console.error("Error in getProfile controller:", error);
+		res.status(500).json({ message: "Erreur serveur" });
+	}
+};
+
 export const getPublicProfile = async (req, res) => {
 	try {
 		const user = await User.findOne({ username: req.params.username }).select("-password");
@@ -70,7 +85,14 @@ export const updateProfile = async (req, res) => {
 			"skills",
 			"experience",
 			"education",
-			"cv"
+			"cv",
+			// Champs spécifiques aux recruteurs
+			"companyName",
+			"industry",
+			"description",
+			"website",
+			"emailPersonelle",
+			"socialLinks"
 		];
 
 		const updatedData = {};
@@ -95,6 +117,8 @@ export const updateProfile = async (req, res) => {
 							startYear: edu.startYear ? parseInt(edu.startYear) : null,
 							endYear: edu.endYear ? parseInt(edu.endYear) : null
 						}));
+					} else if (field === 'socialLinks') {
+						updatedData[field] = JSON.parse(req.body[field]);
 					} else {
 						updatedData[field] = req.body[field];
 					}
