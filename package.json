@@ -1,0 +1,36 @@
+{
+	"name": "linkedin-clone",
+	"version": "1.0.0",
+	"description": "",
+	"main": "backend/server.js",
+	"scripts": {
+		"dev": "nodemon backend/server.js",
+		"start": "node backend/server.js",
+		"build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+	},
+	"keywords": [],
+	"author": "",
+	"type": "module",
+	"license": "ISC",
+	"dependencies": {
+		"@giphy/js-fetch-api": "^5.6.0",
+		"bcrypt": "^6.0.0",
+		"bcryptjs": "^2.4.3",
+		"cloudinary": "^2.4.0",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"date-fns": "^4.1.0",
+		"dotenv": "^16.4.5",
+		"emoji-picker-react": "^4.12.2",
+		"express": "^4.19.2",
+		"express-fileupload": "^1.5.1",
+		"jsonwebtoken": "^9.0.2",
+		"mailtrap": "^3.4.0",
+		"mongoose": "^8.6.1",
+		"nodemailer": "^6.10.1",
+		"socket.io": "^4.8.1"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.4"
+	}
+}
