@@ -9,10 +9,10 @@ import RecommendedUsers from "../components/RecommendedUsers";
 const HomePage = () => {
 	const { user } = useAuth();
 
-	const { data: posts, isLoading: postsLoading } = useQuery({
+	const { data: posts, isLoading } = useQuery({
 		queryKey: ["posts"],
 		queryFn: async () => {
-			const response = await axiosInstance.get("/posts");
+			const response = await axiosInstance.get("/posts/only");
 			return response.data;
 		},
 		enabled: !!user,
@@ -26,7 +26,7 @@ const HomePage = () => {
 		);
 	}
 
-	if (postsLoading) {
+	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<Spinner />

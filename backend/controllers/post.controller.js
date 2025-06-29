@@ -456,3 +456,25 @@ export const getJobPostApplications = async (req, res) => {
 		});
 	}
 };
+
+// Endpoint pour récupérer uniquement les posts classiques
+export const getOnlyPosts = async (req, res) => {
+	try {
+		const posts = await Post.find()
+			.populate("author", "name username profilePicture headline role companyName industry")
+			.populate("comments.user", "name profilePicture")
+			.sort({ createdAt: -1 });
+		// Filtrer les posts sans auteur
+		const validPosts = posts.filter(post => post.author);
+		res.status(200).json({
+			success: true,
+			data: validPosts
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			message: "Erreur lors de la récupération des posts",
+			error: error.message
+		});
+	}
+};

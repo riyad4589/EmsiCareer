@@ -10,6 +10,7 @@ import {
 	sharePost,
 	applyToJobPost,
 	getJobPostApplications,
+	getOnlyPosts,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -25,5 +26,7 @@ router.post("/:postId/share", protect, sharePost);
 // Routes pour les posts de recruteurs
 router.post("/:postId/apply", protect, applyToJobPost);
 router.get("/:postId/applications", protect, getJobPostApplications);
+
+router.get("/only", protect, getOnlyPosts);
 
 export default router;

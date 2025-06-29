@@ -68,9 +68,11 @@ const PostList = ({ posts }) => {
 		);
 	}
 
+	const validPosts = posts.data.filter(post => post.author && post.author.name);
+
 	return (
 		<div className="space-y-6">
-			{posts.data.map((post) => (
+			{validPosts.map((post) => (
 				<div key={post._id} className="bg-white rounded-lg shadow p-6">
 					<div className="flex items-center space-x-4 mb-4">
 						<img
