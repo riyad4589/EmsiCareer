@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Heart, MessageCircle, Share2, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, Users } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
@@ -68,6 +68,8 @@ const PostList = ({ posts }) => {
 		);
 	}
 
+
+	
 	const validPosts = posts.data.filter(post => post.author && post.author.name);
 
 	return (

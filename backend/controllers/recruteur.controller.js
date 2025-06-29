@@ -18,6 +18,7 @@ export const createOffer = async (req, res) => {
     } = req.body;
 
     let imageUrl = null;
+    let mediasUrls = [];
 
     if (req.files && req.files.image) {
       const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
@@ -29,6 +30,18 @@ export const createOffer = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
+    if (req.files && req.files.medias) {
+      const files = Array.isArray(req.files.medias) ? req.files.medias : [req.files.medias];
+      for (const file of files) {
+        const isVideo = file.mimetype.startsWith('video/');
+        const result = await cloudinary.uploader.upload(file.tempFilePath, {
+          folder: "offres",
+          resource_type: isVideo ? "video" : "image",
+        });
+        mediasUrls.push(result.secure_url);
+      }
+    }
+
     const newOffer = new Offre({
       author: req.user._id,
       titre,
@@ -38,6 +51,7 @@ export const createOffer = async (req, res) => {
       competencesRequises,
       dateExpiration,
       image: imageUrl,
+      medias: mediasUrls,
     });
 
     await newOffer.save();

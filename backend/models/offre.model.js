@@ -40,8 +40,9 @@ const offreSchema = new mongoose.Schema(
       required: true,
     },
 
-    image: {
-      type: String, // optionnel, comme un post
+    medias: {
+      type: [String], // URLs Cloudinary (images, vidéos, gifs)
+      default: [],
     },
 
     likes: [
@@ -96,7 +97,7 @@ offreSchema.index({ author: 1 });
 offreSchema.index({ createdAt: -1 });
 offreSchema.index({ likes: 1 });
 
-// Nettoyage à l’export
+// Nettoyage à l'export
 offreSchema.methods.toJSON = function () {
   const offre = this.toObject();
   delete offre.__v;
