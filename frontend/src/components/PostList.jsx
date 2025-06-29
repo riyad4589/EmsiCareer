@@ -74,12 +74,12 @@ const PostList = ({ posts }) => {
 				<div key={post._id} className="bg-white rounded-lg shadow p-6">
 					<div className="flex items-center space-x-4 mb-4">
 						<img
-							src={post.author.profilePicture || "/default-avatar.png"}
-							alt={post.author.name}
+							src={post.author?.profilePicture || "/default-avatar.png"}
+							alt={post.author?.name || "Utilisateur"}
 							className="w-12 h-12 rounded-full"
 						/>
 						<div>
-							<h3 className="font-medium">{post.author.name}</h3>
+							<h3 className="font-medium">{post.author?.name || "Utilisateur inconnu"}</h3>
 							<p className="text-sm text-gray-500">
 								{formatDistanceToNow(new Date(post.createdAt), {
 									addSuffix: true,
@@ -154,14 +154,14 @@ const PostList = ({ posts }) => {
 										className="flex items-start space-x-3 bg-gray-50 p-3 rounded-lg"
 									>
 										<img
-											src={comment.user.profilePicture || "/default-avatar.png"}
-											alt={comment.user.name}
+											src={comment.user?.profilePicture || "/default-avatar.png"}
+											alt={comment.user?.name || "Utilisateur"}
 											className="w-8 h-8 rounded-full"
 										/>
 										<div className="flex-1">
 											<div className="flex items-center space-x-2">
 												<h4 className="font-medium text-sm">
-													{comment.user.name}
+													{comment.user?.name || "Utilisateur inconnu"}
 												</h4>
 												<span className="text-xs text-gray-500">
 													{formatDistanceToNow(new Date(comment.createdAt), {

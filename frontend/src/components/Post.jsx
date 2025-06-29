@@ -20,7 +20,7 @@ const Post = ({ post }) => {
 	const [showApplyModal, setShowApplyModal] = useState(false);
 	const [cv, setCv] = useState("");
 	const [lettreMotivation, setLettreMotivation] = useState("");
-	const isOwner = authUser?._id === post.author._id;
+	const isOwner = authUser?._id === post.author?._id;
 	const isLiked = post.likes?.includes(authUser?._id) || false;
 	
 	// Détecter si c'est une offre d'emploi
@@ -148,8 +148,8 @@ const Post = ({ post }) => {
 							<Link to={`/profile/${post?.author?.username}`} className="group">
 								<div className="relative">
 									<img
-										src={post.author.profilePicture || "/avatar.png"}
-										alt={post.author.name}
+										src={post.author?.profilePicture || "/avatar.png"}
+										alt={post.author?.name || "Utilisateur"}
 										className='size-10 rounded-full mr-3 object-cover border-2 border-transparent group-hover:border-primary transition-colors duration-200'
 									/>
 									<div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
@@ -165,9 +165,9 @@ const Post = ({ post }) => {
 									to={`/profile/${post?.author?.username}`}
 									className='font-semibold hover:text-primary transition-colors duration-200'
 								>
-									{post.author.name}
+									{post.author?.name || "Utilisateur inconnu"}
 								</Link>
-								<p className='text-xs text-info'>{post.author.headline}</p>
+								<p className='text-xs text-info'>{post.author?.headline || ""}</p>
 								<p className='text-xs text-info'>
 									{formatDistanceToNow(new Date(post.createdAt), { 
 										addSuffix: true,
@@ -267,7 +267,7 @@ const Post = ({ post }) => {
 						/>
 
 						{/* Bouton Postuler pour les offres d'emploi */}
-						{isOffre && !isOwner && post.author.role === "recruteur" && (
+						{isOffre && !isOwner && post.author?.role === "recruteur" && (
 							<PostAction
 								icon={<Briefcase size={18} />}
 								text={hasApplied ? "Déjà postulé" : "Postuler"}
@@ -291,20 +291,20 @@ const Post = ({ post }) => {
 							{comments.length > 0 ? (
 								comments.map((comment) => (
 									<div key={comment._id} className='bg-base-100 p-3 rounded-lg flex items-start gap-3'>
-										<Link to={`/profile/${comment.user.username}`} className="flex-shrink-0">
+										<Link to={`/profile/${comment.user?.username}`} className="flex-shrink-0">
 											<img
-												src={comment.user.profilePicture || "/avatar.png"}
-												alt={comment.user.name}
+												src={comment.user?.profilePicture || "/avatar.png"}
+												alt={comment.user?.name || "Utilisateur"}
 												className='w-8 h-8 rounded-full object-cover border-2 border-transparent hover:border-primary transition-colors duration-200'
 											/>
 										</Link>
 										<div className='flex-grow'>
 											<div className='flex items-center gap-2 mb-1'>
 												<Link 
-													to={`/profile/${comment.user.username}`}
+													to={`/profile/${comment.user?.username}`}
 													className='font-semibold hover:text-primary transition-colors duration-200'
 												>
-													{comment.user.name}
+													{comment.user?.name || "Utilisateur inconnu"}
 												</Link>
 												<span className='text-xs text-info'>
 													{formatDistanceToNow(new Date(comment.createdAt), { 
