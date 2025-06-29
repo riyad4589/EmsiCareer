@@ -89,6 +89,16 @@ const OfferList = ({ offres }) => {
               </div>
             </div>
           )}
+          {/* Affichage du média (image, gif ou vidéo) */}
+          {offre.image && (
+            <div className="mb-4">
+              {offre.image.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                <video src={offre.image} controls className="w-full max-h-64 rounded-lg object-contain" />
+              ) : (
+                <img src={offre.image} alt="Média de l'offre" className="w-full max-h-64 rounded-lg object-contain" />
+              )}
+            </div>
+          )}
           <div className="flex items-center space-x-6 text-gray-500 mb-2">
             <button
               onClick={() => likeMutation.mutate(offre._id)}

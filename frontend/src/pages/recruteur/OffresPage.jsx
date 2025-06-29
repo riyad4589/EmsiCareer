@@ -36,6 +36,12 @@ const OffresPage = () => {
     const [editCompetence, setEditCompetence] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [mediaFiles, setMediaFiles] = useState([]);
+    const [mediaPreviews, setMediaPreviews] = useState([]);
+    const [mediaTypes, setMediaTypes] = useState([]);
+    const [editMediaFile, setEditMediaFile] = useState(null);
+    const [editMediaPreview, setEditMediaPreview] = useState(null);
+    const [editMediaType, setEditMediaType] = useState(null);
 
     const createOfferMutation = useMutation({
         mutationFn: (offerData) => axiosInstance.post("/recruteur/offres", offerData),
@@ -116,17 +122,49 @@ const OffresPage = () => {
         }));
     };
 
+    const handleMediaChange = (e) => {
+        const files = Array.from(e.target.files);
+        const previews = [];
+        const types = [];
+        files.forEach(file => {
+            types.push(file.type.startsWith('video/') ? 'video' : 'image');
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setMediaPreviews(prev => [...prev, reader.result]);
+            };
+            reader.readAsDataURL(file);
+        });
+        setMediaFiles(prev => [...prev, ...files]);
+        setMediaTypes(prev => [...prev, ...types]);
+    };
+
+    const handleRemoveMedia = (index) => {
+        setMediaFiles(prev => prev.filter((_, i) => i !== index));
+        setMediaPreviews(prev => prev.filter((_, i) => i !== index));
+        setMediaTypes(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleCreateOffer = async (e) => {
         e.preventDefault();
-        
         if (!newOffer.titre || !newOffer.description || !newOffer.localisation || !newOffer.dateExpiration) {
             toast.error("Veuillez remplir tous les champs obligatoires");
             return;
         }
-
         setIsSubmitting(true);
         try {
-            await createOfferMutation.mutateAsync(newOffer);
+            const formData = new FormData();
+            formData.append("titre", newOffer.titre);
+            formData.append("description", newOffer.description);
+            formData.append("localisation", newOffer.localisation);
+            formData.append("typeContrat", newOffer.typeContrat);
+            formData.append("dateExpiration", newOffer.dateExpiration);
+            formData.append("competencesRequises", JSON.stringify(newOffer.competencesRequises));
+            if (mediaFiles.length > 0) {
+                mediaFiles.forEach((file, idx) => {
+                    formData.append("medias", file);
+                });
+            }
+            await createOfferMutation.mutateAsync(formData);
         } finally {
             setIsSubmitting(false);
         }
@@ -142,9 +180,17 @@ const OffresPage = () => {
 
         setIsEditing(true);
         try {
+            const formData = new FormData();
+            formData.append("titre", editingOffer.titre);
+            formData.append("description", editingOffer.description);
+            formData.append("localisation", editingOffer.localisation);
+            formData.append("typeContrat", editingOffer.typeContrat);
+            formData.append("dateExpiration", editingOffer.dateExpiration);
+            formData.append("competencesRequises", JSON.stringify(editingOffer.competencesRequises));
+            if (editMediaFile) formData.append("image", editMediaFile);
             await updateOfferMutation.mutateAsync({
                 offerId: editingOffer._id,
-                offerData: editingOffer
+                offerData: formData
             });
         } finally {
             setIsEditing(false);
@@ -320,18 +366,39 @@ const OffresPage = () => {
                                 )}
                             </div>
 
-                            {/* Image (optionnel) */}
+                            {/* Médias (optionnel) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    URL de l'image (optionnel)
+                                    Médias (images, gifs ou vidéos, optionnel)
                                 </label>
                                 <input
-                                    type="url"
+                                    type="file"
+                                    accept="image/*,video/*"
+                                    multiple
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={newOffer.image}
-                                    onChange={e => setNewOffer({ ...newOffer, image: e.target.value })}
-                                    placeholder="https://exemple.com/image.jpg"
+                                    onChange={handleMediaChange}
                                 />
+                                {mediaPreviews.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-4">
+                                        {mediaPreviews.map((preview, idx) => (
+                                            <div key={idx} className="relative group">
+                                                <button
+                                                    type="button"
+                                                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow group-hover:bg-red-100"
+                                                    onClick={() => handleRemoveMedia(idx)}
+                                                    title="Supprimer ce média"
+                                                >
+                                                    <X className="w-5 h-5 text-red-600" />
+                                                </button>
+                                                {mediaTypes[idx] === 'video' ? (
+                                                    <video src={preview} controls className="w-48 h-32 object-cover rounded" />
+                                                ) : (
+                                                    <img src={preview} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Boutons */}
@@ -489,18 +556,67 @@ const OffresPage = () => {
                                 )}
                             </div>
 
-                            {/* Image (optionnel) */}
+                            {/* Média (optionnel) pour modification */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    URL de l'image (optionnel)
+                                    Média (image, gif ou vidéo, optionnel)
                                 </label>
                                 <input
-                                    type="url"
+                                    type="file"
+                                    accept="image/*,video/*"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editingOffer.image || ""}
-                                    onChange={e => setEditingOffer({ ...editingOffer, image: e.target.value })}
-                                    placeholder="https://exemple.com/image.jpg"
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        setEditMediaFile(file);
+                                        if (file) {
+                                            setEditMediaType(file.type.startsWith('video/') ? 'video' : 'image');
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => setEditMediaPreview(reader.result);
+                                            reader.readAsDataURL(file);
+                                        } else {
+                                            setEditMediaPreview(null);
+                                            setEditMediaType(null);
+                                        }
+                                    }}
                                 />
+                                {/* Aperçu du média sélectionné pour modification */}
+                                {editMediaPreview ? (
+                                    <div className="mt-2 flex items-center gap-4">
+                                        {editMediaType === 'video' ? (
+                                            <video src={editMediaPreview} controls className="w-48 h-32 object-cover rounded" />
+                                        ) : (
+                                            <img src={editMediaPreview} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
+                                        )}
+                                        <button
+                                            type="button"
+                                            className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                            onClick={() => {
+                                                setEditMediaFile(null);
+                                                setEditMediaPreview(null);
+                                                setEditMediaType(null);
+                                            }}
+                                        >
+                                            Supprimer le média
+                                        </button>
+                                    </div>
+                                ) : (
+                                    editingOffer.image && (
+                                        <div className="mt-2 flex items-center gap-4">
+                                            {editingOffer.image.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                                <video src={editingOffer.image} controls className="w-48 h-32 object-cover rounded" />
+                                            ) : (
+                                                <img src={editingOffer.image} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                onClick={() => setEditingOffer({ ...editingOffer, image: "" })}
+                                            >
+                                                Supprimer le média
+                                            </button>
+                                        </div>
+                                    )
+                                )}
                             </div>
 
                             {/* Boutons */}
