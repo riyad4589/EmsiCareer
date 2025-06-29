@@ -8,7 +8,8 @@ import {
   likeOffer,
   unlikeOffer,
   addComment,
-  applyToOffer
+  applyToOffer,
+  getJobPostApplications
 } from "../controllers/offres.controller.js";
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.post("/:id/like", protect, likeOffer);
 router.delete("/:id/like", protect, unlikeOffer);
 router.post("/:id/comments", protect, addComment);
 router.post("/:id/apply", protect, applyToOffer);
+router.get("/:id/applications", protect, getJobPostApplications);
 
 export default router; 

@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
-import { Plus, X, MapPin, Calendar, Briefcase, Users, Trash2, Edit } from "lucide-react";
+import { Plus, X, MapPin, Calendar, Briefcase, Trash2, Edit, Users, CheckCircle, XCircle, Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { getDownloadUrl } from "../../utils/cloudinary";
 
 const OffresPage = () => {
     const queryClient = useQueryClient();
@@ -42,6 +43,59 @@ const OffresPage = () => {
     const [editMediaFile, setEditMediaFile] = useState(null);
     const [editMediaPreview, setEditMediaPreview] = useState(null);
     const [editMediaType, setEditMediaType] = useState(null);
+    const [selectedOffer, setSelectedOffer] = useState(null);
+    const [applications, setApplications] = useState([]);
+    const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
+    const [loadingApplications, setLoadingApplications] = useState(false);
+    const [applicationsError, setApplicationsError] = useState("");
+
+    // Fonction pour forcer le téléchargement depuis Cloudinary
+    const downloadFile = async (url, filename) => {
+        try {
+            console.log('Tentative de téléchargement:', url);
+            
+            // Essayer d'abord avec fetch
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/pdf,application/octet-stream,*/*'
+                }
+            });
+            
+            console.log('Réponse fetch:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            console.log('Blob créé:', blob.size, 'bytes');
+            
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+            
+            toast.success('Téléchargement en cours...');
+        } catch (error) {
+            console.error('Erreur de téléchargement détaillée:', error);
+            
+            // Fallback: ouvrir dans un nouvel onglet
+            try {
+                console.log('Tentative de fallback avec window.open');
+                window.open(url, '_blank');
+                toast.success('Fichier ouvert dans un nouvel onglet. Utilisez Ctrl+S pour le sauvegarder.');
+            } catch (fallbackError) {
+                console.error('Erreur fallback:', fallbackError);
+                toast.error(`Erreur lors du téléchargement: ${error.message}`);
+            }
+        }
+    };
 
     const createOfferMutation = useMutation({
         mutationFn: (offerData) => axiosInstance.post("/recruteur/offres", offerData),
@@ -160,7 +214,7 @@ const OffresPage = () => {
             formData.append("dateExpiration", newOffer.dateExpiration);
             formData.append("competencesRequises", JSON.stringify(newOffer.competencesRequises));
             if (mediaFiles.length > 0) {
-                mediaFiles.forEach((file, idx) => {
+                mediaFiles.forEach((file) => {
                     formData.append("medias", file);
                 });
             }
@@ -213,6 +267,48 @@ const OffresPage = () => {
             competencesRequises: [...(offre.competencesRequises || [])]
         });
         setIsEditModalOpen(true);
+    };
+
+    const openApplicationsModal = async (offre) => {
+        console.log("Ouverture de la modale pour l'offre:", offre._id);
+        setSelectedOffer(offre);
+        setIsApplicationsModalOpen(true);
+        setLoadingApplications(true);
+        setApplicationsError("");
+        try {
+            console.log("Appel API pour récupérer les candidatures...");
+            const res = await axiosInstance.get(`/offres/${offre._id}/applications`);
+            console.log("Réponse API:", res.data);
+            
+            // Gérer la nouvelle structure de réponse
+            const candidatures = res.data.data || res.data.applications || res.data;
+            console.log("Candidatures extraites:", candidatures);
+            
+            setApplications(candidatures);
+            
+            if (!candidatures || candidatures.length === 0) {
+                setApplicationsError("Aucune candidature trouvée pour cette offre.");
+            }
+        } catch (e) {
+            console.error("Erreur lors de la récupération des candidatures:", e);
+            console.error("Détails de l'erreur:", e.response?.data);
+            setApplications([]);
+            
+            if (e.response?.status === 403) {
+                setApplicationsError("Vous n'êtes pas autorisé à voir les candidatures de cette offre.");
+            } else if (e.response?.status === 404) {
+                setApplicationsError("Offre non trouvée.");
+            } else {
+                setApplicationsError(`Erreur lors de la récupération des candidatures (${e.response?.status || "?"}): ${e.response?.data?.message || e.message}`);
+            }
+        }
+        setLoadingApplications(false);
+    };
+
+    const closeApplicationsModal = () => {
+        setIsApplicationsModalOpen(false);
+        setSelectedOffer(null);
+        setApplications([]);
     };
 
     if (isLoading) {
@@ -645,98 +741,168 @@ const OffresPage = () => {
             )}
 
             {/* Liste des offres */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="flex flex-col gap-8 mt-8">
                 {offres && offres.length > 0 ? (
-                    <div className="divide-y divide-gray-200">
-                        {offres.map((offre) => (
-                            <div key={offre._id} className="p-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <h3 className="text-xl font-semibold text-gray-900">{offre.titre}</h3>
-                                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                                {offre.typeContrat}
-                                            </span>
+                    offres.map((offre) => (
+                        <div key={offre._id} className="relative group">
+                            <div
+                                className="bg-white rounded-xl shadow-lg p-6 flex flex-col h-full cursor-pointer hover:shadow-2xl transition-shadow w-full"
+                                onClick={() => openApplicationsModal(offre)}
+                            >
+                                <div className="flex-1 flex flex-col">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <h3 className="text-xl font-semibold text-gray-900">{offre.titre}</h3>
+                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                            {offre.typeContrat}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                                        <div className="flex items-center gap-1">
+                                            <MapPin size={16} />
+                                            {offre.localisation}
                                         </div>
-                                        
-                                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                                            <div className="flex items-center gap-1">
-                                                <MapPin size={16} />
-                                                {offre.localisation}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Calendar size={16} />
-                                                Expire le {new Date(offre.dateExpiration).toLocaleDateString()}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <Users size={16} />
-                                                {offre.candidatures?.length || 0} candidature(s)
+                                        <div className="flex items-center gap-1">
+                                            <Calendar size={16} />
+                                            Expire le {new Date(offre.dateExpiration).toLocaleDateString()}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Users size={16} />
+                                            {offre.candidatures?.length || 0} candidature(s)
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-600 mb-3 line-clamp-4">{offre.description}</p>
+                                    {offre.competencesRequises?.length > 0 && (
+                                        <div className="mb-3">
+                                            <span className="text-sm font-medium text-gray-700">Compétences requises :</span>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {offre.competencesRequises.map((comp, index) => (
+                                                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                                        {comp}
+                                                    </span>
+                                                ))}
                                             </div>
                                         </div>
-
-                                        <p className="text-gray-600 mb-3">{offre.description}</p>
-
-                                        {offre.competencesRequises?.length > 0 && (
-                                            <div className="mb-3">
-                                                <span className="text-sm font-medium text-gray-700">Compétences requises :</span>
-                                                <div className="flex flex-wrap gap-1 mt-1">
-                                                    {offre.competencesRequises.map((comp, index) => (
-                                                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                                                            {comp}
-                                                        </span>
-                                                    ))}
+                                    )}
+                                    {/* Galerie de médias */}
+                                    {offre.medias && offre.medias.length > 0 && (
+                                        <div className="mb-4 flex gap-4 flex-wrap">
+                                            {offre.medias.map((mediaUrl, idx) => (
+                                                <div key={idx} className="">
+                                                    {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                                        <video src={mediaUrl} controls className="w-48 h-32 object-cover rounded" />
+                                                    ) : (
+                                                        <img src={mediaUrl} alt="Média de l'offre" className="w-32 h-32 object-cover rounded" />
+                                                    )}
                                                 </div>
-                                            </div>
-                                        )}
-
-                                        {offre.image && (
-                                            <img 
-                                                src={offre.image} 
-                                                alt="Offre" 
-                                                className="w-full max-w-xs rounded-lg"
-                                            />
-                                        )}
-                                    </div>
-                                    
-                                    {/* Boutons d'action */}
-                                    <div className="flex flex-col gap-2 ml-4">
-                                        <button
-                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                            title="Modifier l'offre"
-                                            onClick={() => openEditModal(offre)}
-                                            disabled={updateOfferMutation.isPending}
-                                        >
-                                            {updateOfferMutation.isPending ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                            ) : (
-                                                <Edit size={18} />
-                                            )}
-                                        </button>
-                                        <button
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Supprimer l'offre"
-                                            onClick={() => handleDeleteOffer(offre._id, offre.titre)}
-                                            disabled={deleteOfferMutation.isPending}
-                                        >
-                                            {deleteOfferMutation.isPending ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                                            ) : (
-                                                <Trash2 size={18} />
-                                            )}
-                                        </button>
-                                    </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            {/* Boutons d'action, positionnés en haut à droite, non cliquables sur la carte */}
+                            <div className="absolute top-2 right-2 flex flex-row gap-2 z-10">
+                                <button
+                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    title="Modifier l'offre"
+                                    onClick={e => { e.stopPropagation(); openEditModal(offre); }}
+                                    disabled={updateOfferMutation.isPending}
+                                >
+                                    {updateOfferMutation.isPending ? (
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                    ) : (
+                                        <Edit size={18} />
+                                    )}
+                                </button>
+                                <button
+                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Supprimer l'offre"
+                                    onClick={e => { e.stopPropagation(); handleDeleteOffer(offre._id, offre.titre); }}
+                                    disabled={deleteOfferMutation.isPending}
+                                >
+                                    {deleteOfferMutation.isPending ? (
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                    ) : (
+                                        <Trash2 size={18} />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    ))
                 ) : (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-8 text-center text-gray-500 col-span-full">
                         <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <p className="text-lg font-medium">Aucune offre d'emploi</p>
                         <p className="text-sm">Créez votre première offre d'emploi pour commencer à recruter</p>
                     </div>
                 )}
             </div>
+
+            {isApplicationsModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+                        <h2 className="text-xl font-bold mb-4">Candidatures pour : {selectedOffer?.titre}</h2>
+                        {loadingApplications ? (
+                            <div className="text-center py-8">Chargement...</div>
+                        ) : applicationsError ? (
+                            <div className="text-center py-8 text-red-500">{applicationsError}</div>
+                        ) : applications.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">Aucune postulation pour cette offre</div>
+                        ) : (
+                            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                                {applications.map((candidature, idx) => (
+                                    <div key={candidature._id || idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 bg-gray-50">
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-blue-800">{candidature.laureat?.name || 'Utilisateur'}</div>
+                                            <div className="text-xs text-gray-500 mb-2">{candidature.laureat?.emailEdu}</div>
+                                            <div className="flex gap-2 mb-1">
+                                                {candidature.cv && (
+                                                    <button
+                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                        onClick={(e) => { e.stopPropagation(); downloadFile(candidature.cv, 'CV.pdf'); }}
+                                                    >
+                                                        <Eye size={14} />
+                                                        Voir le CV
+                                                    </button>
+                                                )}
+                                                {candidature.lettreMotivation && (
+                                                    <button
+                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                        onClick={(e) => { e.stopPropagation(); downloadFile(candidature.lettreMotivation, 'Lettre de motivation.pdf'); }}
+                                                    >
+                                                        <Eye size={14} />
+                                                        Voir La Lettre De Motivation
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                className="flex items-center gap-2 px-5 py-2 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 hover:scale-105 transition-all duration-150 font-semibold text-base"
+                                                onClick={() => {/* Action Valider ici */}}
+                                            >
+                                                <CheckCircle className="w-5 h-5" /> Valider
+                                            </button>
+                                            <button
+                                                className="flex items-center gap-2 px-5 py-2 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 hover:scale-105 transition-all duration-150 font-semibold text-base"
+                                                onClick={() => {/* Action Refuser ici */}}
+                                            >
+                                                <XCircle className="w-5 h-5" /> Refuser
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <button
+                            className="absolute top-4 right-4 text-gray-400 hover:text-red-600 text-2xl"
+                            onClick={closeApplicationsModal}
+                            title="Fermer"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

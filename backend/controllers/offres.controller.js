@@ -131,8 +131,6 @@ export const addComment = async (req, res) => {
 };
 
 // ✅ Postuler à une offre
-
-
 export const applyToOffer = async (req, res) => {
   try {
     const offer = await Offre.findById(req.params.id);
@@ -159,7 +157,8 @@ export const applyToOffer = async (req, res) => {
       const cvResult = await cloudinary.uploader.upload(req.files.cv.tempFilePath, {
         folder: "cv",
         resource_type: "raw",
-         use_filename: true,         // 👈 garde le nom du fichier local
+        type: "upload",
+        use_filename: true,         // 👈 garde le nom du fichier local
         unique_filename: false,
         filename_override: req.files.cv.name  
       });
@@ -171,8 +170,9 @@ export const applyToOffer = async (req, res) => {
       const lmResult = await cloudinary.uploader.upload(req.files.lettreMotivation.tempFilePath, {
         folder: "lettres",
         resource_type: "raw",
-         use_filename: true,         // 👈 garde le nom du fichier local
-         unique_filename: false, 
+        type: "upload",
+        use_filename: true,         // 👈 garde le nom du fichier local
+        unique_filename: false, 
         filename_override: req.files.lettreMotivation.name
       });
       lettreMotivationUrl = lmResult.secure_url;
@@ -190,6 +190,43 @@ export const applyToOffer = async (req, res) => {
     res.status(201).json({ message: "Candidature envoyée avec succès" });
   } catch (error) {
     console.error("Erreur postulation:", error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+export const getJobPostApplications = async (req, res) => {
+  try {
+    console.log("Récupération des candidatures pour l'offre:", req.params.id);
+    console.log("Utilisateur connecté:", req.user._id);
+    
+    const offre = await Offre.findById(req.params.id).populate({
+      path: "candidatures.laureat",
+      select: "name email emailEdu"
+    });
+    
+    if (!offre) {
+      console.log("Offre non trouvée");
+      return res.status(404).json({ message: "Offre non trouvée" });
+    }
+    
+    console.log("Auteur de l'offre:", offre.author);
+    console.log("Nombre de candidatures:", offre.candidatures?.length || 0);
+    
+    // Vérifier que l'utilisateur connecté est l'auteur de l'offre
+    if (offre.author.toString() !== req.user._id.toString()) {
+      console.log("Accès non autorisé - l'utilisateur n'est pas l'auteur");
+      return res.status(403).json({ message: "Accès non autorisé" });
+    }
+    
+    console.log("Candidatures récupérées:", offre.candidatures);
+    
+    res.status(200).json({
+      success: true,
+      data: offre.candidatures || [],
+      count: offre.candidatures?.length || 0
+    });
+  } catch (error) {
+    console.error("Erreur dans getJobPostApplications:", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };

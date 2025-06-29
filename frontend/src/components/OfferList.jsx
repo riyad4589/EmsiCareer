@@ -89,14 +89,18 @@ const OfferList = ({ offres }) => {
               </div>
             </div>
           )}
-          {/* Affichage du média (image, gif ou vidéo) */}
-          {offre.image && (
-            <div className="mb-4">
-              {offre.image.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                <video src={offre.image} controls className="w-full max-h-64 rounded-lg object-contain" />
-              ) : (
-                <img src={offre.image} alt="Média de l'offre" className="w-full max-h-64 rounded-lg object-contain" />
-              )}
+          {/* Affichage des médias (images, gifs ou vidéos) */}
+          {offre.medias && offre.medias.length > 0 && (
+            <div className="mb-4 flex gap-4 flex-wrap">
+              {offre.medias.map((mediaUrl, idx) => (
+                <div key={idx} className="">
+                  {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                    <video src={mediaUrl} controls className="w-48 h-32 object-cover rounded" />
+                  ) : (
+                    <img src={mediaUrl} alt="Média de l'offre" className="w-32 h-32 object-cover rounded" />
+                  )}
+                </div>
+              ))}
             </div>
           )}
           <div className="flex items-center space-x-6 text-gray-500 mb-2">
