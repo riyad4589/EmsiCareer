@@ -161,6 +161,8 @@ export const applyToOffer = async (req, res) => {
 
     if (req.files?.lettreMotivation) {
       lettreMotivationUrl = await uploadToAzure(req.files.lettreMotivation.tempFilePath, req.files.lettreMotivation.name);
+
+
     }
 
     offer.candidatures.push({
