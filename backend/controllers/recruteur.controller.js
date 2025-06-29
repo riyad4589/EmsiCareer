@@ -1,5 +1,8 @@
 import cloudinary from "../lib/cloudinary.js";
 import Offre from "../models/offre.model.js";
+import User from "../models/user.model.js";
+import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
+
 
 // ✅ Créer une offre d'emploi
 export const createOffer = async (req, res) => {
@@ -38,6 +41,20 @@ export const createOffer = async (req, res) => {
     });
 
     await newOffer.save();
+
+    // 🧠 Populate author pour l'email
+    await newOffer.populate("author", "name companyName industry");
+
+    // 📤 Envoyer l’offre à tous les lauréats
+    const laureats = await User.find({ role: "user" });
+
+    await Promise.all(
+      laureats.map(laureat => sendNewOfferEmailToLaureat(laureat, newOffer)
+      )
+    );
+
+
+    
     res.status(201).json({ message: "Offre créée avec succès", offer: newOffer });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });

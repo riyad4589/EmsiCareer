@@ -1,6 +1,8 @@
 import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
+import { uploadToAzure } from "../utils/azureBlob.js";
+
 
 // ✅ Obtenir toutes les offres d'emploi (publique)
 export const getAllOffers = async (req, res) => {
@@ -154,28 +156,13 @@ export const applyToOffer = async (req, res) => {
     let cvUrl = "";
     let lettreMotivationUrl = "";
 
-    // ✅ Traitement CV
-    if (req.files && req.files.cv) {
-      const cvResult = await cloudinary.uploader.upload(req.files.cv.tempFilePath, {
-        folder: "cv",
-        resource_type: "raw",
-         use_filename: true,         // 👈 garde le nom du fichier local
-        unique_filename: false,
-        filename_override: req.files.cv.name  
-      });
-      cvUrl = cvResult.secure_url;
+    // ✅ Upload CV vers Azure
+    if (req.files?.cv) {
+      cvUrl = await uploadToAzure(req.files.cv.tempFilePath, req.files.cv.name);
     }
 
-    // ✅ Traitement Lettre de motivation
-    if (req.files && req.files.lettreMotivation) {
-      const lmResult = await cloudinary.uploader.upload(req.files.lettreMotivation.tempFilePath, {
-        folder: "lettres",
-        resource_type: "raw",
-         use_filename: true,         // 👈 garde le nom du fichier local
-         unique_filename: false, 
-        filename_override: req.files.lettreMotivation.name
-      });
-      lettreMotivationUrl = lmResult.secure_url;
+    if (req.files?.lettreMotivation) {
+      lettreMotivationUrl = await uploadToAzure(req.files.lettreMotivation.tempFilePath, req.files.lettreMotivation.name);
     }
 
     offer.candidatures.push({
