@@ -1,5 +1,6 @@
 import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
+import cloudinary from "../lib/cloudinary.js";
 
 // ✅ Obtenir toutes les offres d'emploi (publique)
 export const getAllOffers = async (req, res) => {
@@ -130,39 +131,67 @@ export const addComment = async (req, res) => {
 };
 
 // ✅ Postuler à une offre
+
+
 export const applyToOffer = async (req, res) => {
   try {
-    const { cv, lettreMotivation } = req.body;
-    
     const offer = await Offre.findById(req.params.id);
     if (!offer) {
       return res.status(404).json({ message: "Offre non trouvée" });
     }
-    
-    // Vérifier si l'utilisateur a déjà postulé
+
     const alreadyApplied = offer.candidatures.some(
-      candidature => candidature.laureat.toString() === req.user._id.toString()
+      (c) => c.laureat.toString() === req.user._id.toString()
     );
-    
     if (alreadyApplied) {
       return res.status(400).json({ message: "Vous avez déjà postulé à cette offre" });
     }
-    
-    // Vérifier que l'utilisateur n'est pas le recruteur
+
     if (offer.author.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: "Vous ne pouvez pas postuler à votre propre offre" });
     }
-    
+
+    let cvUrl = "";
+    let lettreMotivationUrl = "";
+
+    // ✅ Traitement CV
+    if (req.files && req.files.cv) {
+      const cvResult = await cloudinary.uploader.upload(req.files.cv.tempFilePath, {
+        folder: "cv",
+        resource_type: "raw",
+         use_filename: true,         // 👈 garde le nom du fichier local
+        unique_filename: false,
+        filename_override: req.files.cv.name  
+      });
+      cvUrl = cvResult.secure_url;
+    }
+
+    // ✅ Traitement Lettre de motivation
+    if (req.files && req.files.lettreMotivation) {
+      const lmResult = await cloudinary.uploader.upload(req.files.lettreMotivation.tempFilePath, {
+        folder: "lettres",
+        resource_type: "raw",
+         use_filename: true,         // 👈 garde le nom du fichier local
+         unique_filename: false, 
+        filename_override: req.files.lettreMotivation.name
+      });
+      lettreMotivationUrl = lmResult.secure_url;
+    }
+
     offer.candidatures.push({
       laureat: req.user._id,
-      cv: cv || "",
-      lettreMotivation: lettreMotivation || "",
+      cv: cvUrl,
+      lettreMotivation: lettreMotivationUrl,
+      datePostulation: new Date()
     });
-    
+
     await offer.save();
-    
+
     res.status(201).json({ message: "Candidature envoyée avec succès" });
   } catch (error) {
+    console.error("Erreur postulation:", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
-}; 
+};
+
+ 
