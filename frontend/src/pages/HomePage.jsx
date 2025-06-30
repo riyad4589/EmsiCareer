@@ -9,7 +9,11 @@ import RecommendedUsers from "../components/RecommendedUsers";
 const HomePage = () => {
 	const { user } = useAuth();
 
-	const { data: posts, isLoading } = useQuery({
+	const {
+		data: posts,
+		isLoading,
+		error,
+	} = useQuery({
 		queryKey: ["posts"],
 		queryFn: async () => {
 			const response = await axiosInstance.get("/posts/only");
@@ -22,6 +26,15 @@ const HomePage = () => {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<p className="text-gray-600">Veuillez vous connecter pour voir votre fil d'actualité</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-screen text-center">
+				<p className="text-red-600 font-semibold text-lg">Erreur lors du chargement des posts</p>
+				<p className="text-gray-500 mt-2">{error.response?.data?.message || error.message}</p>
 			</div>
 		);
 	}

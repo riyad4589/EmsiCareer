@@ -247,9 +247,10 @@ const OffresPage = () => {
             formData.append("typeContrat", newOffer.typeContrat);
             formData.append("dateExpiration", newOffer.dateExpiration);
             formData.append("competencesRequises", JSON.stringify(newOffer.competencesRequises));
+            
             if (mediaFiles.length > 0) {
-                mediaFiles.forEach((file) => {
-                    formData.append("medias", file);
+                mediaFiles.forEach(file => {
+                    formData.append('media', file);
                 });
             }
             await createOfferMutation.mutateAsync(formData);
@@ -260,25 +261,19 @@ const OffresPage = () => {
 
     const handleEditOffer = async (e) => {
         e.preventDefault();
-        
-        if (!editingOffer.titre || !editingOffer.description || !editingOffer.localisation || !editingOffer.dateExpiration) {
-            toast.error("Veuillez remplir tous les champs obligatoires");
-            return;
-        }
-
         setIsEditing(true);
+
+        const dataToUpdate = {
+            ...editingOffer,
+            competencesRequises: Array.isArray(editingOffer.competencesRequises) 
+                ? editingOffer.competencesRequises 
+                : editingOffer.competencesRequises.split(',').map(s => s.trim())
+        };
+
         try {
-            const formData = new FormData();
-            formData.append("titre", editingOffer.titre);
-            formData.append("description", editingOffer.description);
-            formData.append("localisation", editingOffer.localisation);
-            formData.append("typeContrat", editingOffer.typeContrat);
-            formData.append("dateExpiration", editingOffer.dateExpiration);
-            formData.append("competencesRequises", JSON.stringify(editingOffer.competencesRequises));
-            if (editMediaFile) formData.append("image", editMediaFile);
             await updateOfferMutation.mutateAsync({
                 offerId: editingOffer._id,
-                offerData: formData
+                offerData: dataToUpdate
             });
         } finally {
             setIsEditing(false);
@@ -479,65 +474,61 @@ const OffresPage = () => {
                 <div className="text-center">Chargement des offres...</div>
             ) : (
                 <div className="space-y-6">
-                    {offres.map(offre => (
-                        <div
-                            key={offre._id}
-                            className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-                            onClick={() => openApplicationsModal(offre)}
-                        >
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">{offre.titre}</h2>
-                                    <div className="flex items-center text-gray-500 mt-2 space-x-4">
-                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                                            {offre.typeContrat}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1">
-                                        <MapPin size={16} />
-                                        {offre.localisation}
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Calendar size={16} />
-                                        Expire le {new Date(offre.dateExpiration).toLocaleDateString()}
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Users size={16} />
-                                        {offre.candidatures?.length || 0} candidature(s)
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 mb-3 line-clamp-4">{offre.description}</p>
-                            {offre.competencesRequises?.length > 0 && (
-                                <div className="mb-3">
-                                    <span className="text-sm font-medium text-gray-700">Compétences requises :</span>
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        {offre.competencesRequises.map((comp, index) => (
-                                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                                                {comp}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {/* Galerie de médias */}
-                            {offre.medias && offre.medias.length > 0 && (
-                                <div className="mb-4 flex gap-4 flex-wrap">
-                                    {offre.medias.map((mediaUrl, idx) => (
-                                        <div key={idx} className="">
-                                            {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                                                <video src={mediaUrl} controls className="w-48 h-32 object-cover rounded" />
-                                            ) : (
-                                                <img src={mediaUrl} alt="Média de l'offre" className="w-32 h-32 object-cover rounded" />
-                                            )}
+                    <div className="flex flex-col gap-6">
+                        {offres && offres.length > 0 ? (
+                            offres.map((offre) => (
+                                <div key={offre._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transform hover:-translate-y-1 transition-transform duration-300">
+                                    {offre.image && <img src={offre.image} alt={offre.titre} className="w-full sm:w-48 h-48 sm:h-auto object-cover"/>}
+                                    <div className="p-5 flex flex-col justify-between flex-grow">
+                                        <div>
+                                            <h3 className="font-bold text-xl mb-2 text-gray-800">{offre.titre}</h3>
+                                            <p className="text-gray-600 text-sm mb-1 flex items-center gap-2"><Briefcase size={14}/> {offre.typeContrat}</p>
+                                            <p className="text-gray-600 text-sm mb-1 flex items-center gap-2"><MapPin size={14}/> {offre.localisation}</p>
+                                            <p className="text-gray-500 text-xs mb-3">Expire le: {new Date(offre.dateExpiration).toLocaleDateString()}</p>
+                                            
+                                            <div className="mb-3">
+                                                <p className="font-semibold text-sm">Compétences :</p>
+                                                <div className="flex flex-wrap gap-2 mt-1">
+                                                    {offre.competencesRequises?.map((comp, idx) => (
+                                                        <span key={idx} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{comp}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
-                                    ))}
+
+                                        <div className="mt-4 flex justify-between items-center">
+                                            <button
+                                                onClick={() => openApplicationsModal(offre)}
+                                                className="text-sm bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                                            >
+                                                <Users size={16} /> Voir les candidatures ({offre.candidatures?.length || 0})
+                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => openEditModal(offre)}
+                                                    className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                                                    aria-label="Modifier l'offre"
+                                                >
+                                                    <Edit size={20} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteOffer(offre._id, offre.titre)}
+                                                    className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                                                    aria-label="Supprimer l'offre"
+                                                >
+                                                    <Trash2 size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    ))}
+                            ))
+                        ) : (
+                            <div className="text-center py-10">
+                                <p className="text-gray-500">Vous n'avez pas encore créé d'offres.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -618,6 +609,73 @@ const OffresPage = () => {
                         >
                             ×
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modale pour la modification d'une offre */}
+            {isEditModalOpen && editingOffer && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+                    <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">Modifier l'offre</h2>
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-2">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleEditOffer} className="space-y-4">
+                            <div>
+                                <label htmlFor="editTitre" className="block text-sm font-medium text-gray-700">Titre de l'offre</label>
+                                <input
+                                    id="editTitre"
+                                    type="text"
+                                    value={editingOffer.titre}
+                                    onChange={(e) => setEditingOffer({ ...editingOffer, titre: e.target.value })}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label htmlFor="editDescription" className="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea
+                                    id="editDescription"
+                                    rows="4"
+                                    value={editingOffer.description}
+                                    onChange={(e) => setEditingOffer({ ...editingOffer, description: e.target.value })}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                                    required
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label htmlFor="editCompetences" className="block text-sm font-medium text-gray-700">Compétences (séparées par des virgules)</label>
+                                <input
+                                    id="editCompetences"
+                                    type="text"
+                                    value={Array.isArray(editingOffer.competencesRequises) ? editingOffer.competencesRequises.join(', ') : editingOffer.competencesRequises}
+                                    onChange={(e) => setEditingOffer({ ...editingOffer, competencesRequises: e.target.value.split(',').map(s => s.trim()) })}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={updateOfferMutation.isPending}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+                                >
+                                    {updateOfferMutation.isPending ? "Sauvegarde..." : "Sauvegarder les modifications"}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

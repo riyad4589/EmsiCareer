@@ -5,13 +5,27 @@ import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase } from "lucid
 import { toast } from "react-hot-toast";
 
 const Navbar = () => {
-	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+	const { data: authUser } = useQuery({ 
+		queryKey: ["authUser"],
+		queryFn: async () => {
+			try {
+				const res = await axiosInstance.get("/auth/me");
+				return res.data;
+			} catch (error) {
+				return null;
+			}
+		},
+		retry: false,
+	 });
 	const queryClient = useQueryClient();
 	const location = useLocation();
 
 	const { data: notifications } = useQuery({
 		queryKey: ["notifications"],
-		queryFn: async () => axiosInstance.get("/notifications"),
+		queryFn: async () => {
+			const res = await axiosInstance.get("/notifications");
+			return res.data.data;
+		},
 		enabled: !!authUser,
 	});
 
@@ -32,8 +46,10 @@ const Navbar = () => {
 		},
 	});
 
-	const unreadNotificationCount = notifications?.data.filter((notif) => !notif.read).length;
-	const unreadConnectionRequestsCount = connectionRequests?.data?.length;
+	const unreadNotificationCount = Array.isArray(notifications)
+		? notifications.filter((notif) => !notif.read).length
+		: 0;
+	const unreadConnectionRequestsCount = connectionRequests?.data?.data?.length || 0;
 
 	const isActive = (path) => {
 		return location.pathname === path;
@@ -53,7 +69,7 @@ const Navbar = () => {
 				<div className='flex justify-between items-center py-3'>
 					<div className='flex items-center space-x-4'>
 						<Link to='/'>
-							<img className='h-8 rounded hover:opacity-90 transition-opacity duration-200' src='/small-logo.png' alt='LinkedIn' />
+							<img className='h-8 rounded hover:opacity-90 transition-opacity duration-200' src='/emsi.svg' alt='LinkedIn' />
 						</Link>
 					</div>
 					<div className='flex items-center gap-2 md:gap-6'>
@@ -74,6 +90,10 @@ const Navbar = () => {
 											{unreadConnectionRequestsCount}
 										</span>
 									)}
+								</Link>
+								<Link to='/job-offers' className={navLinkClass('/job-offers')}>
+									<Briefcase size={20} />
+									<span className='text-xs hidden md:block'>Offres d'emploi</span>
 								</Link>
 								<Link to='/messages' className={navLinkClass("/messages")}>
 									<MessageSquare size={20} />
@@ -98,10 +118,7 @@ const Navbar = () => {
 									<User size={20} />
 									<span className='text-xs hidden md:block'>Profil</span>
 								</Link>
-								<Link to='/job-offers' className={navLinkClass('/job-offers')}>
-									<Briefcase size={20} />
-									<span className='text-xs hidden md:block'>Offres d'emploi</span>
-								</Link>
+								
 								<button
 									className='flex items-center space-x-1 text-sm text-neutral hover:text-primary transition-colors duration-200'
 									onClick={() => logout()}

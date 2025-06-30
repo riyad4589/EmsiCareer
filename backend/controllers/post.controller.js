@@ -64,6 +64,12 @@ export const createPost = async (req, res) => {
 		
 		// Si c'est un recruteur, créer une offre d'emploi
 		if (user.role === "recruteur") {
+			// S'assurer que les compétences sont bien un tableau
+			let competences = jobDetails?.competencesRequises || [];
+			if (typeof competences === 'string') {
+				competences = competences.split(',').map(skill => skill.trim());
+			}
+
 			// Extraire les détails de l'offre du contenu ou utiliser jobDetails
 			const offreData = {
 				author: author,
@@ -71,7 +77,7 @@ export const createPost = async (req, res) => {
 				description: content || "Description de l'offre",
 				localisation: jobDetails?.localisation || "Non spécifié",
 				typeContrat: jobDetails?.typeContrat || "CDI",
-				competencesRequises: jobDetails?.competencesRequises || [],
+				competencesRequises: competences,
 				dateExpiration: jobDetails?.dateExpiration || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours par défaut
 				image: imageUrl
 			};
@@ -464,13 +470,14 @@ export const getOnlyPosts = async (req, res) => {
 			.populate("author", "name username profilePicture headline role companyName industry")
 			.populate("comments.user", "name profilePicture")
 			.sort({ createdAt: -1 });
-		// Filtrer les posts sans auteur
+		
+		// Filtrer les posts sans auteur pour éviter les erreurs
 		const validPosts = posts.filter(post => post.author);
-		res.status(200).json({
-			success: true,
-			data: validPosts
-		});
+		
+		res.status(200).json(validPosts);
+
 	} catch (error) {
+		console.error("Erreur dans getOnlyPosts:", error);
 		res.status(500).json({
 			success: false,
 			message: "Erreur lors de la récupération des posts",
