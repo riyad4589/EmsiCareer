@@ -17,7 +17,7 @@ const ProfilePage = () => {
 	const [editedProfile, setEditedProfile] = useState({});
 	const [previewImages, setPreviewImages] = useState({
 		profilePicture: null,
-		coverPicture: null,
+		banniere: null,
 	});
 	const [isEditingCompany, setIsEditingCompany] = useState(false);
 	const [editedCompany, setEditedCompany] = useState({});
@@ -64,7 +64,7 @@ const ProfilePage = () => {
 				
 				// Ajouter les champs textuels
 				Object.keys(updatedData).forEach(key => {
-					if (key !== 'profilePicture' && key !== 'bannerImg' && key !== 'cv') {
+					if (key !== 'profilePicture' && key !== 'banniere' && key !== 'cv') {
 						if (typeof updatedData[key] === 'object') {
 							formData.append(key, JSON.stringify(updatedData[key]));
 						} else {
@@ -77,8 +77,8 @@ const ProfilePage = () => {
 				if (updatedData.profilePicture instanceof File) {
 					formData.append('profilePicture', updatedData.profilePicture);
 				}
-				if (updatedData.bannerImg instanceof File) {
-					formData.append('bannerImg', updatedData.bannerImg);
+				if (updatedData.banniere instanceof File) {
+					formData.append('banniere', updatedData.banniere);
 				}
 				if (updatedData.cv instanceof File) {
 					formData.append('cv', updatedData.cv);
@@ -103,7 +103,7 @@ const ProfilePage = () => {
 			queryClient.invalidateQueries(["authUser"]);
 			toast.success("Profil mis à jour avec succès");
 			setIsEditing(false);
-			setPreviewImages({ profilePicture: null, bannerImg: null });
+			setPreviewImages({ profilePicture: null, banniere: null });
 		},
 		onError: (error) => {
 			console.error("Erreur de mutation:", error);
@@ -130,7 +130,7 @@ const ProfilePage = () => {
 	const handleCancel = () => {
 		setIsEditing(false);
 		setEditedProfile({});
-		setPreviewImages({ profilePicture: null, coverPicture: null });
+		setPreviewImages({ profilePicture: null, banniere: null });
 	};
 
 	const handleInputChange = (field, value) => {
@@ -185,8 +185,8 @@ const ProfilePage = () => {
 			if (previewImages.profilePicture) {
 				URL.revokeObjectURL(previewImages.profilePicture);
 			}
-			if (previewImages.coverPicture) {
-				URL.revokeObjectURL(previewImages.coverPicture);
+			if (previewImages.banniere) {
+				URL.revokeObjectURL(previewImages.banniere);
 			}
 		};
 	}, [previewImages]);
@@ -215,7 +215,7 @@ const ProfilePage = () => {
 			<div className="bg-white rounded-lg shadow mb-6">
 				<div className="relative h-48 bg-gray-200 rounded-t-lg">
 					<img
-						src={previewImages.coverPicture || profile.coverPicture || "/banner.png"}
+						src={previewImages.banniere || profile.banniere || "/banner.png"}
 						alt="Photo de couverture"
 						className="w-full h-full object-cover rounded-t-lg"
 						loading="lazy"
@@ -227,7 +227,7 @@ const ProfilePage = () => {
 								type="file"
 								className="hidden"
 								accept="image/*"
-								onChange={(e) => handleImageChange(e, 'coverPicture')}
+								onChange={(e) => handleImageChange(e, 'banniere')}
 							/>
 						</label>
 					)}

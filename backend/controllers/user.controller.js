@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import Connection from "../models/connection.model.js";
-import { uploadToAzure } from "../utils/azureBlob.js";
+import { uploadToAzure, uploadMediaToAzure } from "../utils/azureBlob.js";
 
 export const getSuggestedConnections = async (req, res) => {
 	try {
@@ -75,101 +75,88 @@ export const getPublicProfile = async (req, res) => {
 	}
 };
 
+
+
 export const updateProfile = async (req, res) => {
-	try {
-		const allowedFields = [
-			"name",
-			"username",
-			"headline",
-			"about",
-			"location",
-			"skills",
-			"experience",
-			"education",
-			"cv",
-			// Champs spécifiques aux recruteurs
-			"companyName",
-			"industry",
-			"description",
-			"website",
-			"emailPersonelle",
-			"socialLinks"
-		];
+  try {
+    const allowedFields = [
+      "name", "username", "headline", "about", "location", "skills", "experience", "education", "cv",
+      "companyName", "industry", "description", "website", "emailPersonelle", "socialLinks"
+    ];
 
-		const updatedData = {};
+    const updatedData = {};
 
-		// Traiter les champs textuels
-		for (const field of allowedFields) {
-			if (req.body[field] !== undefined) {
-				try {
-					if (field === 'skills') {
-						updatedData[field] = JSON.parse(req.body[field]);
-					} else if (field === 'experience') {
-						const experience = JSON.parse(req.body[field]);
-						updatedData[field] = experience.map(exp => ({
-							...exp,
-							startDate: exp.startDate ? new Date(exp.startDate) : null,
-							endDate: exp.endDate ? new Date(exp.endDate) : null
-						}));
-					} else if (field === 'education') {
-						const education = JSON.parse(req.body[field]);
-						updatedData[field] = education.map(edu => ({
-							...edu,
-							startYear: edu.startYear ? parseInt(edu.startYear) : null,
-							endYear: edu.endYear ? parseInt(edu.endYear) : null
-						}));
-					} else if (field === 'socialLinks') {
-						updatedData[field] = JSON.parse(req.body[field]);
-					} else {
-						updatedData[field] = req.body[field];
-					}
-				} catch (parseError) {
-					console.error(`Error parsing ${field}:`, parseError);
-					continue;
-				}
-			}
-		}
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        try {
+          if (field === 'skills') {
+            updatedData[field] = JSON.parse(req.body[field]);
+          } else if (field === 'experience') {
+            const experience = JSON.parse(req.body[field]);
+            updatedData[field] = experience.map(exp => ({
+              ...exp,
+              startDate: exp.startDate ? new Date(exp.startDate) : null,
+              endDate: exp.endDate ? new Date(exp.endDate) : null
+            }));
+          } else if (field === 'education') {
+            const education = JSON.parse(req.body[field]);
+            updatedData[field] = education.map(edu => ({
+              ...edu,
+              startYear: edu.startYear ? parseInt(edu.startYear) : null,
+              endYear: edu.endYear ? parseInt(edu.endYear) : null
+            }));
+          } else if (field === 'socialLinks') {
+            updatedData[field] = JSON.parse(req.body[field]);
+          } else {
+            updatedData[field] = req.body[field];
+          }
+        } catch (parseError) {
+          console.error(`Erreur parsing ${field} :`, parseError);
+        }
+      }
+    }
 
-		// Traiter l'image de profil
-		if (req.files && req.files.profilePicture) {
-			const azureUrl = await uploadToAzure(
-				req.files.profilePicture.tempFilePath,
-				req.files.profilePicture.name,
-				"profile",
-				req.files.profilePicture.mimetype
-			);
-			updatedData.profilePicture = azureUrl;
-		}
+    // ✅ Image de profil => uploadMediaToAzure
+    if (req.files?.profilePicture) {
+      const url = await uploadMediaToAzure(
+        req.files.profilePicture.tempFilePath,
+        req.files.profilePicture.name,
+        "profile"
+      );
+      updatedData.profilePicture = url;
+    }
 
-		// Traiter l'image de couverture
-		if (req.files && req.files.bannerImg) {
-			const result = await cloudinary.uploader.upload(req.files.bannerImg.tempFilePath, {
-				folder: "banner_images",
-				width: 1500,
-				height: 500,
-				crop: "fill"
-			});
-			updatedData.bannerImg = result.secure_url;
-		}
+	if (req.files?.banniere) {
+      const url = await uploadMediaToAzure(
+        req.files.banniere.tempFilePath,
+        req.files.banniere.name,
+        "baniere"
+      );
+      updatedData.banniere = url;
+    }
 
-		// Traiter le CV
-		if (req.files && req.files.cv) {
-			const result = await cloudinary.uploader.upload(req.files.cv.tempFilePath, {
-				folder: "cvs",
-				resource_type: "raw"
-			});
-			updatedData.cv = result.secure_url;
-		}
 
-		const user = await User.findByIdAndUpdate(
-			req.user._id,
-			{ $set: updatedData },
-			{ new: true }
-		).select("-password");
 
-		res.json(user);
-	} catch (error) {
-		console.error("Error in updateProfile controller:", error);
-		res.status(500).json({ message: "Erreur lors de la mise à jour du profil" });
-	}
+    // ✅ CV => uploadToAzure
+    if (req.files?.cv) {
+      const url = await uploadToAzure(
+        req.files.cv.tempFilePath,
+        req.files.cv.name,
+        "cv"
+      );
+      updatedData.cv = url;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updatedData },
+      { new: true }
+    ).select("-password");
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error in updateProfile controller:", error);
+    res.status(500).json({ message: "Erreur lors de la mise à jour du profil" });
+  }
 };
+

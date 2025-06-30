@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			default: "",
 		},
+		banniere: {
+			type: String,
+			default: "",
+		},
 		role: {
 			type: String,
 			enum: ["user", "admin", "recruteur"],

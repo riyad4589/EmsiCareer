@@ -34,7 +34,7 @@ const SidebarRecruteur = () => {
                 <div
                     className='h-16 rounded-t-lg bg-cover bg-center relative'
                     style={{
-                        backgroundImage: `url("${user?.bannerImg || "/banner.png"}")`,
+                        backgroundImage: `url("${user?.babanniere || "/banner.png"}")`,
                     }}
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-20 rounded-t-lg" />

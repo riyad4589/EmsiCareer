@@ -183,7 +183,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 			<div
 				className='relative h-48 rounded-t-lg bg-cover bg-center'
 				style={{
-					backgroundImage: `url('${editedData.bannerImg || userData.bannerImg || "/banner.png"}')`,
+					backgroundImage: `url('${editedData.babanniere || userData.babanniere || "/banner.png"}')`,
 				}}
 			>
 				{isEditing && (
@@ -192,7 +192,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 						<input
 							type='file'
 							className='hidden'
-							name='bannerImg'
+							name='babanniere'
 							onChange={handleImageChange}
 							accept='image/*'
 						/>
