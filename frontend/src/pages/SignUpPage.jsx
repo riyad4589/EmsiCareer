@@ -73,9 +73,7 @@ const SignUpPage = () => {
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
         }
-      //  if (!isTermsAccepted) {
-        //    newErrors.terms = "Vous devez accepter les conditions d'utilisation";
-        // }
+        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
