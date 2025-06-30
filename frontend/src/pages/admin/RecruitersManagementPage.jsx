@@ -299,7 +299,7 @@ const RecruitersManagementPage = () => {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
 					<p className="mt-4 text-gray-600">Chargement des recruteurs...</p>
 				</div>
 			</div>
@@ -324,7 +324,7 @@ const RecruitersManagementPage = () => {
 					<h1 className="text-2xl font-bold text-gray-900">Gestion des recruteurs</h1>
 					<button
 						onClick={() => setIsCreating(true)}
-						className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+						className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
 					>
 						<Plus className="h-5 w-5 mr-2" />
 						Ajouter un recruteur
@@ -346,7 +346,7 @@ const RecruitersManagementPage = () => {
 									value={companyFilter}
 									onChange={(e) => setCompanyFilter(e.target.value)}
 									placeholder="Rechercher une entreprise..."
-									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
 								/>
 								<Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
 							</div>
@@ -361,7 +361,7 @@ const RecruitersManagementPage = () => {
 								id="industryFilter"
 								value={industryFilter}
 								onChange={(e) => setIndustryFilter(e.target.value)}
-								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
 							>
 								<option value="">Tous les secteurs</option>
 								{uniqueIndustries.map((industry) => (
@@ -449,7 +449,7 @@ const RecruitersManagementPage = () => {
 											<div className="flex items-center justify-center space-x-4">
 												<button
 													onClick={() => handleEdit(recruiter)}
-													className="text-blue-600 hover:text-blue-900"
+													className="text-green-600 hover:text-green-900"
 												>
 													<Edit size={18} />
 												</button>
@@ -516,7 +516,7 @@ const RecruitersManagementPage = () => {
 											type={showPassword ? "text" : "password"}
 											value={passwordForm.password}
 											onChange={handlePasswordChange}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 										<button
@@ -556,7 +556,7 @@ const RecruitersManagementPage = () => {
 											type={showConfirmPassword ? "text" : "password"}
 											value={passwordForm.confirmPassword}
 											onChange={handleConfirmPasswordChange}
-											className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
+											className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 ${
 												passwordForm.confirmPassword
 													? passwordMatch
 														? "border-green-300"
@@ -582,13 +582,13 @@ const RecruitersManagementPage = () => {
 								<button
 									type="button"
 									onClick={() => setSelectedRecruiter(null)}
-									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Annuler
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2.5 bg-blue-600 text-sm font-medium text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Enregistrer
 								</button>
@@ -633,7 +633,7 @@ const RecruitersManagementPage = () => {
 													type="text"
 													value={createForm.name}
 													onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required
 												/>
 											</div>
@@ -645,7 +645,7 @@ const RecruitersManagementPage = () => {
 													type="email"
 													value={createForm.emailEdu}
 													onChange={(e) => setCreateForm({ ...createForm, emailEdu: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required
 												/>
 											</div>
@@ -657,7 +657,7 @@ const RecruitersManagementPage = () => {
 													type="email"
 													value={createForm.emailPersonelle}
 													onChange={(e) => setCreateForm({ ...createForm, emailPersonelle: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 												/>
 											</div>
 										</div>
@@ -670,7 +670,7 @@ const RecruitersManagementPage = () => {
 													type="text"
 													value={createForm.username}
 													onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required
 												/>
 											</div>
@@ -683,7 +683,7 @@ const RecruitersManagementPage = () => {
 														type={showPassword ? "text" : "password"}
 														value={createForm.password}
 														onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-														className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+														className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 														required
 													/>
 													<button
@@ -702,7 +702,7 @@ const RecruitersManagementPage = () => {
 												<select
 													value={createForm.status}
 													onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 												>
 													<option value="active">Actif</option>
 													<option value="pending">En attente</option>
@@ -726,7 +726,7 @@ const RecruitersManagementPage = () => {
 													type="text"
 													value={createForm.companyName}
 													onChange={(e) => setCreateForm({ ...createForm, companyName: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required
 												/>
 											</div>
@@ -737,7 +737,7 @@ const RecruitersManagementPage = () => {
 												<select
 													value={createForm.industry}
 													onChange={(e) => setCreateForm({ ...createForm, industry: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required
 												>
 													<option value="">Sélectionnez un secteur</option>
@@ -755,7 +755,7 @@ const RecruitersManagementPage = () => {
 															type="text"
 															value={createForm.customIndustry}
 															onChange={(e) => setCreateForm({ ...createForm, customIndustry: e.target.value })}
-															className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+															className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 															placeholder="Précisez le secteur d'activité"
 															required
 														/>
@@ -770,7 +770,7 @@ const RecruitersManagementPage = () => {
 													type="text"
 													value={createForm.location}
 													onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													placeholder="Ville, Adresse"
 													required
 												/>
@@ -782,7 +782,7 @@ const RecruitersManagementPage = () => {
 												<textarea
 													value={createForm.companyDescription}
 													onChange={(e) => setCreateForm({ ...createForm, companyDescription: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													rows="3"
 													placeholder="Décrivez brièvement votre entreprise..."
 													required
@@ -797,13 +797,13 @@ const RecruitersManagementPage = () => {
 								<button
 									type="button"
 									onClick={() => setIsCreating(false)}
-									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Annuler
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2.5 bg-blue-600 text-sm font-medium text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Créer
 								</button>
@@ -833,7 +833,7 @@ const RecruitersManagementPage = () => {
 											type="text"
 											value={editForm.name}
 											onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -845,7 +845,7 @@ const RecruitersManagementPage = () => {
 											type="text"
 											value={editForm.username}
 											onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -857,7 +857,7 @@ const RecruitersManagementPage = () => {
 											type="email"
 											value={editForm.emailEdu}
 											onChange={(e) => setEditForm({ ...editForm, emailEdu: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											placeholder="exemple@emsi.ma"
 											required
 										/>
@@ -870,7 +870,7 @@ const RecruitersManagementPage = () => {
 											type="email"
 											value={editForm.emailPersonelle}
 											onChange={(e) => setEditForm({ ...editForm, emailPersonelle: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											placeholder="exemple@gmail.com"
 										/>
 									</div>
@@ -889,7 +889,7 @@ const RecruitersManagementPage = () => {
 											type="text"
 											value={editForm.companyName}
 											onChange={(e) => setEditForm({ ...editForm, companyName: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -900,7 +900,7 @@ const RecruitersManagementPage = () => {
 										<select
 											value={editForm.industry}
 											onChange={(e) => setEditForm({ ...editForm, industry: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										>
 											<option value="">Sélectionner un secteur</option>
@@ -925,7 +925,7 @@ const RecruitersManagementPage = () => {
 													type="text"
 													value={editForm.customIndustry}
 													onChange={(e) => setEditForm({ ...editForm, customIndustry: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													placeholder="Précisez le secteur d'activité"
 													required
 												/>
@@ -940,7 +940,7 @@ const RecruitersManagementPage = () => {
 											type="text"
 											value={editForm.location}
 											onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											placeholder="Ville, Adresse"
 											required
 										/>
@@ -952,7 +952,7 @@ const RecruitersManagementPage = () => {
 										<textarea
 											value={editForm.companyDescription}
 											onChange={(e) => setEditForm({ ...editForm, companyDescription: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											rows="3"
 											placeholder="Description de l'entreprise"
 											required
@@ -972,7 +972,7 @@ const RecruitersManagementPage = () => {
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+									className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
 								>
 									Enregistrer les modifications
 								</button>

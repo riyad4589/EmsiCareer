@@ -17,6 +17,7 @@ import adminRoutes from "./routes/admin.route.js";
 import messageRoutes from "./routes/message.route.js";
 import recruteurRoutes from "./routes/recruteur.route.js";
 import offresRoutes from "./routes/offres.route.js";
+import routesIndex from "./routes/index.js";
 
 // Charger les variables d'environnement en premier
 dotenv.config();
@@ -91,6 +92,7 @@ io.on("connection", (socket) => {
 app.set("io", io);
 
 // Routes API v1
+app.use("/api/v1", routesIndex);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);

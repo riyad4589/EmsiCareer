@@ -70,7 +70,7 @@ const Navbar = () => {
 									to={item.path}
 									title={item.label}
 									className={`relative flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
-										${isActive ? "text-blue-600 bg-blue-100" : "text-gray-600 hover:text-blue-600 hover:bg-blue-100"}`}
+										${isActive ? "text-green-600 bg-green-100" : "text-gray-600 hover:text-green-600 hover:bg-green-100"}`}
 								>
 									<Icon className="h-5 w-5" />
 

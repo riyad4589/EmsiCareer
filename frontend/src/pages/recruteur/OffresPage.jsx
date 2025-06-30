@@ -343,7 +343,7 @@ const OffresPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
             </div>
         );
     }
@@ -422,7 +422,7 @@ const OffresPage = () => {
                                         onChange={(e) => setNewCompetence(e.target.value)}
                                         className="w-full p-3 border rounded-lg"
                                     />
-                                    <button type="button" onClick={handleAddCompetence} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter</button>
+                                    <button type="button" onClick={handleAddCompetence} className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Ajouter</button>
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {newOffer.competencesRequises.map((c, index) => (
@@ -490,7 +490,7 @@ const OffresPage = () => {
                                                 <p className="font-semibold text-sm">Compétences :</p>
                                                 <div className="flex flex-wrap gap-2 mt-1">
                                                     {offre.competencesRequises?.map((comp, idx) => (
-                                                        <span key={idx} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{comp}</span>
+                                                        <span key={idx} className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{comp}</span>
                                                     ))}
                                                 </div>
                                             </div>
@@ -499,14 +499,14 @@ const OffresPage = () => {
                                         <div className="mt-4 flex justify-between items-center">
                                             <button
                                                 onClick={() => openApplicationsModal(offre)}
-                                                className="text-sm bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                                                className="text-sm bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
                                             >
                                                 <Users size={16} /> Voir les candidatures ({offre.candidatures?.length || 0})
                                             </button>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => openEditModal(offre)}
-                                                    className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                                                    className="p-2 text-gray-500 hover:text-green-600 transition-colors"
                                                     aria-label="Modifier l'offre"
                                                 >
                                                     <Edit size={20} />
@@ -547,12 +547,12 @@ const OffresPage = () => {
                                 {applications.map((application, idx) => (
                                     <div key={application._id || idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 bg-gray-50">
                                         <div className="flex-1">
-                                            <div className="font-semibold text-blue-800">{application.laureat?.name || 'Utilisateur'}</div>
+                                            <div className="font-semibold text-green-800">{application.laureat?.name || 'Utilisateur'}</div>
                                             <div className="text-xs text-gray-500 mb-2">{application.laureat?.emailEdu}</div>
                                             <div className="flex gap-2 mb-1">
                                                 {application.cv && (
                                                     <button
-                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                        className="flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium"
                                                         onClick={(e) => { e.stopPropagation(); downloadFile(application.cv, 'CV.pdf'); }}
                                                     >
                                                         <Eye size={14} />
@@ -561,7 +561,7 @@ const OffresPage = () => {
                                                 )}
                                                 {application.lettreMotivation && (
                                                     <button
-                                                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                                        className="flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium"
                                                         onClick={(e) => { e.stopPropagation(); downloadFile(application.lettreMotivation, 'Lettre de motivation.pdf'); }}
                                                     >
                                                         <Eye size={14} />
@@ -670,7 +670,7 @@ const OffresPage = () => {
                                 <button
                                     type="submit"
                                     disabled={updateOfferMutation.isPending}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-green-400"
                                 >
                                     {updateOfferMutation.isPending ? "Sauvegarde..." : "Sauvegarder les modifications"}
                                 </button>

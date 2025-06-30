@@ -81,7 +81,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 				{experiences.map((exp) => (
 					<div key={exp._id} className='flex justify-between items-start p-4 rounded-lg bg-base-100 hover:shadow-md transition-all duration-200'>
 						<div className='flex items-start gap-4'>
-							<Briefcase size={24} className='text-primary mt-1' />
+							<Briefcase size={24} className='text-success mt-1' />
 							<div>
 								<h3 className='font-semibold text-lg'>{exp.title}</h3>
 								<p className='text-info'>{exp.company}</p>
@@ -114,14 +114,14 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 							placeholder='Titre du poste'
 							value={newExperience.title}
 							onChange={(e) => setNewExperience({ ...newExperience, title: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 						<input
 							type='text'
 							placeholder='Entreprise'
 							value={newExperience.company}
 							onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 						<div className="grid grid-cols-2 gap-4">
 							<div>
@@ -130,7 +130,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 									type='date'
 									value={newExperience.startDate}
 									onChange={(e) => setNewExperience({ ...newExperience, startDate: e.target.value })}
-									className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+									className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 								/>
 							</div>
 							{!newExperience.currentlyWorking && (
@@ -140,7 +140,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 										type='date'
 										value={newExperience.endDate}
 										onChange={(e) => setNewExperience({ ...newExperience, endDate: e.target.value })}
-										className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+										className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 									/>
 								</div>
 							)}
@@ -151,7 +151,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 								id='currentlyWorking'
 								checked={newExperience.currentlyWorking}
 								onChange={handleCurrentlyWorkingChange}
-								className='mr-2 rounded border-gray-300 text-primary focus:ring-primary'
+								className='mr-2 rounded border-gray-300 text-success focus:ring-success'
 							/>
 							<label htmlFor='currentlyWorking' className="text-info">Je travaille actuellement ici</label>
 						</div>
@@ -159,11 +159,11 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 							placeholder='Description'
 							value={newExperience.description}
 							onChange={(e) => setNewExperience({ ...newExperience, description: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px]'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success min-h-[100px]'
 						/>
 						<button
 							onClick={handleAddExperience}
-							className='w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							<Plus size={20} />
 							Ajouter une expérience
@@ -178,7 +178,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 						<button
 							onClick={handleSave}
 							disabled={isSaving}
-							className='w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							{isSaving ? (
 								<>
@@ -192,7 +192,7 @@ const ExperienceSection = ({ userData, isOwnProfile, onSave }) => {
 					) : (
 						<button
 							onClick={() => setIsEditing(true)}
-							className='w-full text-primary hover:text-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full text-success hover:text-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							<Plus size={20} />
 							Modifier les expériences

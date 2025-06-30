@@ -43,35 +43,35 @@ const AdminNavbar = () => {
 					<div className="flex items-center space-x-4">
 						<Link
 							to="/admin"
-							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-success hover:bg-success/10 transition-colors duration-200"
 						>
 							<Home className="h-5 w-5 mr-2" />
 							Accueil
 						</Link>
 						<Link
 							to="/admin/users"
-							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-success hover:bg-success/10 transition-colors duration-200"
 						>
 							<Users className="h-5 w-5 mr-2" />
 							Utilisateurs
 						</Link>
 						<Link
 							to="/admin/recruiters"
-							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-success hover:bg-success/10 transition-colors duration-200"
 						>
 							<Building2 className="h-5 w-5 mr-2" />
 							Recruteurs
 						</Link>
 						<Link
 							to="/admin/posts"
-							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-success hover:bg-success/10 transition-colors duration-200"
 						>
 							<FileText className="h-5 w-5 mr-2" />
 							Posts
 						</Link>
 						<Link
 							to="/admin/offers"
-							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+							className="flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-success hover:bg-success/10 transition-colors duration-200"
 						>
 							<ScrollText className="h-5 w-5 mr-2" />
 							Offers

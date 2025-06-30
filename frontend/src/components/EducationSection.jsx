@@ -80,7 +80,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 				{educations.map((edu) => (
 					<div key={edu._id} className='flex justify-between items-start p-4 rounded-lg bg-base-100 hover:shadow-md transition-all duration-200'>
 						<div className='flex items-start gap-4'>
-							<School size={24} className='text-primary mt-1' />
+							<School size={24} className='text-success mt-1' />
 							<div>
 								<h3 className='font-semibold text-lg'>{edu.fieldOfStudy}</h3>
 								<p className='text-info'>{edu.school}</p>
@@ -113,14 +113,14 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 							placeholder='Établissement'
 							value={newEducation.school}
 							onChange={(e) => setNewEducation({ ...newEducation, school: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 						<input
 							type='text'
 							placeholder='Domaine d\'études'
 							value={newEducation.fieldOfStudy}
 							onChange={(e) => setNewEducation({ ...newEducation, fieldOfStudy: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 						<div className="grid grid-cols-2 gap-4">
 							<div>
@@ -129,7 +129,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 									type='number'
 									value={newEducation.startYear}
 									onChange={(e) => setNewEducation({ ...newEducation, startYear: e.target.value })}
-									className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+									className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 								/>
 							</div>
 							{!newEducation.currentlyStudying && (
@@ -139,7 +139,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 										type='number'
 										value={newEducation.endYear}
 										onChange={(e) => setNewEducation({ ...newEducation, endYear: e.target.value })}
-										className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+										className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 									/>
 								</div>
 							)}
@@ -150,7 +150,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 								id='currentlyStudying'
 								checked={newEducation.currentlyStudying}
 								onChange={handleCurrentlyStudyingChange}
-								className='mr-2 rounded border-gray-300 text-primary focus:ring-primary'
+								className='mr-2 rounded border-gray-300 text-success focus:ring-success'
 							/>
 							<label htmlFor='currentlyStudying' className="text-info">J'étudie actuellement ici</label>
 						</div>
@@ -158,11 +158,11 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 							placeholder='Description'
 							value={newEducation.description}
 							onChange={(e) => setNewEducation({ ...newEducation, description: e.target.value })}
-							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary min-h-[100px]'
+							className='w-full p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success min-h-[100px]'
 						/>
 						<button
 							onClick={handleAddEducation}
-							className='w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							<Plus size={20} />
 							Ajouter une formation
@@ -177,7 +177,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 						<button
 							onClick={handleSave}
 							disabled={isSaving}
-							className='w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							{isSaving ? (
 								<>
@@ -191,7 +191,7 @@ const EducationSection = ({ userData, isOwnProfile, onSave }) => {
 					) : (
 						<button
 							onClick={() => setIsEditing(true)}
-							className='w-full text-primary hover:text-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full text-success hover:text-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							<Plus size={20} />
 							Modifier les formations

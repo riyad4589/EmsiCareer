@@ -144,7 +144,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 				return (
 					<button
 						onClick={() => sendConnectionRequest(userData._id)}
-						className='bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-full transition duration-300 flex items-center justify-center'
+						className='bg-success hover:bg-success-dark text-white py-2 px-4 rounded-full transition duration-300 flex items-center justify-center'
 						disabled={isSendingRequest}
 					>
 						{isSendingRequest ? (
@@ -228,7 +228,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 							type='text'
 							value={editedData.name ?? userData.name}
 							onChange={(e) => setEditedData({ ...editedData, name: e.target.value })}
-							className='text-2xl font-bold mb-2 text-center w-full bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='text-2xl font-bold mb-2 text-center w-full bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 					) : (
 						<h1 className='text-2xl font-bold mb-2'>{userData.name}</h1>
@@ -239,7 +239,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 							type='text'
 							value={editedData.headline ?? userData.headline}
 							onChange={(e) => setEditedData({ ...editedData, headline: e.target.value })}
-							className='text-info text-center w-full bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='text-info text-center w-full bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 					) : (
 						<p className='text-info'>{userData.headline}</p>
@@ -252,7 +252,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 								type='text'
 								value={editedData.location ?? userData.location}
 								onChange={(e) => setEditedData({ ...editedData, location: e.target.value })}
-								className='text-info text-center bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-primary'
+								className='text-info text-center bg-base-100 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-success'
 							/>
 						) : (
 							<span className='text-info'>{userData.location}</span>
@@ -263,7 +263,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 				{isOwnProfile ? (
 					isEditing ? (
 						<button
-							className='w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark transition duration-300'
+							className='w-full bg-success text-white py-2 px-4 rounded-full hover:bg-success-dark transition duration-300'
 							onClick={handleSave}
 						>
 							Enregistrer
@@ -271,7 +271,7 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 					) : (
 						<button
 							onClick={() => setIsEditing(true)}
-							className='w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark transition duration-300'
+							className='w-full bg-success text-white py-2 px-4 rounded-full hover:bg-success-dark transition duration-300'
 						>
 							Modifier le profil
 						</button>

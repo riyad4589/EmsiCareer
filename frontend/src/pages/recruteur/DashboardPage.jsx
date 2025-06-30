@@ -42,7 +42,7 @@ const DashboardPage = () => {
     if (isLoading || isProfileLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -55,10 +55,10 @@ const DashboardPage = () => {
                     <img
                         src={profile.companyLogo || "/logo.png"}
                         alt={profile.companyName}
-                        className="w-20 h-20 rounded-full object-cover border-2 border-blue-200"
+                        className="w-20 h-20 rounded-full object-cover border-2 border-primary"
                     />
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-1">Bienvenue, <span className="text-blue-700">{profile.name}</span> !</h2>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">Bienvenue, <span className="text-primary">{profile.name}</span> !</h2>
                         <p className="text-gray-700 font-medium">{profile.companyName} <span className="text-gray-400">|</span> {profile.industry}</p>
                         <div className="flex items-center gap-2 mt-1 text-gray-500">
                             <MapPin className="w-4 h-4" />
@@ -73,7 +73,7 @@ const DashboardPage = () => {
                 {/* Carte des offres d'emploi */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <div className="p-3 rounded-full bg-primary text-primary">
                             <Briefcase className="h-6 w-6" />
                         </div>
                         <div className="ml-4">
@@ -86,7 +86,7 @@ const DashboardPage = () => {
                 {/* Carte des candidatures */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-green-100 text-green-600">
+                        <div className="p-3 rounded-full bg-primary text-primary">
                             <Users className="h-6 w-6" />
                         </div>
                         <div className="ml-4">
@@ -99,7 +99,7 @@ const DashboardPage = () => {
                 {/* Carte des offres actives */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <div className="p-3 rounded-full bg-primary text-primary">
                             <FileText className="h-6 w-6" />
                         </div>
                         <div className="ml-4">
@@ -112,7 +112,7 @@ const DashboardPage = () => {
                 {/* Carte des candidatures en attente */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <div className="p-3 rounded-full bg-primary text-primary">
                             <Building2 className="h-6 w-6" />
                         </div>
                         <div className="ml-4">

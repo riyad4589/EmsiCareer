@@ -150,7 +150,7 @@ const Post = ({ post }) => {
 									<img
 										src={post.author?.profilePicture || "/avatar.png"}
 										alt={post.author?.name || "Utilisateur"}
-										className='size-10 rounded-full mr-3 object-cover border-2 border-transparent group-hover:border-primary transition-colors duration-200'
+										className='size-10 rounded-full mr-3 object-cover border-2 border-transparent group-hover:border-success transition-colors duration-200'
 									/>
 									<div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
 										<span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
@@ -163,7 +163,7 @@ const Post = ({ post }) => {
 							<div>
 								<Link 
 									to={`/profile/${post?.author?.username}`}
-									className='font-semibold hover:text-primary transition-colors duration-200'
+									className='font-semibold hover:text-success transition-colors duration-200'
 								>
 									{post.author?.name || "Utilisateur inconnu"}
 								</Link>
@@ -179,7 +179,7 @@ const Post = ({ post }) => {
 						<div className="relative">
 							<button 
 								onClick={() => setShowOptions(!showOptions)}
-								className='text-info hover:text-primary transition-colors duration-200'
+								className='text-info hover:text-success transition-colors duration-200'
 							>
 								<MoreVertical size={18} />
 							</button>
@@ -210,10 +210,10 @@ const Post = ({ post }) => {
 
 					{/* Affichage des détails de l'offre d'emploi */}
 					{isOffre && (
-						<div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+						<div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
 							<div className="flex items-center gap-2 mb-2">
-								<Briefcase size={20} className="text-blue-600" />
-								<h3 className="font-semibold text-blue-800">{post.titre}</h3>
+								<Briefcase size={20} className="text-green-600" />
+								<h3 className="font-semibold text-green-800">{post.titre}</h3>
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
 								<div>
@@ -229,7 +229,7 @@ const Post = ({ post }) => {
 										<span className="font-medium text-gray-700">Compétences requises :</span>
 										<div className="flex flex-wrap gap-1 mt-1">
 											{post.competencesRequises.map((comp, index) => (
-												<span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+												<span key={index} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
 													{comp}
 												</span>
 											))}
@@ -254,7 +254,7 @@ const Post = ({ post }) => {
 
 					<div className='flex justify-between text-info'>
 						<PostAction
-							icon={<ThumbsUp size={18} className={isLiked ? "text-blue-500 fill-blue-500" : ""} />}
+							icon={<ThumbsUp size={18} className={isLiked ? "text-green-500 fill-green-500" : ""} />}
 							text={`J'aime (${post.likes?.length || 0})`}
 							onClick={handleLikePost}
 							disabled={isLikingPost}
@@ -295,14 +295,14 @@ const Post = ({ post }) => {
 											<img
 												src={comment.user?.profilePicture || "/avatar.png"}
 												alt={comment.user?.name || "Utilisateur"}
-												className='w-8 h-8 rounded-full object-cover border-2 border-transparent hover:border-primary transition-colors duration-200'
+												className='w-8 h-8 rounded-full object-cover border-2 border-transparent hover:border-success transition-colors duration-200'
 											/>
 										</Link>
 										<div className='flex-grow'>
 											<div className='flex items-center gap-2 mb-1'>
 												<Link 
 													to={`/profile/${comment.user?.username}`}
-													className='font-semibold hover:text-primary transition-colors duration-200'
+													className='font-semibold hover:text-success transition-colors duration-200'
 												>
 													{comment.user?.name || "Utilisateur inconnu"}
 												</Link>
@@ -328,13 +328,13 @@ const Post = ({ post }) => {
 								value={newComment}
 								onChange={(e) => setNewComment(e.target.value)}
 								placeholder='Ajouter un commentaire...'
-								className='flex-grow p-2 rounded-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+								className='flex-grow p-2 rounded-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 								maxLength={500}
 							/>
 
 							<button
 								type='submit'
-								className='bg-primary text-white p-2 rounded-full hover:bg-primary-dark transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
+								className='bg-success text-white p-2 rounded-full hover:bg-success-dark transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed'
 								disabled={isAddingComment || !newComment.trim()}
 							>
 								{isAddingComment ? (
@@ -372,7 +372,7 @@ const Post = ({ post }) => {
 										value={cv}
 										onChange={(e) => setCv(e.target.value)}
 										placeholder="Collez votre CV ou décrivez votre expérience..."
-										className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+										className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 										rows={4}
 									/>
 								</div>
@@ -385,7 +385,7 @@ const Post = ({ post }) => {
 										value={lettreMotivation}
 										onChange={(e) => setLettreMotivation(e.target.value)}
 										placeholder="Expliquez pourquoi vous êtes intéressé par ce poste..."
-										className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+										className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 										rows={4}
 									/>
 								</div>
@@ -401,7 +401,7 @@ const Post = ({ post }) => {
 									<button
 										type="submit"
 										disabled={isApplying || (!cv.trim() && !lettreMotivation.trim())}
-										className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+										className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
 										{isApplying ? (
 											<>

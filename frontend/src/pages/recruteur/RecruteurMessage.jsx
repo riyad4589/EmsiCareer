@@ -84,7 +84,7 @@ const RecruteurMessage = () => {
 
 	return (
 		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-			<h1 className="text-2xl font-bold mb-6 text-blue-700">Messagerie Recruteur</h1>
+			<h1 className="text-2xl font-bold mb-6 text-green-700">Messagerie Recruteur</h1>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				{/* Liste des conversations */}
 				<div className="lg:col-span-1">
@@ -118,7 +118,7 @@ const RecruteurMessage = () => {
 												</p>
 											</div>
 											{conversation.unreadCount > 0 && (
-												<span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+												<span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
 													{conversation.unreadCount}
 												</span>
 											)}
@@ -159,7 +159,7 @@ const RecruteurMessage = () => {
 														<div
 															className={`max-w-[70%] rounded-lg p-3 ${
 																message.sender._id === user._id
-																	? "bg-blue-600 text-white"
+																	? "bg-green-600 text-white"
 																	: "bg-gray-100"
 															}`}
 														>
@@ -179,12 +179,12 @@ const RecruteurMessage = () => {
 												type="text"
 												name="message"
 												placeholder="Écrivez votre message..."
-												className="flex-1 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+												className="flex-1 rounded-lg border-gray-300 focus:ring-green-500 focus:border-green-500"
 											/>
 											<button
 												type="submit"
 												disabled={sendMessageMutation.isPending}
-												className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+												className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
 											>
 												{sendMessageMutation.isPending ? "Envoi..." : "Envoyer"}
 											</button>

@@ -83,11 +83,11 @@ const SkillsSection = ({ userData, isOwnProfile, onSave }) => {
 							value={newSkill}
 							onChange={(e) => setNewSkill(e.target.value)}
 							onKeyPress={handleKeyPress}
-							className='flex-grow p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+							className='flex-grow p-2 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						/>
 						<button
 							onClick={handleAddSkill}
-							className='bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center gap-2'
+							className='bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center gap-2'
 						>
 							<Plus size={20} />
 							Ajouter
@@ -102,7 +102,7 @@ const SkillsSection = ({ userData, isOwnProfile, onSave }) => {
 						<button
 							onClick={handleSave}
 							disabled={isSaving}
-							className='w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							{isSaving ? (
 								<>
@@ -116,7 +116,7 @@ const SkillsSection = ({ userData, isOwnProfile, onSave }) => {
 					) : (
 						<button
 							onClick={() => setIsEditing(true)}
-							className='w-full text-primary hover:text-primary-dark transition duration-300 flex items-center justify-center gap-2'
+							className='w-full text-success hover:text-success-dark transition duration-300 flex items-center justify-center gap-2'
 						>
 							<Plus size={20} />
 							Modifier les compétences

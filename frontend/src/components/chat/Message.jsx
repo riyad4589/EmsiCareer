@@ -18,7 +18,7 @@ const Message = ({ message, isOwn }) => {
 				<div
 					className={`rounded-lg p-3 ${
 						isOwn
-							? "bg-primary text-white rounded-br-none"
+							? "bg-success text-white rounded-br-none"
 							: "bg-gray-100 text-gray-900 rounded-bl-none"
 					}`}
 				>

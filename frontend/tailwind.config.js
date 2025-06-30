@@ -11,7 +11,7 @@ export default {
 		themes: [
 			{
 				linkedin: {
-					primary: "#0A66C2", // LinkedIn Blue
+					success: "#0A66C2", // LinkedIn green
 					secondary: "#FFFFFF", // White
 					accent: "#7FC15E", // LinkedIn Green (for accents)
 					neutral: "#000000", // Black (for text)

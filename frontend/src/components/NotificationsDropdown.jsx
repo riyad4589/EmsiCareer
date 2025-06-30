@@ -88,7 +88,7 @@ const NotificationsDropdown = () => {
 								<button
 									onClick={handleMarkAllAsRead}
 									disabled={markAllAsReadMutation.isPending || !notifications?.length}
-									className="p-2 text-blue-600 hover:text-blue-500 disabled:opacity-50"
+									className="p-2 text-green-600 hover:text-green-500 disabled:opacity-50"
 									title="Tout marquer comme lu"
 								>
 									{markAllAsReadMutation.isPending ? (
@@ -128,7 +128,7 @@ const NotificationsDropdown = () => {
 									<div
 										key={notification._id}
 										className={`p-4 hover:bg-gray-50 ${
-											!notification.read ? "bg-blue-50" : ""
+											!notification.read ? "bg-green-50" : ""
 										}`}
 									>
 										<div className="flex items-start space-x-3">

@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.animate-slide-in-up {
+  animation: slideInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.animate-slide-out-down {
+  animation: slideOutDown 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideOutDown {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0; }
+}
+
+/* Si tu as des classes personnalisées, adapte-les ici :
+.bg-success { background-color: #22c55e; } /* vert-500 */
+.text-success { color: #22c55e; }
+.border-success { border-color: #22c55e; }
+
+/* Si tu as des classes pour les hover, focus, etc. */
+.bg-success:hover { background-color: #16a34a; } /* vert-600 */
+.text-success:hover { color: #16a34a; }
+
+/* ... autres adaptations ... */
