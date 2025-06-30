@@ -1,12 +1,11 @@
-import cloudinary from "../lib/cloudinary.js";
-import Offre from "../models/offre.model.js";
-import User from "../models/user.model.js";
+
 import Connection from "../models/connection.model.js";
-import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
 import { sendCandidatureAcceptedEmail } from "../emails/emailHandlers.js";
 import { sendCandidatureRejectedEmail } from "../emails/emailHandlers.js";
-import { uploadToAzure } from "../utils/azureBlob.js";
-
+import User from "../models/user.model.js";
+import Offre from "../models/offre.model.js";
+import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
+import { uploadMediaToAzure } from "../utils/azureBlob.js"; // ✅ conteneur "offresmedias"
 
 // ✅ Créer une offre d'emploi
 export const createOffer = async (req, res) => {
@@ -18,52 +17,46 @@ export const createOffer = async (req, res) => {
       typeContrat,
       dateExpiration,
     } = req.body;
+
     let competencesRequises = req.body.competencesRequises;
 
-    // Assurer que les compétences sont un tableau
-    if (typeof competencesRequises === 'string') {
+    // 🧠 Vérifier et parser les compétences
+    if (typeof competencesRequises === "string") {
       try {
-        // Essayer de parser le JSON d'abord
         const parsed = JSON.parse(competencesRequises);
-        if (Array.isArray(parsed)) {
-          competencesRequises = parsed;
-        } else {
-          // Sinon, splitter par la virgule
-          competencesRequises = competencesRequises.split(',').map(skill => skill.trim());
-        }
+        competencesRequises = Array.isArray(parsed)
+          ? parsed
+          : parsed.split(",").map((skill) => skill.trim());
       } catch (e) {
-        // Si le parsing échoue, c'est probablement une chaîne simple
-        competencesRequises = competencesRequises.split(',').map(skill => skill.trim());
+        competencesRequises = competencesRequises.split(",").map((skill) => skill.trim());
       }
     } else if (!Array.isArray(competencesRequises)) {
       competencesRequises = [];
     }
 
-    let imageUrl = null;
+    // 📦 Upload des images uniquement vers Azure
     let mediasUrls = [];
 
-    if (req.files && req.files.image) {
-      const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
-        folder: "offres",
-        width: 1000,
-        height: 1000,
-        crop: "limit"
-      });
-      imageUrl = result.secure_url;
-    }
+    if (req.files?.medias) {
+      const files = Array.isArray(req.files.medias)
+        ? req.files.medias
+        : [req.files.medias];
 
-    if (req.files && req.files.medias) {
-      const files = Array.isArray(req.files.medias) ? req.files.medias : [req.files.medias];
       for (const file of files) {
-        const isVideo = file.mimetype.startsWith('video/');
-        const result = await cloudinary.uploader.upload(file.tempFilePath, {
-          folder: "offres",
-          resource_type: isVideo ? "video" : "image",
-        });
-        mediasUrls.push(result.secure_url);
+        if (!file.mimetype.startsWith("image/")) {
+          console.log("⛔ Fichier ignoré (non image) :", file.name, file.mimetype);
+          continue;
+        }
+
+        const url = await uploadMediaToAzure(file.tempFilePath, file.name);
+        mediasUrls.push(url);
+        console.log("✅ Image uploadée sur Azure :", url);
       }
+    } else {
+      console.log("⚠️ Aucun fichier 'medias' reçu dans req.files");
     }
 
+    // ✅ Création de l'offre
     const newOffer = new Offre({
       author: req.user._id,
       titre,
@@ -72,28 +65,23 @@ export const createOffer = async (req, res) => {
       typeContrat,
       competencesRequises,
       dateExpiration,
-      image: imageUrl,
       medias: mediasUrls,
     });
 
     await newOffer.save();
-
-    // 🧠 Populate author pour l'email
     await newOffer.populate("author", "name companyName industry");
 
-    // 📤 Envoyer l'offre à tous les lauréats
+    // 📤 Notifier les lauréats
     const laureats = await User.find({ role: "user" });
 
     await Promise.all(
-      laureats.map(laureat => sendNewOfferEmailToLaureat(laureat, newOffer)
-      )
+      laureats.map((laureat) => sendNewOfferEmailToLaureat(laureat, newOffer))
     );
 
-
-    
-    res.status(201).json({ message: "Offre créée avec succès", offer: newOffer });
+    return res.status(201).json({ message: "Offre créée avec succès", offer: newOffer });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error: error.message });
+    console.error("❌ Erreur createOffer :", error);
+    return res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
@@ -106,6 +94,7 @@ export const getMyOffers = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 
 // ✅ Obtenir une offre spécifique
 export const getOfferById = async (req, res) => {
@@ -175,29 +164,39 @@ export const getReceivedApplications = async (req, res) => {
 // ✅ Statistiques du recruteur connecté
 export const getRecruiterStats = async (req, res) => {
   try {
-    // Offres du recruteur
-    const offers = await Offre.find({ author: req.user._id });
-    const totalOffers = offers.length;
-    const activeOffers = offers.filter(o => !o.dateExpiration || new Date(o.dateExpiration) > new Date()).length;
+    const recruteurId = req.user._id;
 
-    // Candidatures sur ses offres
-    let totalApplications = 0;
-    let pendingApplications = 0;
-    offers.forEach(offer => {
-      if (Array.isArray(offer.candidatures)) {
-        totalApplications += offer.candidatures.length;
-        pendingApplications += offer.candidatures.filter(c => c.status === 'pending').length;
-      }
+    // Total des offres publiées par ce recruteur
+    const totalOffers = await Offre.countDocuments({ author: recruteurId });
+
+    // Offres non expirées (actives)
+    const activeOffers = await Offre.countDocuments({
+      author: recruteurId,
+      dateExpiration: { $gte: new Date() }
     });
 
-    res.status(200).json({
+    // On récupère les offres pour compter les candidatures
+    const offres = await Offre.find({ author: recruteurId });
+
+    let totalApplications = 0;
+    let pendingApplications = 0;
+
+    for (const offre of offres) {
+      totalApplications += offre.candidatures.length;
+      pendingApplications += offre.candidatures.filter(
+        (c) => c.status === "pending"
+      ).length;
+    }
+
+    return res.status(200).json({
       totalOffers,
-      totalApplications,
       activeOffers,
+      totalApplications,
       pendingApplications
     });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors du calcul des statistiques", error: error.message });
+    console.error("❌ Erreur stats recruteur :", error);
+    return res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
@@ -291,4 +290,7 @@ export const rejectApplication = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
+
+
 

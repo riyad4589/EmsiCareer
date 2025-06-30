@@ -212,19 +212,28 @@ const OffresPage = () => {
 
     const handleMediaChange = (e) => {
         const files = Array.from(e.target.files);
-        const previews = [];
+        const imageFiles = files.filter(file => file.type.startsWith("image/"));
+
+        if (imageFiles.length === 0) {
+            toast.error("Seules les images sont autorisées.");
+            return;
+        }
+
         const types = [];
-        files.forEach(file => {
-            types.push(file.type.startsWith('video/') ? 'video' : 'image');
+
+        imageFiles.forEach(file => {
+            types.push("image");
             const reader = new FileReader();
             reader.onloadend = () => {
-                setMediaPreviews(prev => [...prev, reader.result]);
+            setMediaPreviews(prev => [...prev, reader.result]);
             };
             reader.readAsDataURL(file);
         });
-        setMediaFiles(prev => [...prev, ...files]);
+
+        setMediaFiles(prev => [...prev, ...imageFiles]);
         setMediaTypes(prev => [...prev, ...types]);
-    };
+        };
+
 
     const handleRemoveMedia = (index) => {
         setMediaFiles(prev => prev.filter((_, i) => i !== index));
@@ -250,7 +259,7 @@ const OffresPage = () => {
             
             if (mediaFiles.length > 0) {
                 mediaFiles.forEach(file => {
-                    formData.append('media', file);
+                    formData.append('medias', file); // ✅ au pluriel, pour correspondre à req.files.medias
                 });
             }
             await createOfferMutation.mutateAsync(formData);
@@ -440,7 +449,7 @@ const OffresPage = () => {
                                 <input
                                     type="file"
                                     multiple
-                                    accept="image/*,video/*"
+                                    accept="image/*"
                                     onChange={handleMediaChange}
                                     className="w-full p-2 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                 />
@@ -478,7 +487,27 @@ const OffresPage = () => {
                         {offres && offres.length > 0 ? (
                             offres.map((offre) => (
                                 <div key={offre._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transform hover:-translate-y-1 transition-transform duration-300">
-                                    {offre.image && <img src={offre.image} alt={offre.titre} className="w-full sm:w-48 h-48 sm:h-auto object-cover"/>}
+                                {offre.medias?.length > 0 ? (
+                                offre.medias[0].includes(".mp4") || offre.medias[0].includes("video") ? (
+                                    <video
+                                    src={offre.medias[0]}
+                                    controls
+                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover"
+                                    />
+                                ) : (
+                                    <img
+                                    src={offre.medias[0]}
+                                    alt={offre.titre}
+                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover"
+                                    />
+                                )
+                                ) : (
+                                <img
+                                    src="/placeholder-offre.png"
+                                    alt="Image indisponible"
+                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover opacity-40"
+                                />
+                                )}
                                     <div className="p-5 flex flex-col justify-between flex-grow">
                                         <div>
                                             <h3 className="font-bold text-xl mb-2 text-gray-800">{offre.titre}</h3>
