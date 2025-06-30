@@ -9,7 +9,6 @@ const candidaturesContainer = "candidatures";
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 const candidaturesClient = blobServiceClient.getContainerClient(candidaturesContainer);
 
-<<<<<<< HEAD
 // 🟢 Conteneur pour les images/vidéos des offres
 const mediasContainer = "offresmedias";
 const mediasClient = blobServiceClient.getContainerClient(mediasContainer);
