@@ -30,14 +30,14 @@ const AboutSection = ({ userData, isOwnProfile, onSave }) => {
 							<textarea
 								value={about}
 								onChange={(e) => setAbout(e.target.value)}
-								className='w-full p-4 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary min-h-[150px]'
+								className='w-full p-4 border rounded-lg bg-base-100 focus:outline-none focus:ring-2 focus:ring-success min-h-[150px]'
 								placeholder="Parlez-nous de vous..."
 							/>
 							<div className="flex gap-2">
 								<button
 									onClick={handleSave}
 									disabled={isSaving}
-									className='flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center gap-2'
+									className='flex-1 bg-success text-white py-2 px-4 rounded-lg hover:bg-success-dark transition duration-300 flex items-center justify-center gap-2'
 								>
 									{isSaving ? (
 										<>
@@ -64,7 +64,7 @@ const AboutSection = ({ userData, isOwnProfile, onSave }) => {
 							<p className="text-info whitespace-pre-wrap">{userData.about || "Aucune description pour le moment."}</p>
 							<button
 								onClick={() => setIsEditing(true)}
-								className='text-primary hover:text-primary-dark transition duration-300 flex items-center gap-2'
+								className='text-success hover:text-success-dark transition duration-300 flex items-center gap-2'
 							>
 								<Edit2 size={20} />
 								Modifier

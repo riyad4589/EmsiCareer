@@ -28,7 +28,7 @@ const Avatar = ({ user, className = "" }) => {
 
 	return (
 		<div
-			className={`flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-medium ${className}`}
+			className={`flex items-center justify-center rounded-full bg-green-100 text-green-600 font-medium ${className}`}
 		>
 			{initials || <User size={20} />}
 		</div>
@@ -259,7 +259,7 @@ const NetworkPage = () => {
 										<div className="flex gap-2">
 											<button
 												onClick={() => navigate(`/messages/${connection._id}`)}
-												className="p-2 text-blue-600 hover:text-blue-700"
+												className="p-2 text-green-600 hover:text-green-700"
 											>
 												<MessageSquare size={20} />
 											</button>
@@ -312,7 +312,7 @@ const NetworkPage = () => {
 												className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
 													suggestion.status === "pending"
 														? "bg-gray-100 text-gray-500 cursor-not-allowed"
-														: "bg-blue-50 text-blue-600 hover:bg-blue-100"
+														: "bg-green-50 text-green-600 hover:bg-green-100"
 												}`}
 											>
 												{connectMutation.isPending && suggestion._id === connectMutation.variables ? (

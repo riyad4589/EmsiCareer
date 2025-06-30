@@ -138,7 +138,7 @@ const SignUpForm = () => {
 						placeholder='Entrez votre nom complet'
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -152,7 +152,7 @@ const SignUpForm = () => {
 						placeholder='Choisissez un nom d\'utilisateur'
 						value={username}
 						onChange={(e) => setUsername(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -166,7 +166,7 @@ const SignUpForm = () => {
 						placeholder='Entrez votre email'
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -181,13 +181,13 @@ const SignUpForm = () => {
 							placeholder='Créez un mot de passe (6+ caractères)'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary pr-10'
+							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success pr-10'
 							required
 						/>
 						<button
 							type="button"
 							onClick={() => setShowPassword(!showPassword)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-primary transition-colors duration-200"
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-success transition-colors duration-200"
 						>
 							{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
 						</button>
@@ -205,13 +205,13 @@ const SignUpForm = () => {
 							placeholder='Confirmez votre mot de passe'
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
-							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary pr-10'
+							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success pr-10'
 							required
 						/>
 						<button
 							type="button"
 							onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-primary transition-colors duration-200"
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-success transition-colors duration-200"
 						>
 							{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
 						</button>
@@ -221,7 +221,7 @@ const SignUpForm = () => {
 				<button 
 					type='submit' 
 					disabled={isLoading}
-					className='btn btn-primary w-full hover:bg-primary-dark transition-colors duration-200'
+					className='btn btn-success w-full hover:bg-success-dark transition-colors duration-200'
 				>
 					{isLoading ? (
 						<>
@@ -236,7 +236,7 @@ const SignUpForm = () => {
 			<div className="text-center text-sm text-info">
 				<p>
 					Déjà un compte ?{" "}
-					<Link to="/login" className="text-primary hover:text-primary-dark transition-colors duration-200">
+					<Link to="/login" className="text-success hover:text-success-dark transition-colors duration-200">
 						Se connecter
 					</Link>
 				</p>

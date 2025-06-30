@@ -77,7 +77,7 @@ const NotificationsPage = () => {
 						<button
 							onClick={() => markAllAsReadMutation.mutate()}
 							disabled={markAllAsReadMutation.isPending}
-							className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-2"
+							className="text-sm text-green-600 hover:text-green-700 flex items-center gap-2"
 						>
 							{markAllAsReadMutation.isPending ? (
 								<Loader size={16} className="animate-spin" />
@@ -110,7 +110,7 @@ const NotificationsPage = () => {
 						<div
 							key={notification._id}
 							className={`p-4 rounded-lg border ${
-								notification.read ? "bg-white" : "bg-blue-50"
+								notification.read ? "bg-white" : "bg-green-50"
 							}`}
 						>
 							<div className="flex justify-between items-start">

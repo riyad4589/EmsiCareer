@@ -19,8 +19,8 @@ const NavbarRecruteur = () => {
     const navLinkClass = (path) => {
         return `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
             location.pathname === path
-                ? "text-blue-600 bg-blue-100"
-                : "text-gray-600 hover:text-blue-600 hover:bg-blue-100"
+                ? "text-green-600 bg-green-100"
+                : "text-gray-600 hover:text-green-600 hover:bg-green-100"
         }`;
     };
 

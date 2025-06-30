@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import Connection from "../models/connection.model.js";
+import { uploadToAzure } from "../utils/azureBlob.js";
 
 export const getSuggestedConnections = async (req, res) => {
 	try {
@@ -131,13 +132,13 @@ export const updateProfile = async (req, res) => {
 
 		// Traiter l'image de profil
 		if (req.files && req.files.profilePicture) {
-			const result = await cloudinary.uploader.upload(req.files.profilePicture.tempFilePath, {
-				folder: "profile_pictures",
-				width: 500,
-				height: 500,
-				crop: "fill"
-			});
-			updatedData.profilePicture = result.secure_url;
+			const azureUrl = await uploadToAzure(
+				req.files.profilePicture.tempFilePath,
+				req.files.profilePicture.name,
+				"profile",
+				req.files.profilePicture.mimetype
+			);
+			updatedData.profilePicture = azureUrl;
 		}
 
 		// Traiter l'image de couverture

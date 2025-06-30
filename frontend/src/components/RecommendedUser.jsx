@@ -106,7 +106,7 @@ const RecommendedUser = ({ user }) => {
 			default:
 				return (
 					<button
-						className='px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center justify-center'
+						className='px-3 py-1 rounded-full text-sm border border-success text-success hover:bg-success hover:text-white transition-colors duration-200 flex items-center justify-center'
 						onClick={handleConnect}
 						disabled={isSendingRequest}
 					>
@@ -139,7 +139,7 @@ const RecommendedUser = ({ user }) => {
 					<img
 						src={user.profilePicture || "/avatar.png"}
 						alt={user.name}
-						className='w-12 h-12 rounded-full mr-3 object-cover border-2 border-transparent group-hover:border-primary transition-colors duration-200'
+						className='w-12 h-12 rounded-full mr-3 object-cover border-2 border-transparent group-hover:border-success transition-colors duration-200'
 					/>
 					<div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
 						<span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
@@ -148,7 +148,7 @@ const RecommendedUser = ({ user }) => {
 					</div>
 				</div>
 				<div>
-					<h3 className='font-semibold text-sm group-hover:text-primary transition-colors duration-200'>{user.name}</h3>
+					<h3 className='font-semibold text-sm group-hover:text-success transition-colors duration-200'>{user.name}</h3>
 					<p className='text-xs text-info'>{user.headline}</p>
 				</div>
 			</Link>

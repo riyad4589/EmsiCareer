@@ -163,6 +163,7 @@ export const login = async (req, res) => {
 export const logout = (req, res) => {
 	try {
 		console.log("Déconnexion");
+		res.clearCookie('token', { httpOnly: true, sameSite: 'lax', secure: true });
 		res.status(200).json({ message: "Déconnexion réussie" });
 	} catch (error) {
 		console.error("Erreur lors de la déconnexion:", error);

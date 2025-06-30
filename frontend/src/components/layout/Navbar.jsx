@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -19,6 +19,7 @@ const Navbar = () => {
 	 });
 	const queryClient = useQueryClient();
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	const { data: notifications } = useQuery({
 		queryKey: ["notifications"],
@@ -40,6 +41,7 @@ const Navbar = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["authUser"] });
 			toast.success("Déconnexion réussie");
+			navigate("/login");
 		},
 		onError: () => {
 			toast.error("Erreur lors de la déconnexion");
@@ -58,8 +60,8 @@ const Navbar = () => {
 	const navLinkClass = (path) => {
 		return `flex flex-col items-center transition-colors duration-200 ${
 			isActive(path)
-				? "text-primary"
-				: "text-neutral hover:text-primary"
+				? "text-success"
+				: "text-neutral hover:text-success"
 		}`;
 	};
 
@@ -84,7 +86,7 @@ const Navbar = () => {
 									<span className='text-xs hidden md:block'>Réseau</span>
 									{unreadConnectionRequestsCount > 0 && (
 										<span
-											className='absolute -top-1 -right-1 md:right-4 bg-primary text-white text-xs 
+											className='absolute -top-1 -right-1 md:right-4 bg-success text-white text-xs 
 											rounded-full size-3 md:size-4 flex items-center justify-center animate-pulse'
 										>
 											{unreadConnectionRequestsCount}
@@ -104,7 +106,7 @@ const Navbar = () => {
 									<span className='text-xs hidden md:block'>Notifications</span>
 									{unreadNotificationCount > 0 && (
 										<span
-											className='absolute -top-1 -right-1 md:right-4 bg-primary text-white text-xs 
+											className='absolute -top-1 -right-1 md:right-4 bg-success text-white text-xs 
 											rounded-full size-3 md:size-4 flex items-center justify-center animate-pulse'
 										>
 											{unreadNotificationCount}
@@ -118,24 +120,13 @@ const Navbar = () => {
 									<User size={20} />
 									<span className='text-xs hidden md:block'>Profil</span>
 								</Link>
-								
-								<button
-									className='flex items-center space-x-1 text-sm text-neutral hover:text-primary transition-colors duration-200'
-									onClick={() => logout()}
-								>
-									<LogOut size={20} />
-									<span className='hidden md:inline'>Déconnexion</span>
-								</button>
 							</>
+							
 						) : (
-							<>
-								<Link to='/login' className='btn btn-ghost'>
-									Connexion
-								</Link>
-								<Link to='/signup' className='btn btn-primary'>
-									S'inscrire
-								</Link>
-							</>
+							<Link to='/login' className={navLinkClass('/login')}>
+								<LogIn size={20} />
+								<span className='text-xs hidden md:block'>Connexion</span>
+							</Link>
 						)}
 					</div>
 				</div>

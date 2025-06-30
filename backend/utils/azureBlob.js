@@ -9,6 +9,7 @@ const candidaturesContainer = "candidatures";
 const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
 const candidaturesClient = blobServiceClient.getContainerClient(candidaturesContainer);
 
+<<<<<<< HEAD
 // 🟢 Conteneur pour les images/vidéos des offres
 const mediasContainer = "offresmedias";
 const mediasClient = blobServiceClient.getContainerClient(mediasContainer);
@@ -18,13 +19,14 @@ export const uploadToAzure = async (filePath, originalName, prefix = "fichier") 
   try {
     const extension = path.extname(originalName);
     const cleanName = path.basename(originalName, extension).replace(/\s+/g, "_");
+
     const timestamp = Date.now();
     const finalName = `${prefix}_${cleanName}_${timestamp}${extension}`;
 
     const blockBlobClient = candidaturesClient.getBlockBlobClient(finalName);
 
     await blockBlobClient.uploadFile(filePath, {
-      blobHTTPHeaders: { blobContentType: "application/pdf" }
+      blobHTTPHeaders: { blobContentType: mimeType || "application/octet-stream" }
     });
 
     return blockBlobClient.url;

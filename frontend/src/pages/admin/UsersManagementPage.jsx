@@ -307,7 +307,7 @@ const UsersManagementPage = () => {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
 					<p className="mt-4 text-gray-600">Chargement des utilisateurs...</p>
 				</div>
 			</div>
@@ -341,7 +341,7 @@ const UsersManagementPage = () => {
 								id="roleFilter"
 								value={roleFilter}
 								onChange={(e) => setRoleFilter(e.target.value)}
-								className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+								className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
 							>
 								<option value="all">Tous les rôles</option>
 								<option value="user">Utilisateur</option>
@@ -351,7 +351,7 @@ const UsersManagementPage = () => {
 						</div>
 						<button
 							onClick={() => setIsCreating(true)}
-							className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+							className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
 						>
 							<Plus className="h-5 w-5 mr-2" />
 							Nouvel utilisateur
@@ -415,7 +415,7 @@ const UsersManagementPage = () => {
 																			type="text"
 																			value={editForm.name}
 																			onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 																			required
 																		/>
 																	</div>
@@ -425,7 +425,7 @@ const UsersManagementPage = () => {
 																			type="email"
 																			value={editForm.emailEdu}
 																			onChange={(e) => setEditForm({ ...editForm, emailEdu: e.target.value })}
-																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 																			required
 																		/>
 																	</div>
@@ -436,7 +436,7 @@ const UsersManagementPage = () => {
 																		<select
 																			value={editForm.role}
 																			onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 																		>
 																			<option value="user">Utilisateur</option>
 																			<option value="recruteur">Recruteur</option>
@@ -448,7 +448,7 @@ const UsersManagementPage = () => {
 																		<select
 																			value={editForm.status}
 																			onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+																			className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 																		>
 																			<option value="active">Actif</option>
 																			<option value="pending">En attente</option>
@@ -465,13 +465,13 @@ const UsersManagementPage = () => {
 																<button
 																	type="button"
 																	onClick={() => setEditingUser(null)}
-																	className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+																	className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 																>
 																	Annuler
 																</button>
 																<button
 																	type="submit"
-																	className="px-6 py-2.5 bg-blue-600 text-sm font-medium text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+																	className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 																>
 																	Enregistrer
 																</button>
@@ -538,7 +538,7 @@ const UsersManagementPage = () => {
 													<div className="flex items-center justify-center space-x-4">
 														<button
 															onClick={() => handleEdit(user)}
-															className="text-blue-600 hover:text-blue-900"
+															className="text-green-600 hover:text-green-900"
 														>
 															<Edit size={18} />
 														</button>
@@ -605,7 +605,7 @@ const UsersManagementPage = () => {
 											type={showPassword ? "text" : "password"}
 											value={passwordForm.password}
 											onChange={handlePasswordChange}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 										<button
@@ -643,7 +643,7 @@ const UsersManagementPage = () => {
 											type={showConfirmPassword ? "text" : "password"}
 											value={passwordForm.confirmPassword}
 											onChange={handleConfirmPasswordChange}
-											className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${
+											className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 ${
 												passwordForm.confirmPassword
 													? passwordMatch
 														? "border-green-300"
@@ -669,13 +669,13 @@ const UsersManagementPage = () => {
 								<button
 									type="button"
 									onClick={() => setSelectedUser(null)}
-									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Annuler
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2.5 bg-blue-600 text-sm font-medium text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Enregistrer
 								</button>
@@ -716,7 +716,7 @@ const UsersManagementPage = () => {
 											type="text"
 											value={createForm.name}
 											onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -728,7 +728,7 @@ const UsersManagementPage = () => {
 											type="email"
 											value={createForm.emailEdu}
 											onChange={(e) => setCreateForm({ ...createForm, emailEdu: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -740,7 +740,7 @@ const UsersManagementPage = () => {
 											type="text"
 											value={createForm.username}
 											onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 											required
 										/>
 									</div>
@@ -755,7 +755,7 @@ const UsersManagementPage = () => {
 												type={showPassword ? "text" : "password"}
 												value={createForm.password}
 												onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-												className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+												className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 												required
 											/>
 											<button
@@ -774,7 +774,7 @@ const UsersManagementPage = () => {
 										<select
 											value={createForm.role}
 											onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 										>
 											<option value="user">Utilisateur</option>
 											<option value="recruteur">Recruteur</option>
@@ -788,7 +788,7 @@ const UsersManagementPage = () => {
 										<select
 											value={createForm.status}
 											onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 										>
 											<option value="active">Actif</option>
 											<option value="pending">En attente</option>
@@ -812,7 +812,7 @@ const UsersManagementPage = () => {
 													type="text"
 													value={createForm.companyName}
 													onChange={(e) => setCreateForm({ ...createForm, companyName: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required={createForm.role === "recruteur"}
 												/>
 											</div>
@@ -823,7 +823,7 @@ const UsersManagementPage = () => {
 												<select
 													value={createForm.industry}
 													onChange={(e) => setCreateForm({ ...createForm, industry: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required={createForm.role === "recruteur"}
 												>
 													<option value="">Sélectionnez un secteur</option>
@@ -844,7 +844,7 @@ const UsersManagementPage = () => {
 													type="text"
 													value={createForm.location}
 													onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													placeholder="Ville, Pays"
 													required={createForm.role === "recruteur"}
 												/>
@@ -858,7 +858,7 @@ const UsersManagementPage = () => {
 												<select
 													value={createForm.companySize}
 													onChange={(e) => setCreateForm({ ...createForm, companySize: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													required={createForm.role === "recruteur"}
 												>
 													<option value="">Sélectionnez une taille</option>
@@ -877,7 +877,7 @@ const UsersManagementPage = () => {
 												<textarea
 													value={createForm.companyDescription}
 													onChange={(e) => setCreateForm({ ...createForm, companyDescription: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
 													rows="4"
 													placeholder="Décrivez brièvement votre entreprise..."
 													required={createForm.role === "recruteur"}
@@ -892,13 +892,13 @@ const UsersManagementPage = () => {
 								<button
 									type="button"
 									onClick={() => setIsCreating(false)}
-									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Annuler
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2.5 bg-blue-600 text-sm font-medium text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+									className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
 								>
 									Créer
 								</button>

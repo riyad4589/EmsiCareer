@@ -8,6 +8,8 @@ const ProfilPage = () => {
     const queryClient = useQueryClient();
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
+    const [profileImagePreview, setProfileImagePreview] = useState(null);
 
     // Récupérer les données du profil
     const { data: profile, isLoading } = useQuery({
@@ -62,6 +64,7 @@ const ProfilPage = () => {
                     facebook: profile.socialLinks?.facebook || ""
                 }
             });
+            setProfileImagePreview(profile.profilePicture || "/avatar.png");
         }
     }, [profile]);
 
@@ -122,6 +125,14 @@ const ProfilPage = () => {
         });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfileImage(file);
+            setProfileImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -132,7 +143,18 @@ const ProfilPage = () => {
 
         setIsSubmitting(true);
         try {
-            await updateProfileMutation.mutateAsync(editData);
+            const formData = new FormData();
+            Object.entries(editData).forEach(([key, value]) => {
+                if (typeof value === "object" && value !== null) {
+                    formData.append(key, JSON.stringify(value));
+                } else {
+                    formData.append(key, value);
+                }
+            });
+            if (profileImage) {
+                formData.append("profilePicture", profileImage);
+            }
+            await updateProfileMutation.mutateAsync(formData);
         } finally {
             setIsSubmitting(false);
         }
@@ -141,7 +163,7 @@ const ProfilPage = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
             </div>
         );
     }
@@ -160,23 +182,24 @@ const ProfilPage = () => {
         <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white shadow rounded-lg overflow-hidden">
                 {/* En-tête du profil */}
-                <div className="relative h-48 bg-gradient-to-r from-blue-600 to-blue-800">
+                <div className="relative h-48 bg-gradient-to-r from-green-600 to-green-800">
                     <div className="absolute bottom-4 left-6 flex items-end space-x-4">
                         <div className="relative">
                             <img
-                                src={profile.profilePicture || "/avatar.png"}
+                                src={profileImagePreview || profile.profilePicture || "/avatar.png"}
                                 alt="Photo de profil"
                                 className="w-24 h-24 rounded-full border-4 border-white object-cover"
                             />
                             {isEditing && (
-                                <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full hover:bg-blue-700">
+                                <label className="absolute bottom-0 right-0 bg-green-600 text-white p-1 rounded-full hover:bg-green-700 cursor-pointer">
                                     <Edit size={16} />
-                                </button>
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                                </label>
                             )}
                         </div>
                         <div className="text-white mb-2">
                             <h1 className="text-2xl font-bold">{profile.name}</h1>
-                            <p className="text-blue-100">{profile.headline || "Recruteur"}</p>
+                            <p className="text-green-100">{profile.headline || "Recruteur"}</p>
                         </div>
                     </div>
                     
@@ -227,7 +250,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.name}
                                             onChange={e => setEditData({ ...editData, name: e.target.value })}
                                             required
@@ -261,7 +284,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="email"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.emailPersonelle}
                                             onChange={e => setEditData({ ...editData, emailPersonelle: e.target.value })}
                                         />
@@ -273,7 +296,7 @@ const ProfilPage = () => {
                                     </label>
                                     <input
                                         type="text"
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                         value={editData.headline}
                                         onChange={e => setEditData({ ...editData, headline: e.target.value })}
                                         placeholder="Ex: Responsable RH, Directeur de recrutement"
@@ -291,7 +314,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.companyName}
                                             onChange={e => setEditData({ ...editData, companyName: e.target.value })}
                                             required
@@ -303,7 +326,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.industry}
                                             onChange={e => setEditData({ ...editData, industry: e.target.value })}
                                             placeholder="Ex: Technologies, Finance, Santé"
@@ -316,7 +339,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.location}
                                             onChange={e => setEditData({ ...editData, location: e.target.value })}
                                             placeholder="Ex: Paris, France"
@@ -329,7 +352,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="url"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.website}
                                             onChange={e => setEditData({ ...editData, website: e.target.value })}
                                             placeholder="https://www.votre-entreprise.com"
@@ -341,7 +364,7 @@ const ProfilPage = () => {
                                         Description de l'entreprise *
                                     </label>
                                     <textarea
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                         rows={4}
                                         value={editData.description}
                                         onChange={e => setEditData({ ...editData, description: e.target.value })}
@@ -361,7 +384,8 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="url"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.socialLinks.linkedin}
                                             onChange={e => setEditData({
                                                 ...editData,
@@ -376,7 +400,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="url"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.socialLinks.twitter}
                                             onChange={e => setEditData({
                                                 ...editData,
@@ -391,7 +415,7 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="url"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                             value={editData.socialLinks.facebook}
                                             onChange={e => setEditData({
                                                 ...editData,
@@ -479,7 +503,7 @@ const ProfilPage = () => {
                                             <Globe className="w-5 h-5 text-gray-400" />
                                             <div>
                                                 <p className="text-sm text-gray-500">Site web</p>
-                                                <a href={profile.website} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">
+                                                <a href={profile.website} target="_blank" rel="noopener noreferrer" className="font-medium text-green-600 hover:underline">
                                                     {profile.website}
                                                 </a>
                                             </div>
@@ -504,7 +528,7 @@ const ProfilPage = () => {
                                                 href={profile.socialLinks.linkedin}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                                                className="flex items-center space-x-2 text-green-600 hover:text-green-800"
                                             >
                                                 <Linkedin className="w-5 h-5" />
                                                 <span>LinkedIn</span>
@@ -515,7 +539,7 @@ const ProfilPage = () => {
                                                 href={profile.socialLinks.twitter}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center space-x-2 text-blue-400 hover:text-blue-600"
+                                                className="flex items-center space-x-2 text-green-400 hover:text-green-600"
                                             >
                                                 <Twitter className="w-5 h-5" />
                                                 <span>Twitter</span>
@@ -526,7 +550,7 @@ const ProfilPage = () => {
                                                 href={profile.socialLinks.facebook}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                                                className="flex items-center space-x-2 text-green-600 hover:text-green-800"
                                             >
                                                 <Facebook className="w-5 h-5" />
                                                 <span>Facebook</span>

@@ -23,8 +23,8 @@ const SidebarRecruteur = () => {
     const navLinkClass = (path) => {
         return `flex items-center py-2 px-3 rounded-md transition-colors ${
             isActive(path)
-                ? "bg-primary text-white"
-                : "hover:bg-base-200 text-info hover:text-primary"
+                ? "bg-success text-white"
+                : "hover:bg-base-200 text-info hover:text-success"
         }`;
     };
 
@@ -39,20 +39,14 @@ const SidebarRecruteur = () => {
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-20 rounded-t-lg" />
                 </div>
-                <Link to={`/profile/${user?.username}`} className="group">
+                <Link className="group">
                     <div className="relative">
                         <img
                             src={user?.profilePicture || "/avatar.png"}
                             alt={user?.name}
-                            className='w-16 h-16 rounded-full mx-auto mt-[-32px] border-4 border-white object-cover group-hover:border-primary transition-colors duration-200'
+                            className='w-16 h-16 rounded-full mx-auto mt-[-32px] border-4 border-white object-cover group-hover:border-success transition-colors duration-200'
                         />
-                        <div className="absolute inset-0 rounded-full bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
-                                Voir le profil
-                            </span>
-                        </div>
                     </div>
-                    <h2 className='text-lg font-semibold mt-2 group-hover:text-primary transition-colors duration-200'>{user?.name}</h2>
                 </Link>
                 <p className='text-sm text-gray-600 mt-1 line-clamp-2'>{user?.company}</p>
             </div>

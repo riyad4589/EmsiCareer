@@ -116,7 +116,7 @@ const PostList = ({ posts }) => {
 						</button>
 						<button
 							onClick={() => toggleComments(post._id)}
-							className="flex items-center space-x-2 hover:text-blue-500"
+							className="flex items-center space-x-2 hover:text-green-500"
 						>
 							<MessageCircle size={20} />
 							<span>{post.comments.length}</span>
@@ -139,12 +139,12 @@ const PostList = ({ posts }) => {
 										}))
 									}
 									placeholder="Ajouter un commentaire..."
-									className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+									className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 								/>
 								<button
 									onClick={() => handleComment(post._id)}
 									disabled={commentMutation.isPending}
-									className="p-2 text-blue-500 hover:text-blue-600 disabled:opacity-50"
+									className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50"
 								>
 									<Send size={20} />
 								</button>

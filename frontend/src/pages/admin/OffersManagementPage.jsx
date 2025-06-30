@@ -125,7 +125,7 @@ const OffersManagementPage = () => {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Chargement des offres...</p>
                 </div>
             </div>
@@ -150,7 +150,7 @@ const OffersManagementPage = () => {
                     <h1 className="text-2xl font-bold text-gray-900">Gestion des Offres</h1>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
                         <Plus className="h-5 w-5 mr-2" />
                         Ajouter une offre
@@ -204,7 +204,7 @@ const OffersManagementPage = () => {
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                 offer.visibility === "public"
                                                     ? "bg-green-100 text-green-800"
-                                                    : "bg-blue-100 text-blue-800"
+                                                    : "bg-green-100 text-green-800"
                                             }`}>
                                                 {offer.visibility === "public" ? "Public" : "Privé"}
                                             </span>
@@ -216,7 +216,7 @@ const OffersManagementPage = () => {
                                             <div className="flex items-center justify-end space-x-4">
                                                 <button
                                                     onClick={() => handleEdit(offer)}
-                                                    className="text-blue-600 hover:text-blue-900"
+                                                    className="text-green-600 hover:text-green-900"
                                                 >
                                                     <Edit size={18} />
                                                 </button>
@@ -269,7 +269,7 @@ const OffersManagementPage = () => {
                                 <select
                                     value={createForm.authorId}
                                     onChange={(e) => setCreateForm({ ...createForm, authorId: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
                                     required
                                 >
                                     <option value="">Sélectionner un auteur</option>
@@ -287,7 +287,7 @@ const OffersManagementPage = () => {
                                 <textarea
                                     value={createForm.content}
                                     onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
                                     rows="4"
                                     required
                                 />
@@ -299,7 +299,7 @@ const OffersManagementPage = () => {
                                 <select
                                     value={createForm.visibility}
                                     onChange={(e) => setCreateForm({ ...createForm, visibility: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
                                 >
                                     <option value="public">Public</option>
                                     <option value="private">Privé</option>
@@ -315,7 +315,7 @@ const OffersManagementPage = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                                 >
                                     Créer
                                 </button>
@@ -348,7 +348,7 @@ const OffersManagementPage = () => {
                                 <textarea
                                     value={editForm.content}
                                     onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
                                     rows="4"
                                     required
                                 />
@@ -360,7 +360,7 @@ const OffersManagementPage = () => {
                                 <select
                                     value={editForm.visibility}
                                     onChange={(e) => setEditForm({ ...editForm, visibility: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
                                 >
                                     <option value="public">Public</option>
                                     <option value="private">Privé</option>
@@ -376,7 +376,7 @@ const OffersManagementPage = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                                 >
                                     Enregistrer
                                 </button>
