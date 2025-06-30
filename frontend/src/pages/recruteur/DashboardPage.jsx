@@ -9,22 +9,23 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const DashboardPage = () => {
     const navigate = useNavigate();
     const { data: stats, isLoading } = useQuery({
-        queryKey: ["recruiterStats"],
-        queryFn: async () => {
-            try {
-                const response = await axiosInstance.get("/recruiter/stats");
-                return response.data;
-            } catch (error) {
-                console.error("Erreur lors de la récupération des statistiques:", error);
-                return {
-                    totalOffers: 0,
-                    totalApplications: 0,
-                    activeOffers: 0,
-                    pendingApplications: 0
-                };
-            }
+    queryKey: ["recruiterStats"],
+    queryFn: async () => {
+        try {
+        const response = await axiosInstance.get("/recruteur/stats");
+        return response.data;
+        } catch (error) {
+        console.error("Erreur lors de la récupération des statistiques:", error);
+        return {
+            totalOffers: 0,
+            totalApplications: 0,
+            activeOffers: 0,
+            pendingApplications: 0
+        };
         }
+    }
     });
+
 
     // Récupérer le profil du recruteur
     const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -123,38 +124,93 @@ const DashboardPage = () => {
                 </div>
             </div>
 
-            {/* Graphique de répartition des candidatures */}
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques des candidatures</h2>
-                <Bar
-                    data={{
-                        labels: ["Total", "Actives", "En attente"],
-                        datasets: [
-                            {
-                                label: "Candidatures",
-                                data: [stats?.totalApplications || 0, stats?.activeOffers || 0, stats?.pendingApplications || 0],
-                                backgroundColor: [
-                                    "#3b82f6",
-                                    "#10b981",
-                                    "#a78bfa"
-                                ],
-                                borderRadius: 6
-                            }
-                        ]
-                    }}
-                    options={{
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            title: { display: false }
-                        },
-                        scales: {
-                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+           {/* Graphique de répartition des candidatures */}
+<div className="bg-gradient-to-r from-white via-gray-50 to-white rounded-lg shadow-lg p-8 mb-8 border border-gray-100">
+    <h2 className="text-xl font-bold text-gray-800 mb-6">Répartition des candidatures</h2>
+    <Bar
+        data={{
+            labels: ["Total", "Actives", "En attente"],
+            datasets: [
+                {
+                    label: "Candidatures",
+                    data: [
+                        stats?.totalApplications || 0,
+                        stats?.activeOffers || 0,
+                        stats?.pendingApplications || 0
+                    ],
+                    backgroundColor: [
+                        "rgba(59, 130, 246, 0.8)",   // bleu
+                        "rgba(16, 185, 129, 0.8)",   // vert
+                        "rgba(167, 139, 250, 0.8)"   // violet
+                    ],
+                    borderColor: [
+                        "rgba(59, 130, 246, 1)",
+                        "rgba(16, 185, 129, 1)",
+                        "rgba(167, 139, 250, 1)"
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    hoverBackgroundColor: [
+                        "rgba(59, 130, 246, 1)",
+                        "rgba(16, 185, 129, 1)",
+                        "rgba(167, 139, 250, 1)"
+                    ]
+                }
+            ]
+        }}
+        options={{
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "bottom",
+                    labels: {
+                        color: "#4B5563",
+                        font: {
+                            size: 14,
+                            weight: "bold"
                         }
-                    }}
-                    height={80}
-                />
-            </div>
+                    }
+                },
+                tooltip: {
+                    backgroundColor: "#111827",
+                    titleColor: "#fff",
+                    bodyColor: "#e5e7eb",
+                    borderWidth: 1,
+                    borderColor: "#374151"
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: "easeOutQuart"
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: "#6B7280",
+                        font: { size: 14 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#6B7280",
+                        font: { size: 14 },
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: "#E5E7EB"
+                    }
+                }
+            }
+        }}
+        height={100}
+    />
+</div>
+
         </div>
     );
 };
