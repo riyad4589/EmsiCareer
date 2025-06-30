@@ -142,6 +142,40 @@ const OffresPage = () => {
         }
     });
 
+    // Mutation pour valider une candidature
+    const acceptApplicationMutation = useMutation({
+        mutationFn: ({ offerId, applicationId }) => 
+            axiosInstance.put(`/recruteur/offres/${offerId}/candidatures/${applicationId}/accept`),
+        onSuccess: (data, variables) => {
+            toast.success("Candidature validée !");
+            // Mettre à jour la liste des candidatures dans l'état local
+            setApplications(prev => prev.map(app => 
+                app._id === variables.applicationId ? { ...app, status: 'accepted' } : app
+            ));
+            queryClient.invalidateQueries(["recruteurOffres"]);
+            queryClient.invalidateQueries(["recruiterStats"]);
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || "Erreur lors de la validation");
+        }
+    });
+
+    // Mutation pour refuser une candidature
+    const rejectApplicationMutation = useMutation({
+        mutationFn: ({ offerId, applicationId }) => 
+            axiosInstance.delete(`/recruteur/offres/${offerId}/candidatures/${applicationId}/reject`),
+        onSuccess: (data, variables) => {
+            toast.success("Candidature refusée.");
+            // Retirer la candidature de l'état local
+            setApplications(prev => prev.filter(app => app._id !== variables.applicationId));
+            queryClient.invalidateQueries(["recruteurOffres"]);
+            queryClient.invalidateQueries(["recruiterStats"]);
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || "Erreur lors du refus");
+        }
+    });
+
     const handleAddCompetence = () => {
         if (newCompetence.trim() && !newOffer.competencesRequises.includes(newCompetence.trim())) {
             setNewOffer(prev => ({
@@ -519,25 +553,25 @@ const OffresPage = () => {
                             <div className="text-center py-8 text-gray-500">Aucune postulation pour cette offre</div>
                         ) : (
                             <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                                {applications.map((candidature, idx) => (
-                                    <div key={candidature._id || idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 bg-gray-50">
+                                {applications.map((application, idx) => (
+                                    <div key={application._id || idx} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center gap-4 bg-gray-50">
                                         <div className="flex-1">
-                                            <div className="font-semibold text-blue-800">{candidature.laureat?.name || 'Utilisateur'}</div>
-                                            <div className="text-xs text-gray-500 mb-2">{candidature.laureat?.emailEdu}</div>
+                                            <div className="font-semibold text-blue-800">{application.laureat?.name || 'Utilisateur'}</div>
+                                            <div className="text-xs text-gray-500 mb-2">{application.laureat?.emailEdu}</div>
                                             <div className="flex gap-2 mb-1">
-                                                {candidature.cv && (
+                                                {application.cv && (
                                                     <button
                                                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                                        onClick={(e) => { e.stopPropagation(); downloadFile(candidature.cv, 'CV.pdf'); }}
+                                                        onClick={(e) => { e.stopPropagation(); downloadFile(application.cv, 'CV.pdf'); }}
                                                     >
                                                         <Eye size={14} />
                                                         Voir le CV
                                                     </button>
                                                 )}
-                                                {candidature.lettreMotivation && (
+                                                {application.lettreMotivation && (
                                                     <button
                                                         className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                                        onClick={(e) => { e.stopPropagation(); downloadFile(candidature.lettreMotivation, 'Lettre de motivation.pdf'); }}
+                                                        onClick={(e) => { e.stopPropagation(); downloadFile(application.lettreMotivation, 'Lettre de motivation.pdf'); }}
                                                     >
                                                         <Eye size={14} />
                                                         Voir La Lettre De Motivation
@@ -545,19 +579,33 @@ const OffresPage = () => {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                className="flex items-center gap-2 px-5 py-2 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 hover:scale-105 transition-all duration-150 font-semibold text-base"
-                                                onClick={() => {/* Action Valider ici */}}
-                                            >
-                                                <CheckCircle className="w-5 h-5" /> Valider
-                                            </button>
-                                            <button
-                                                className="flex items-center gap-2 px-5 py-2 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 hover:scale-105 transition-all duration-150 font-semibold text-base"
-                                                onClick={() => {/* Action Refuser ici */}}
-                                            >
-                                                <XCircle className="w-5 h-5" /> Refuser
-                                            </button>
+                                        <div className="flex items-center gap-2">
+                                            {application.status === 'pending' && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => acceptApplicationMutation.mutate({ offerId: selectedOffer._id, applicationId: application._id })}
+                                                        disabled={acceptApplicationMutation.isLoading}
+                                                        className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                                                    >
+                                                        <CheckCircle className="inline h-4 w-4 mr-1" />
+                                                        Valider
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => rejectApplicationMutation.mutate({ offerId: selectedOffer._id, applicationId: application._id })}
+                                                        disabled={rejectApplicationMutation.isLoading}
+                                                        className="px-3 py-1 text-xs font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:bg-gray-400 transition-colors"
+                                                    >
+                                                        <XCircle className="inline h-4 w-4 mr-1" />
+                                                        Refuser
+                                                    </button>
+                                                </>
+                                            )}
+                                            {application.status === 'accepted' && (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                                    Validée
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

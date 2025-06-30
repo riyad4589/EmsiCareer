@@ -1,6 +1,7 @@
 import cloudinary from "../lib/cloudinary.js";
 import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
+import Connection from "../models/connection.model.js";
 import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
 
 
@@ -176,5 +177,76 @@ export const getRecruiterStats = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors du calcul des statistiques", error: error.message });
+  }
+};
+
+// ✅ Valider une candidature
+export const acceptApplication = async (req, res) => {
+  try {
+    const { offerId, applicationId } = req.params;
+    const recruiterId = req.user._id;
+
+    const offer = await Offre.findById(offerId);
+    if (!offer) {
+      return res.status(404).json({ message: "Offre non trouvée." });
+    }
+
+    if (offer.author.toString() !== recruiterId.toString()) {
+      return res.status(403).json({ message: "Action non autorisée." });
+    }
+
+    const application = offer.candidatures.id(applicationId);
+    if (!application) {
+      return res.status(404).json({ message: "Candidature non trouvée." });
+    }
+
+    application.status = "accepted";
+    
+    // Créer une connexion si elle n'existe pas déjà
+    const existingConnection = await Connection.findOne({
+      $or: [
+        { user1: recruiterId, user2: application.laureat },
+        { user1: application.laureat, user2: recruiterId },
+      ],
+    });
+
+    if (!existingConnection) {
+      await Connection.create({
+        user1: recruiterId,
+        user2: application.laureat,
+        status: "accepted",
+      });
+    }
+
+    await offer.save();
+
+    res.status(200).json({ message: "Candidature validée avec succès." });
+
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+// ✅ Refuser une candidature
+export const rejectApplication = async (req, res) => {
+  try {
+    const { offerId, applicationId } = req.params;
+    const recruiterId = req.user._id;
+
+    const offer = await Offre.findById(offerId);
+    if (!offer) {
+      return res.status(404).json({ message: "Offre non trouvée." });
+    }
+
+    if (offer.author.toString() !== recruiterId.toString()) {
+      return res.status(403).json({ message: "Action non autorisée." });
+    }
+    
+    offer.candidatures.pull({ _id: applicationId });
+    await offer.save();
+
+    res.status(200).json({ message: "Candidature refusée avec succès." });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
