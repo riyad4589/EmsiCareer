@@ -198,3 +198,43 @@ export const createNewOfferEmailTemplate = (name, offer) => {
 </html>
   `;
 };
+
+
+export const createCandidatureAcceptedEmailTemplate = (name, offerTitle) => {
+  return `
+    <p>Bonjour <strong>${name}</strong>,</p>
+    <p>Félicitations ! Votre candidature pour le poste <strong>${offerTitle}</strong> a été <span style="color:green;"><strong>acceptée</strong></span>.</p>
+    <p>Le recruteur va vous contacter prochainement pour la suite du processus.</p>
+    <p>Bonne continuation,<br>L'équipe EMSI</p>
+  `;
+};
+
+
+export const createCandidatureRejectedEmailTemplate = (name, offerTitle) => {
+  return `
+    <p>Bonjour <strong>${name}</strong>,</p>
+    <p>Nous vous remercions pour votre candidature au poste de <strong>${offerTitle}</strong>.</p>
+    <p>Après examen, nous sommes au regret de vous informer que votre profil n'a pas été retenu pour ce poste.</p>
+    <p>Nous vous souhaitons une bonne continuation dans votre recherche d'emploi.</p>
+    <p>Cordialement,<br>L'équipe EMSI</p>
+  `;
+};
+
+
+
+// emails/emailTemplates.js
+
+export const createNewCandidatureNotificationTemplate = (recruteurNom, laureatNom, offreTitre, cvUrl, lettreMotivationUrl) => {
+  return `
+    <h2>Nouvelle Candidature reçue</h2>
+    <p>Bonjour ${recruteurNom},</p>
+    <p>Le lauréat <strong>${laureatNom}</strong> a postulé à votre offre : <strong>${offreTitre}</strong>.</p>
+    <ul>
+      <li>📄 <a href="${cvUrl}" target="_blank">Voir le CV</a></li>
+      <li>📨 <a href="${lettreMotivationUrl}" target="_blank">Voir la lettre de motivation</a></li>
+    </ul>
+    <br/>
+    <p>Bonne chance dans vos recrutements,</p>
+    <p><strong>Portail EMSI Recrutement</strong></p>
+  `;
+};

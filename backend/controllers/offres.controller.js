@@ -3,6 +3,8 @@ import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { uploadToAzure } from "../utils/azureBlob.js";
 import Connection from "../models/connection.model.js";
+import { sendNewCandidatureEmail } from "../emails/emailHandlers.js";
+
 
 
 // ✅ Obtenir toutes les offres d'emploi (publique)
@@ -134,13 +136,16 @@ export const addComment = async (req, res) => {
 };
 
 // ✅ Postuler à une offre
+
 export const applyToOffer = async (req, res) => {
   try {
-    const offer = await Offre.findById(req.params.id);
+    // ✅ On récupère l'offre avec les infos nécessaires sur l'auteur
+    const offer = await Offre.findById(req.params.id).populate("author", "name emailEdu emailPersonelle");
     if (!offer) {
       return res.status(404).json({ message: "Offre non trouvée" });
     }
 
+    // ✅ Vérifie si le lauréat a déjà postulé
     const alreadyApplied = offer.candidatures.some(
       (c) => c.laureat.toString() === req.user._id.toString()
     );
@@ -148,24 +153,27 @@ export const applyToOffer = async (req, res) => {
       return res.status(400).json({ message: "Vous avez déjà postulé à cette offre" });
     }
 
-    if (offer.author.toString() === req.user._id.toString()) {
+    // ✅ Empêche de postuler à sa propre offre
+    if (offer.author._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: "Vous ne pouvez pas postuler à votre propre offre" });
     }
 
     let cvUrl = "";
     let lettreMotivationUrl = "";
 
-    // ✅ Upload CV vers Azure
+    // ✅ Upload vers Azure
     if (req.files?.cv) {
       cvUrl = await uploadToAzure(req.files.cv.tempFilePath, req.files.cv.name);
     }
 
     if (req.files?.lettreMotivation) {
-      lettreMotivationUrl = await uploadToAzure(req.files.lettreMotivation.tempFilePath, req.files.lettreMotivation.name);
-
-
+      lettreMotivationUrl = await uploadToAzure(
+        req.files.lettreMotivation.tempFilePath,
+        req.files.lettreMotivation.name
+      );
     }
 
+    // ✅ Ajout de la candidature
     offer.candidatures.push({
       laureat: req.user._id,
       cv: cvUrl,
@@ -175,12 +183,27 @@ export const applyToOffer = async (req, res) => {
 
     await offer.save();
 
+    // ✅ Détermination de l'email du recruteur
+    const recruteurEmail = offer.author.emailPersonelle || offer.author.emailEdu;
+    const recruteurNom = offer.author.name;
+
+    // ✅ Envoi du mail de notification
+    await sendNewCandidatureEmail({
+      recruteurEmail,
+      recruteurNom,
+      laureatNom: req.user.name,
+      offreTitre:  offer.titre, // selon le nom du champ réel
+      cvUrl,
+      lettreMotivationUrl
+    });
+
     res.status(201).json({ message: "Candidature envoyée avec succès" });
   } catch (error) {
     console.error("Erreur postulation:", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
 
 export const getJobPostApplications = async (req, res) => {
   try {
