@@ -384,7 +384,8 @@ const ProfilPage = () => {
                                         </label>
                                         <input
                                             type="url"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"                                            value={editData.socialLinks.linkedin}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            value={editData.socialLinks.linkedin}
                                             onChange={e => setEditData({
                                                 ...editData,
                                                 socialLinks: { ...editData.socialLinks, linkedin: e.target.value }

@@ -18,6 +18,7 @@ export const uploadToAzure = async (filePath, originalName, prefix = "fichier") 
   try {
     const extension = path.extname(originalName);
     const cleanName = path.basename(originalName, extension).replace(/\s+/g, "_");
+
     const timestamp = Date.now();
     const finalName = `${prefix}_${cleanName}_${timestamp}${extension}`;
 

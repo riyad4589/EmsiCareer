@@ -3,7 +3,6 @@ import { axiosInstance } from "../../lib/axios";
 import { Plus, X, MapPin, Calendar, Briefcase, Trash2, Edit, Users, CheckCircle, XCircle, Download, Eye } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { getDownloadUrl } from "../../utils/cloudinary";
 
 const OffresPage = () => {
     const queryClient = useQueryClient();
