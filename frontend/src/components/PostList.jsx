@@ -68,7 +68,6 @@ const PostList = ({ posts }) => {
 		);
 	}
 
-
 	
 	const validPosts = posts.data.filter(post => post.author && post.author.name);
 

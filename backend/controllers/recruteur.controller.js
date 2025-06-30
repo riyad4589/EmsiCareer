@@ -59,7 +59,7 @@ export const createOffer = async (req, res) => {
     // 🧠 Populate author pour l'email
     await newOffer.populate("author", "name companyName industry");
 
-    // 📤 Envoyer l’offre à tous les lauréats
+    // 📤 Envoyer l'offre à tous les lauréats
     const laureats = await User.find({ role: "user" });
 
     await Promise.all(
@@ -147,5 +147,34 @@ export const getReceivedApplications = async (req, res) => {
     res.status(200).json(offres);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+// ✅ Statistiques du recruteur connecté
+export const getRecruiterStats = async (req, res) => {
+  try {
+    // Offres du recruteur
+    const offers = await Offre.find({ author: req.user._id });
+    const totalOffers = offers.length;
+    const activeOffers = offers.filter(o => !o.dateExpiration || new Date(o.dateExpiration) > new Date()).length;
+
+    // Candidatures sur ses offres
+    let totalApplications = 0;
+    let pendingApplications = 0;
+    offers.forEach(offer => {
+      if (Array.isArray(offer.candidatures)) {
+        totalApplications += offer.candidatures.length;
+        pendingApplications += offer.candidatures.filter(c => c.status === 'pending').length;
+      }
+    });
+
+    res.status(200).json({
+      totalOffers,
+      totalApplications,
+      activeOffers,
+      pendingApplications
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors du calcul des statistiques", error: error.message });
   }
 };

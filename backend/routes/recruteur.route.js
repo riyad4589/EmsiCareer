@@ -9,7 +9,8 @@ import {
   getOfferById,
   updateOffer,
   deleteOffer,
-  getReceivedApplications
+  getReceivedApplications,
+  getRecruiterStats
 } from "../controllers/recruteur.controller.js";
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.get("/offres/:id", protect, isRecruteur, getOfferById);
 router.put("/offres/:id", protect, isRecruteur, updateOffer);
 router.delete("/offres/:id", protect, isRecruteur, deleteOffer);
 router.get("/candidatures", protect, isRecruteur, getReceivedApplications);
+router.get("/stats", protect, isRecruteur, getRecruiterStats);
 
 export default router;

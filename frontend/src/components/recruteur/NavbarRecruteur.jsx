@@ -1,6 +1,6 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Home, Briefcase, User, LogOut } from "lucide-react";
+import { Home, Briefcase, User, LogOut, MessageCircle } from "lucide-react";
 
 const NavbarRecruteur = () => {
     const { user, logout } = useAuth();
@@ -30,6 +30,7 @@ const NavbarRecruteur = () => {
                 <div className="flex items-center space-x-4">
                 <Link to="/RecruteurDashboard" className={navLinkClass("/RecruteurDashboard")}><Home size={18} /></Link>
                 <Link to="/recruteur/offres" className={navLinkClass("/recruteur/offres")}><Briefcase size={18} /></Link>
+                <Link to="/recruteur/messages" className={navLinkClass("/recruteur/messages")}><MessageCircle size={18} /></Link>
                 <Link to="/recruteur/profil" className={navLinkClass("/recruteur/profil")}><User size={18} /></Link>
                 <button onClick={handleLogout} className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-500 hover:text-red-600 transition-colors"> <LogOut className="mr-2" size={18} /></button>
                 </div>

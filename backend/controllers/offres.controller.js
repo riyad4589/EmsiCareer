@@ -2,6 +2,7 @@ import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { uploadToAzure } from "../utils/azureBlob.js";
+import Connection from "../models/connection.model.js";
 
 
 // ✅ Obtenir toutes les offres d'emploi (publique)
@@ -214,6 +215,45 @@ export const getJobPostApplications = async (req, res) => {
     });
   } catch (error) {
     console.error("Erreur dans getJobPostApplications:", error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+export const validateApplication = async (req, res) => {
+  try {
+    const { id, candidatureId } = req.params;
+    const offre = await Offre.findById(id);
+    if (!offre) {
+      return res.status(404).json({ message: "Offre non trouvée" });
+    }
+    // Vérifier que l'utilisateur connecté est bien le recruteur
+    if (offre.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Non autorisé" });
+    }
+    // Trouver la candidature
+    const candidature = offre.candidatures.id(candidatureId);
+    if (!candidature) {
+      return res.status(404).json({ message: "Candidature non trouvée" });
+    }
+    // Marquer la candidature comme validée (ajout d'un champ status si besoin)
+    candidature.status = 'accepted';
+    await offre.save();
+    // Créer la connexion de messagerie si elle n'existe pas déjà
+    const user1 = offre.author;
+    const user2 = candidature.laureat;
+    const existing = await Connection.findOne({
+      $or: [
+        { user1, user2 },
+        { user1: user2, user2: user1 }
+      ],
+      status: 'accepted'
+    });
+    if (!existing) {
+      await Connection.create({ user1, user2, status: 'accepted' });
+    }
+    res.status(200).json({ message: "Candidature validée et connexion de messagerie créée." });
+  } catch (error) {
+    console.error("Erreur validation candidature:", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };

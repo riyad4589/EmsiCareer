@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Home, Briefcase, User, LogOut } from "lucide-react";
+import { Home, Briefcase, User, LogOut, MessageCircle } from "lucide-react";
 
 const SidebarRecruteur = () => {
     const location = useLocation();
@@ -73,6 +73,14 @@ const SidebarRecruteur = () => {
                                 className={navLinkClass('/recruteur/offres')}
                             >
                                 <Briefcase className='mr-2' size={18} /> Offres
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                to='/recruteur/messages'
+                                className={navLinkClass('/recruteur/messages')}
+                            >
+                                <MessageCircle className='mr-2' size={18} /> Messagerie
                             </Link>
                         </li>
                         <li>

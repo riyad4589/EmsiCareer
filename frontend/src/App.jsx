@@ -22,6 +22,7 @@ import LayoutRecruteur from "./components/layout/LayoutRecruteur";
 import DashboardPage from "./pages/recruteur/DashboardPage";
 import OffresPage from "./pages/recruteur/OffresPage";
 import ProfilPage from "./pages/recruteur/ProfilPage";
+import RecruteurMessage from "./pages/recruteur/RecruteurMessage";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -53,6 +54,7 @@ function AppRoutes() {
 				<Route path="/RecruteurDashboard" element={<DashboardPage />} />
 				<Route path="/recruteur/offres" element={<OffresPage />} />
 				<Route path="/recruteur/profil" element={<ProfilPage />} />
+				<Route path="/recruteur/messages" element={<RecruteurMessage />} />
 			</Route>
 
 			{/* Layout principal pour le reste */}

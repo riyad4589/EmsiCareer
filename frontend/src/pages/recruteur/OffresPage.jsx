@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
-import { Plus, X, MapPin, Calendar, Briefcase, Trash2, Edit, Users, CheckCircle, XCircle, Download } from "lucide-react";
+import { Plus, X, MapPin, Calendar, Briefcase, Trash2, Edit, Users, CheckCircle, XCircle, Download, Eye } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { getDownloadUrl } from "../../utils/cloudinary";
@@ -320,419 +320,120 @@ const OffresPage = () => {
     }
 
     return (
-        <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="p-8 bg-gray-50 min-h-screen">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Mes offres d'emploi</h1>
+                <h1 className="text-4xl font-bold text-gray-800">Mes Offres d'Emploi</h1>
                 <button
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     onClick={() => setIsModalOpen(true)}
+                    className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition flex items-center"
                 >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Nouvelle offre
+                    <Plus className="mr-2" /> Créer une offre
                 </button>
             </div>
 
-            {/* Modale de création d'offre */}
+            {/* Modal de création d'offre */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-                        <button
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                        <h2 className="text-xl font-bold mb-6">Créer une nouvelle offre d'emploi</h2>
-                        <form onSubmit={handleCreateOffer} className="space-y-6">
-                            {/* Titre */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Titre du poste *
-                                </label>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800">Créer une nouvelle offre</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateOffer} className="space-y-4">
+                            <input
+                                type="text"
+                                placeholder="Titre de l'offre"
+                                value={newOffer.titre}
+                                onChange={(e) => setNewOffer({ ...newOffer, titre: e.target.value })}
+                                className="w-full p-3 border rounded-lg"
+                            />
+                            <textarea
+                                placeholder="Description de l'offre"
+                                value={newOffer.description}
+                                onChange={(e) => setNewOffer({ ...newOffer, description: e.target.value })}
+                                className="w-full p-3 border rounded-lg h-32"
+                            />
+                            <div className="flex space-x-4">
                                 <input
                                     type="text"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={newOffer.titre}
-                                    onChange={e => setNewOffer({ ...newOffer, titre: e.target.value })}
-                                    placeholder="Ex: Développeur Full Stack"
-                                    required
+                                    placeholder="Localisation"
+                                    value={newOffer.localisation}
+                                    onChange={(e) => setNewOffer({ ...newOffer, localisation: e.target.value })}
+                                    className="w-full p-3 border rounded-lg"
                                 />
+                                <select
+                                    value={newOffer.typeContrat}
+                                    onChange={(e) => setNewOffer({ ...newOffer, typeContrat: e.target.value })}
+                                    className="w-full p-3 border rounded-lg bg-white"
+                                >
+                                    <option>CDI</option>
+                                    <option>CDD</option>
+                                    <option>Stage</option>
+                                    <option>Alternance</option>
+                                </select>
                             </div>
-
-                            {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description du poste *
-                                </label>
-                                <textarea
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={newOffer.description}
-                                    onChange={e => setNewOffer({ ...newOffer, description: e.target.value })}
-                                    rows={4}
-                                    placeholder="Décrivez le poste, les responsabilités, l'environnement de travail..."
-                                    required
-                                />
-                            </div>
-
-                            {/* Localisation et Type de contrat */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Localisation *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={newOffer.localisation}
-                                        onChange={e => setNewOffer({ ...newOffer, localisation: e.target.value })}
-                                        placeholder="Ex: Paris, France"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Type de contrat
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={newOffer.typeContrat}
-                                        onChange={e => setNewOffer({ ...newOffer, typeContrat: e.target.value })}
-                                    >
-                                        <option value="CDI">CDI</option>
-                                        <option value="CDD">CDD</option>
-                                        <option value="Stage">Stage</option>
-                                        <option value="Freelance">Freelance</option>
-                                        <option value="Alternance">Alternance</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Date d'expiration */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Date d'expiration *
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Date d'expiration</label>
                                 <input
                                     type="date"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={newOffer.dateExpiration}
-                                    onChange={e => setNewOffer({ ...newOffer, dateExpiration: e.target.value })}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    required
+                                    onChange={(e) => setNewOffer({ ...newOffer, dateExpiration: e.target.value })}
+                                    className="w-full p-3 border rounded-lg"
                                 />
                             </div>
-
-                            {/* Compétences requises */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Compétences requises
-                                </label>
-                                <div className="flex gap-2 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Compétences requises</label>
+                                <div className="flex space-x-2">
                                     <input
                                         type="text"
-                                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Ajouter une compétence"
                                         value={newCompetence}
-                                        onChange={e => setNewCompetence(e.target.value)}
-                                        onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddCompetence())}
-                                        placeholder="Ajouter une compétence"
+                                        onChange={(e) => setNewCompetence(e.target.value)}
+                                        className="w-full p-3 border rounded-lg"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={handleAddCompetence}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                    >
-                                        +
-                                    </button>
+                                    <button type="button" onClick={handleAddCompetence} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter</button>
                                 </div>
-                                {newOffer.competencesRequises.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                        {newOffer.competencesRequises.map((comp, index) => (
-                                            <span key={index} className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                                                {comp}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveCompetence(index)}
-                                                    className="text-blue-600 hover:text-blue-800"
-                                                >
-                                                    ×
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Médias (optionnel) */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Médias (images, gifs ou vidéos, optionnel)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*,video/*"
-                                    multiple
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    onChange={handleMediaChange}
-                                />
-                                {mediaPreviews.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-4">
-                                        {mediaPreviews.map((preview, idx) => (
-                                            <div key={idx} className="relative group">
-                                                <button
-                                                    type="button"
-                                                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow group-hover:bg-red-100"
-                                                    onClick={() => handleRemoveMedia(idx)}
-                                                    title="Supprimer ce média"
-                                                >
-                                                    <X className="w-5 h-5 text-red-600" />
-                                                </button>
-                                                {mediaTypes[idx] === 'video' ? (
-                                                    <video src={preview} controls className="w-48 h-32 object-cover rounded" />
-                                                ) : (
-                                                    <img src={preview} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Boutons */}
-                            <div className="flex justify-end gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-                                    onClick={() => setIsModalOpen(false)}
-                                >
-                                    Annuler
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? "Création..." : "Créer l'offre"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Modale de modification d'offre */}
-            {isEditModalOpen && editingOffer && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-                        <button
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-                            onClick={() => {
-                                setIsEditModalOpen(false);
-                                setEditingOffer(null);
-                            }}
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                        <h2 className="text-xl font-bold mb-6">Modifier l'offre d'emploi</h2>
-                        <form onSubmit={handleEditOffer} className="space-y-6">
-                            {/* Titre */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Titre du poste *
-                                </label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editingOffer.titre}
-                                    onChange={e => setEditingOffer({ ...editingOffer, titre: e.target.value })}
-                                    placeholder="Ex: Développeur Full Stack"
-                                    required
-                                />
-                            </div>
-
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description du poste *
-                                </label>
-                                <textarea
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editingOffer.description}
-                                    onChange={e => setEditingOffer({ ...editingOffer, description: e.target.value })}
-                                    rows={4}
-                                    placeholder="Décrivez le poste, les responsabilités, l'environnement de travail..."
-                                    required
-                                />
-                            </div>
-
-                            {/* Localisation et Type de contrat */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Localisation *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={editingOffer.localisation}
-                                        onChange={e => setEditingOffer({ ...editingOffer, localisation: e.target.value })}
-                                        placeholder="Ex: Paris, France"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Type de contrat
-                                    </label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={editingOffer.typeContrat}
-                                        onChange={e => setEditingOffer({ ...editingOffer, typeContrat: e.target.value })}
-                                    >
-                                        <option value="CDI">CDI</option>
-                                        <option value="CDD">CDD</option>
-                                        <option value="Stage">Stage</option>
-                                        <option value="Freelance">Freelance</option>
-                                        <option value="Alternance">Alternance</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Date d'expiration */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Date d'expiration *
-                                </label>
-                                <input
-                                    type="date"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editingOffer.dateExpiration}
-                                    onChange={e => setEditingOffer({ ...editingOffer, dateExpiration: e.target.value })}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    required
-                                />
-                            </div>
-
-                            {/* Compétences requises */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Compétences requises
-                                </label>
-                                <div className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={editCompetence}
-                                        onChange={e => setEditCompetence(e.target.value)}
-                                        onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddEditCompetence())}
-                                        placeholder="Ajouter une compétence"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleAddEditCompetence}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                    >
-                                        +
-                                    </button>
-                                </div>
-                                {editingOffer.competencesRequises.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                        {editingOffer.competencesRequises.map((comp, index) => (
-                                            <span key={index} className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                                                {comp}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveEditCompetence(index)}
-                                                    className="text-blue-600 hover:text-blue-800"
-                                                >
-                                                    ×
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Média (optionnel) pour modification */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Média (image, gif ou vidéo, optionnel)
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*,video/*"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    onChange={e => {
-                                        const file = e.target.files[0];
-                                        setEditMediaFile(file);
-                                        if (file) {
-                                            setEditMediaType(file.type.startsWith('video/') ? 'video' : 'image');
-                                            const reader = new FileReader();
-                                            reader.onloadend = () => setEditMediaPreview(reader.result);
-                                            reader.readAsDataURL(file);
-                                        } else {
-                                            setEditMediaPreview(null);
-                                            setEditMediaType(null);
-                                        }
-                                    }}
-                                />
-                                {/* Aperçu du média sélectionné pour modification */}
-                                {editMediaPreview ? (
-                                    <div className="mt-2 flex items-center gap-4">
-                                        {editMediaType === 'video' ? (
-                                            <video src={editMediaPreview} controls className="w-48 h-32 object-cover rounded" />
-                                        ) : (
-                                            <img src={editMediaPreview} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
-                                        )}
-                                        <button
-                                            type="button"
-                                            className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                            onClick={() => {
-                                                setEditMediaFile(null);
-                                                setEditMediaPreview(null);
-                                                setEditMediaType(null);
-                                            }}
-                                        >
-                                            Supprimer le média
-                                        </button>
-                                    </div>
-                                ) : (
-                                    editingOffer.image && (
-                                        <div className="mt-2 flex items-center gap-4">
-                                            {editingOffer.image.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                                                <video src={editingOffer.image} controls className="w-48 h-32 object-cover rounded" />
-                                            ) : (
-                                                <img src={editingOffer.image} alt="Aperçu" className="w-32 h-32 object-cover rounded" />
-                                            )}
-                                            <button
-                                                type="button"
-                                                className="ml-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                                onClick={() => setEditingOffer({ ...editingOffer, image: "" })}
-                                            >
-                                                Supprimer le média
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {newOffer.competencesRequises.map((c, index) => (
+                                        <div key={index} className="bg-gray-200 px-3 py-1 rounded-full flex items-center">
+                                            {c}
+                                            <button type="button" onClick={() => handleRemoveCompetence(index)} className="ml-2 text-red-500">
+                                                <X size={16} />
                                             </button>
                                         </div>
-                                    )
-                                )}
+                                    ))}
+                                </div>
                             </div>
-
-                            {/* Boutons */}
-                            <div className="flex justify-end gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-                                    onClick={() => {
-                                        setIsEditModalOpen(false);
-                                        setEditingOffer(null);
-                                    }}
-                                >
-                                    Annuler
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                                    disabled={isEditing}
-                                >
-                                    {isEditing ? "Modification..." : "Modifier l'offre"}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Ajouter des médias (images, vidéos)</label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*,video/*"
+                                    onChange={handleMediaChange}
+                                    className="w-full p-2 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                />
+                                <div className="flex flex-wrap gap-4 mt-4">
+                                    {mediaPreviews.map((preview, index) => (
+                                        <div key={index} className="relative">
+                                            {mediaTypes[index] === 'video' ? (
+                                                <video src={preview} controls className="w-32 h-32 object-cover rounded-lg" />
+                                            ) : (
+                                                <img src={preview} alt="Aperçu" className="w-32 h-32 object-cover rounded-lg" />
+                                            )}
+                                            <button type="button" onClick={() => handleRemoveMedia(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1">
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex justify-end pt-4">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="mr-4 px-6 py-2 rounded-lg border">Annuler</button>
+                                <button type="submit" disabled={isSubmitting} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+                                    {isSubmitting ? 'Création...' : 'Créer'}
                                 </button>
                             </div>
                         </form>
@@ -740,102 +441,71 @@ const OffresPage = () => {
                 </div>
             )}
 
-            {/* Liste des offres */}
-            <div className="flex flex-col gap-8 mt-8">
-                {offres && offres.length > 0 ? (
-                    offres.map((offre) => (
-                        <div key={offre._id} className="relative group">
-                            <div
-                                className="bg-white rounded-xl shadow-lg p-6 flex flex-col h-full cursor-pointer hover:shadow-2xl transition-shadow w-full"
-                                onClick={() => openApplicationsModal(offre)}
-                            >
-                                <div className="flex-1 flex flex-col">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h3 className="text-xl font-semibold text-gray-900">{offre.titre}</h3>
+            {isLoading ? (
+                <div className="text-center">Chargement des offres...</div>
+            ) : (
+                <div className="space-y-6">
+                    {offres.map(offre => (
+                        <div
+                            key={offre._id}
+                            className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
+                            onClick={() => openApplicationsModal(offre)}
+                        >
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">{offre.titre}</h2>
+                                    <div className="flex items-center text-gray-500 mt-2 space-x-4">
                                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                                             {offre.typeContrat}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin size={16} />
-                                            {offre.localisation}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar size={16} />
-                                            Expire le {new Date(offre.dateExpiration).toLocaleDateString()}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Users size={16} />
-                                            {offre.candidatures?.length || 0} candidature(s)
-                                        </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1">
+                                        <MapPin size={16} />
+                                        {offre.localisation}
                                     </div>
-                                    <p className="text-gray-600 mb-3 line-clamp-4">{offre.description}</p>
-                                    {offre.competencesRequises?.length > 0 && (
-                                        <div className="mb-3">
-                                            <span className="text-sm font-medium text-gray-700">Compétences requises :</span>
-                                            <div className="flex flex-wrap gap-1 mt-1">
-                                                {offre.competencesRequises.map((comp, index) => (
-                                                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                                                        {comp}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {/* Galerie de médias */}
-                                    {offre.medias && offre.medias.length > 0 && (
-                                        <div className="mb-4 flex gap-4 flex-wrap">
-                                            {offre.medias.map((mediaUrl, idx) => (
-                                                <div key={idx} className="">
-                                                    {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                                                        <video src={mediaUrl} controls className="w-48 h-32 object-cover rounded" />
-                                                    ) : (
-                                                        <img src={mediaUrl} alt="Média de l'offre" className="w-32 h-32 object-cover rounded" />
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <Calendar size={16} />
+                                        Expire le {new Date(offre.dateExpiration).toLocaleDateString()}
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Users size={16} />
+                                        {offre.candidatures?.length || 0} candidature(s)
+                                    </div>
                                 </div>
                             </div>
-                            {/* Boutons d'action, positionnés en haut à droite, non cliquables sur la carte */}
-                            <div className="absolute top-2 right-2 flex flex-row gap-2 z-10">
-                                <button
-                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="Modifier l'offre"
-                                    onClick={e => { e.stopPropagation(); openEditModal(offre); }}
-                                    disabled={updateOfferMutation.isPending}
-                                >
-                                    {updateOfferMutation.isPending ? (
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                    ) : (
-                                        <Edit size={18} />
-                                    )}
-                                </button>
-                                <button
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Supprimer l'offre"
-                                    onClick={e => { e.stopPropagation(); handleDeleteOffer(offre._id, offre.titre); }}
-                                    disabled={deleteOfferMutation.isPending}
-                                >
-                                    {deleteOfferMutation.isPending ? (
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                                    ) : (
-                                        <Trash2 size={18} />
-                                    )}
-                                </button>
-                            </div>
+                            <p className="text-gray-600 mb-3 line-clamp-4">{offre.description}</p>
+                            {offre.competencesRequises?.length > 0 && (
+                                <div className="mb-3">
+                                    <span className="text-sm font-medium text-gray-700">Compétences requises :</span>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {offre.competencesRequises.map((comp, index) => (
+                                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                                {comp}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Galerie de médias */}
+                            {offre.medias && offre.medias.length > 0 && (
+                                <div className="mb-4 flex gap-4 flex-wrap">
+                                    {offre.medias.map((mediaUrl, idx) => (
+                                        <div key={idx} className="">
+                                            {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                                <video src={mediaUrl} controls className="w-48 h-32 object-cover rounded" />
+                                            ) : (
+                                                <img src={mediaUrl} alt="Média de l'offre" className="w-32 h-32 object-cover rounded" />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    ))
-                ) : (
-                    <div className="p-8 text-center text-gray-500 col-span-full">
-                        <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <p className="text-lg font-medium">Aucune offre d'emploi</p>
-                        <p className="text-sm">Créez votre première offre d'emploi pour commencer à recruter</p>
-                    </div>
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
 
             {isApplicationsModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

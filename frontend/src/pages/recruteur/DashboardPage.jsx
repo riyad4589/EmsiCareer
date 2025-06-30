@@ -1,8 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
-import { Building2, Users, FileText, Briefcase } from "lucide-react";
+import { Building2, Users, FileText, Briefcase, MessageCircle, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const DashboardPage = () => {
+    const navigate = useNavigate();
     const { data: stats, isLoading } = useQuery({
         queryKey: ["recruiterStats"],
         queryFn: async () => {
@@ -21,7 +26,20 @@ const DashboardPage = () => {
         }
     });
 
-    if (isLoading) {
+    // Récupérer le profil du recruteur
+    const { data: profile, isLoading: isProfileLoading } = useQuery({
+        queryKey: ["recruteurProfile"],
+        queryFn: async () => {
+            try {
+                const response = await axiosInstance.get("/users/profile");
+                return response.data;
+            } catch (error) {
+                return null;
+            }
+        }
+    });
+
+    if (isLoading || isProfileLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -31,6 +49,24 @@ const DashboardPage = () => {
 
     return (
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Message de bienvenue et infos entreprise */}
+            {profile && (
+                <div className="flex items-center gap-6 mb-8 bg-white rounded-lg shadow p-6">
+                    <img
+                        src={profile.companyLogo || "/logo.png"}
+                        alt={profile.companyName}
+                        className="w-20 h-20 rounded-full object-cover border-2 border-blue-200"
+                    />
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">Bienvenue, <span className="text-blue-700">{profile.name}</span> !</h2>
+                        <p className="text-gray-700 font-medium">{profile.companyName} <span className="text-gray-400">|</span> {profile.industry}</p>
+                        <div className="flex items-center gap-2 mt-1 text-gray-500">
+                            <MapPin className="w-4 h-4" />
+                            <span>{profile.location}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             <h1 className="text-2xl font-bold text-gray-900 mb-8">Tableau de bord recruteur</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -85,6 +121,39 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Graphique de répartition des candidatures */}
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques des candidatures</h2>
+                <Bar
+                    data={{
+                        labels: ["Total", "Actives", "En attente"],
+                        datasets: [
+                            {
+                                label: "Candidatures",
+                                data: [stats?.totalApplications || 0, stats?.activeOffers || 0, stats?.pendingApplications || 0],
+                                backgroundColor: [
+                                    "#3b82f6",
+                                    "#10b981",
+                                    "#a78bfa"
+                                ],
+                                borderRadius: 6
+                            }
+                        ]
+                    }}
+                    options={{
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                        }
+                    }}
+                    height={80}
+                />
             </div>
         </div>
     );

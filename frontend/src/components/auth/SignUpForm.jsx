@@ -5,6 +5,37 @@ import { toast } from "react-hot-toast";
 import { Loader, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const PasswordStrengthIndicator = ({ password }) => {
+	const getStrength = (password) => {
+		let strength = 0;
+		if (password.length >= 8) strength++;
+		if (password.match(/[a-z]/)) strength++;
+		if (password.match(/[A-Z]/)) strength++;
+		if (password.match(/[0-9]/)) strength++;
+		if (password.match(/[^a-zA-Z0-9]/)) strength++;
+		return strength;
+	};
+
+	const strength = getStrength(password);
+	const strengthLabels = ["Très faible", "Faible", "Moyen", "Fort", "Très fort", "Excellent"];
+	const strengthColors = ["bg-red-500", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500", "bg-green-600"];
+
+	return (
+		<div className="mt-1">
+			<div className="flex justify-between items-center mb-1">
+				<span className="text-xs text-gray-500">Force du mot de passe</span>
+				<span className={`text-xs font-semibold ${strength > 2 ? 'text-green-600' : 'text-red-600'}`}>{strengthLabels[strength]}</span>
+			</div>
+			<div className="w-full bg-gray-200 rounded-full h-2">
+				<div
+					className={`h-2 rounded-full ${strengthColors[strength]}`}
+					style={{ width: `${(strength / 5) * 100}%`, transition: 'width 0.3s' }}
+				></div>
+			</div>
+		</div>
+	);
+};
+
 const SignUpForm = () => {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -161,6 +192,7 @@ const SignUpForm = () => {
 							{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
 						</button>
 					</div>
+					{password && <PasswordStrengthIndicator password={password} />}
 				</div>
 				<div className="space-y-2">
 					<label htmlFor="confirmPassword" className="block text-sm font-medium text-info">
