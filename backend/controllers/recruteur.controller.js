@@ -3,6 +3,7 @@ import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
 import Connection from "../models/connection.model.js";
 import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
+import { uploadToAzure } from "../utils/azureBlob.js";
 
 
 // ✅ Créer une offre d'emploi
@@ -13,10 +14,28 @@ export const createOffer = async (req, res) => {
       description,
       localisation,
       typeContrat,
-      competencesRequises,
       dateExpiration,
-      image,
     } = req.body;
+    let competencesRequises = req.body.competencesRequises;
+
+    // Assurer que les compétences sont un tableau
+    if (typeof competencesRequises === 'string') {
+      try {
+        // Essayer de parser le JSON d'abord
+        const parsed = JSON.parse(competencesRequises);
+        if (Array.isArray(parsed)) {
+          competencesRequises = parsed;
+        } else {
+          // Sinon, splitter par la virgule
+          competencesRequises = competencesRequises.split(',').map(skill => skill.trim());
+        }
+      } catch (e) {
+        // Si le parsing échoue, c'est probablement une chaîne simple
+        competencesRequises = competencesRequises.split(',').map(skill => skill.trim());
+      }
+    } else if (!Array.isArray(competencesRequises)) {
+      competencesRequises = [];
+    }
 
     let imageUrl = null;
     let mediasUrls = [];

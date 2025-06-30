@@ -17,6 +17,7 @@ const router = express.Router();
 
 router.post("/", protect, createPost);
 router.get("/", protect, getFeedPosts);
+router.get("/only", protect, getOnlyPosts);
 router.get("/:postId", protect, getPost);
 router.delete("/:postId", protect, deletePost);
 router.post("/:postId/comment", protect, addComment);
@@ -26,7 +27,5 @@ router.post("/:postId/share", protect, sharePost);
 // Routes pour les posts de recruteurs
 router.post("/:postId/apply", protect, applyToJobPost);
 router.get("/:postId/applications", protect, getJobPostApplications);
-
-router.get("/only", protect, getOnlyPosts);
 
 export default router;

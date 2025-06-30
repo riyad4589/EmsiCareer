@@ -258,4 +258,67 @@ export const validateApplication = async (req, res) => {
   }
 };
 
+// ✅ Mettre à jour une offre (recruteur)
+export const updateOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titre, description, localisation, typeContrat, competencesRequises } = req.body;
+
+    const offre = await Offre.findById(id);
+
+    if (!offre) {
+      return res.status(404).json({ message: "Offre non trouvée" });
+    }
+
+    // Vérifier que l'utilisateur est bien l'auteur de l'offre
+    if (offre.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Action non autorisée" });
+    }
+
+    // Mettre à jour les champs
+    offre.titre = titre || offre.titre;
+    offre.description = description || offre.description;
+    offre.localisation = localisation || offre.localisation;
+    offre.typeContrat = typeContrat || offre.typeContrat;
+
+    // Traiter les compétences pour s'assurer que c'est un tableau
+    if (competencesRequises) {
+      if (typeof competencesRequises === 'string') {
+        offre.competencesRequises = competencesRequises.split(',').map(skill => skill.trim());
+      } else if (Array.isArray(competencesRequises)) {
+        offre.competencesRequises = competencesRequises;
+      }
+    }
+
+    const updatedOffre = await offre.save();
+    res.status(200).json({ message: "Offre mise à jour avec succès", data: updatedOffre });
+
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+// ✅ Supprimer une offre (recruteur)
+export const deleteOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const offre = await Offre.findById(id);
+
+    if (!offre) {
+      return res.status(404).json({ message: "Offre non trouvée" });
+    }
+
+    // Vérifier que l'utilisateur est bien l'auteur de l'offre
+    if (offre.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Action non autorisée" });
+    }
+
+    await offre.deleteOne();
+    res.status(200).json({ message: "Offre supprimée avec succès" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
  
