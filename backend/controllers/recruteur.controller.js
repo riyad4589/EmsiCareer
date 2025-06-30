@@ -3,6 +3,9 @@ import Offre from "../models/offre.model.js";
 import User from "../models/user.model.js";
 import Connection from "../models/connection.model.js";
 import { sendNewOfferEmailToLaureat } from "../emails/emailHandlers.js";
+import { sendCandidatureAcceptedEmail } from "../emails/emailHandlers.js";
+import { sendCandidatureRejectedEmail } from "../emails/emailHandlers.js";
+
 
 
 // ✅ Créer une offre d'emploi
@@ -220,6 +223,13 @@ export const acceptApplication = async (req, res) => {
 
     await offer.save();
 
+    // Récupérer le lauréat
+    const laureat = await User.findById(application.laureat);
+
+    // Envoyer un mail de confirmation
+    await sendCandidatureAcceptedEmail(laureat, offer.titre);
+
+
     res.status(200).json({ message: "Candidature validée avec succès." });
 
   } catch (error) {
@@ -241,12 +251,26 @@ export const rejectApplication = async (req, res) => {
     if (offer.author.toString() !== recruiterId.toString()) {
       return res.status(403).json({ message: "Action non autorisée." });
     }
-    
-    offer.candidatures.pull({ _id: applicationId });
+
+    const application = offer.candidatures.id(applicationId);
+    if (!application) {
+      return res.status(404).json({ message: "Candidature non trouvée." });
+    }
+
+    const laureat = await User.findById(application.laureat);
+
+    // Supprimer la candidature
+    application.deleteOne(); // ou offer.candidatures.pull(application._id);
     await offer.save();
 
+    // Envoi de mail de refus
+    await sendCandidatureRejectedEmail(laureat, offer.titre);
+
     res.status(200).json({ message: "Candidature refusée avec succès." });
+
   } catch (error) {
+    console.error("Erreur refus candidature :", error);
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+
