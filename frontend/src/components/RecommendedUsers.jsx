@@ -43,7 +43,7 @@ const RecommendedUsers = () => {
 	});
 
 	const connectMutation = useMutation({
-		mutationFn: (userId) => axiosInstance.post(`/connections/${userId}`),
+		mutationFn: (userId) => axiosInstance.post(`/connections/request/${userId}`),
 		onSuccess: (_, userId) => {
 			// Mettre à jour le cache pour marquer l'utilisateur comme en attente
 			queryClient.setQueryData(["suggestions"], (oldData) => {
