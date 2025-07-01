@@ -129,6 +129,23 @@ export function rejectionAccountTemplate(name, emailEdu){
 
 
 export const createNewOfferEmailTemplate = (name, offer) => {
+  // Fonction helper pour générer les images dans les détails
+  const generateImagesInDetails = (medias) => {
+    if (!medias || medias.length === 0) {
+      return '';
+    }
+
+    const imageItems = medias.map(imageUrl => {
+      return `
+        <div style="margin: 15px 0; text-align: center;">
+          <img src="${imageUrl}" alt="Visuel de l'offre" style="max-width: 100%; height: auto; border-radius: 6px; border: 1px solid #e0e0e0;">
+        </div>
+      `;
+    }).join('');
+
+    return imageItems;
+  };
+
   return `
     <!DOCTYPE html>
 <html lang="en">
@@ -146,39 +163,27 @@ export const createNewOfferEmailTemplate = (name, offer) => {
     <p style="font-size: 18px; color: #005baa;"><strong>Bonjour ${name}</strong></p>
     <p>Excellente nouvelle ! Une nouvelle offre d'emploi vient d'être publiée sur EMSI Career par <strong>${offer.author?.companyName || "un recruteur EMSI"}</strong>.</p>
    
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #005baa;">
-      <p style="font-size: 16px; margin: 0; color: #005baa;"><strong>💼 Détails de l'offre :</strong></p>
+    <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #005baa;">
+      <h2 style="font-size: 18px; margin: 0 0 20px 0; color: #005baa; font-weight: bold;">💼 Détails de l'offre</h2>
       
-      <table style="width: 100%; margin-top: 15px; border-collapse: collapse;">
+      <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+        
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa; width: 35%;">📌 Titre :</td>
-          <td style="padding: 8px 0;">${offer.titre}</td>
+          <td style="padding: 10px 0; font-weight: bold; color: #005baa; vertical-align: top;">🏢 Entreprise :</td>
+          <td style="padding: 10px 0; color: #333;">${offer.author?.companyName}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">📍 Localisation :</td>
-          <td style="padding: 8px 0;">${offer.localisation}</td>
+          <td style="padding: 10px 0; font-weight: bold; color: #005baa; vertical-align: top;">🌐 Secteur :</td>
+          <td style="padding: 10px 0; color: #333;">${offer.author?.industry}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">📝 Type de contrat :</td>
-          <td style="padding: 8px 0;">${offer.typeContrat}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🎯 Compétences :</td>
-          <td style="padding: 8px 0;">${offer.competencesRequises}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">⏳ Date limite :</td>
-          <td style="padding: 8px 0;">${offer.dateExpiration}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🏢 Entreprise :</td>
-          <td style="padding: 8px 0;">${offer.author?.companyName}}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #005baa;">🌐 Secteur :</td>
-          <td style="padding: 8px 0;">${offer.author?.industry}}</td>
+          <td style="padding: 10px 0; font-weight: bold; color: #005baa; vertical-align: top;">🌐 Secteur :</td>
+          <td style="padding: 10px 0; color: #333;">${offer.dateExpiration}</td>
         </tr>
       </table>
+
+      ${generateImagesInDetails(offer.medias)}
+
     </div>
     
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
