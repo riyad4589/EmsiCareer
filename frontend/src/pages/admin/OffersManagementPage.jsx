@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-hot-toast";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, Users, Calendar, MapPin, Eye, X, Building2, Clock, Heart, MessageCircle, FileText, User } from "lucide-react";
 import { useState } from "react";
 
 const OffersManagementPage = () => {
@@ -129,12 +129,25 @@ const OffersManagementPage = () => {
         createOffer(createForm);
     };
 
+    const getContractTypeColor = (type) => {
+        switch(type) {
+            case 'CDI': return 'bg-emerald-500';
+            case 'CDD': return 'bg-blue-500';
+            case 'Stage': return 'bg-orange-500';
+            case 'Freelance': return 'bg-purple-500';
+            default: return 'bg-gray-500';
+        }
+    };
+
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Chargement des offres...</p>
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mx-auto"></div>
+                        <Building2 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-emerald-600" />
+                    </div>
+                    <p className="mt-6 text-slate-600 font-medium">Chargement des offres...</p>
                 </div>
             </div>
         );
@@ -142,89 +155,177 @@ const OffersManagementPage = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <p className="text-red-500 text-lg">Une erreur est survenue lors du chargement des offres</p>
-                    <p className="text-gray-600 mt-2">{error.message}</p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <X className="h-8 w-8 text-red-500" />
+                    </div>
+                    <p className="text-red-600 text-lg font-semibold">Une erreur est survenue</p>
+                    <p className="text-slate-600 mt-2">{error.message}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-4">
-                        Gestion des Offres
-                        
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-600 rounded-xl">
+                            <Building2 className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900">Gestion des Offres</h1>
+                            <p className="text-slate-600 mt-1">Gérez et organisez vos offres d'emploi</p>
+                        </div>
                         {offersData && (
-                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-base font-semibold align-middle">
-                                {offersData.length} Offre{offersData.length > 1 ? 's' : ''}
-                            </span>
+                            <div className="px-4 py-2 bg-white rounded-full shadow-sm border border-slate-200">
+                                <span className="text-emerald-600 font-semibold text-sm">
+                                    {offersData.length} Offre{offersData.length > 1 ? 's' : ''}
+                                </span>
+                            </div>
                         )}
-                    </h1>
+                    </div>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl shadow-lg hover:bg-emerald-700 transform hover:scale-105 transition-all duration-200 font-medium"
                     >
                         <Plus className="h-5 w-5 mr-2" />
-                        Ajouter une offre
+                        Nouvelle offre
                     </button>
                 </div>
 
-                <div className="bg-white shadow rounded-lg overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auteur</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {offersData && offersData.length > 0 ? (
-                                offersData.map((offre, idx) => (
-                                    <tr key={offre._id} className={idx % 2 === 0 ? "bg-white cursor-pointer" : "bg-gray-50 hover:bg-green-50 cursor-pointer"} onClick={() => setSelectedOffer(offre)}>
-                                        <td className="px-4 py-3 whitespace-nowrap">{offre.author?.name || offre.author || '-'}</td>
-                                        <td className="px-4 py-3 whitespace-nowrap font-semibold">{offre.titre}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="2" className="px-6 py-4 text-center text-gray-500">
-                                        Aucune offre trouvée
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {/* Grille des offres */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {offersData && offersData.length > 0 ? (
+                        offersData.map((offre) => (
+                            <div 
+                                key={offre._id} 
+                                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border border-slate-200 overflow-hidden group"
+                                onClick={() => setSelectedOffer(offre)}
+                            >
+                                {/* Image de l'offre */}
+                                <div className="relative h-48 bg-gradient-to-br from-emerald-400 to-emerald-600 overflow-hidden">
+                                    {offre.medias && offre.medias.length > 0 ? (
+                                        <img 
+                                            src={offre.medias[0]} 
+                                            alt={offre.titre}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.querySelector('.fallback-content').style.display = 'flex';
+                                            }}
+                                        />
+                                    ) : null}
+                                    <div className="fallback-content absolute inset-0 bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center" style={{ display: offre.medias && offre.medias.length > 0 ? 'none' : 'flex' }}>
+                                        <Building2 className="h-16 w-16 text-white opacity-80" />
+                                    </div>
+                                    
+                                    {/* Badge type de contrat */}
+                                    <div className="absolute top-4 right-4">
+                                        <span className={`px-3 py-1 rounded-full text-white text-xs font-bold ${getContractTypeColor(offre.typeContrat)} shadow-lg`}>
+                                            {offre.typeContrat || 'Non spécifié'}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Overlay avec icône voir */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                                        <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
+                                </div>
+
+                                {/* Contenu de la carte */}
+                                <div className="p-6">
+                                    {/* Titre */}
+                                    <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors duration-200">
+                                        {offre.titre}
+                                    </h3>
+                                    
+                                    {/* Auteur */}
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
+                                            <User className="h-4 w-4 text-slate-600" />
+                                        </div>
+                                        <span className="text-slate-600 font-medium text-sm">
+                                            {offre.author?.name || offre.author || 'Auteur non spécifié'}
+                                        </span>
+                                    </div>
+
+                                    {/* Localisation */}
+                                    {offre.localisation && (
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <MapPin className="h-4 w-4 text-slate-400" />
+                                            <span className="text-slate-600 text-sm">{offre.localisation}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Stats */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                        <div className="flex items-center gap-4 text-xs text-slate-500">
+                                            <div className="flex items-center gap-1">
+                                                <Heart className="h-3 w-3" />
+                                                <span>{offre.likes?.length || 0}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <MessageCircle className="h-3 w-3" />
+                                                <span>{offre.comments?.length || 0}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Users className="h-3 w-3" />
+                                                <span>{offre.candidatures?.length || 0}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-xs text-slate-500">
+                                            <Clock className="h-3 w-3" />
+                                            <span>{offre.createdAt ? new Date(offre.createdAt).toLocaleDateString('fr-FR') : '-'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full flex flex-col items-center justify-center py-16">
+                            <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                <Building2 className="h-12 w-12 text-slate-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-900 mb-2">Aucune offre trouvée</h3>
+                            <p className="text-slate-600 text-center mb-6">Commencez par créer votre première offre d'emploi</p>
+                            <button
+                                onClick={() => setIsCreateModalOpen(true)}
+                                className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl shadow-lg hover:bg-emerald-700 transform hover:scale-105 transition-all duration-200 font-medium"
+                            >
+                                <Plus className="h-5 w-5 mr-2" />
+                                Créer une offre
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Modal de création d'offre */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold">Créer une nouvelle offre</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-200">
+                            <h2 className="text-2xl font-bold text-slate-900">Créer une nouvelle offre</h2>
                             <button
                                 onClick={() => setIsCreateModalOpen(false)}
-                                className="text-gray-400 hover:text-gray-500"
+                                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-colors"
                             >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <X className="h-6 w-6" />
                             </button>
                         </div>
-                        <form onSubmit={handleCreateSubmit} className="space-y-4">
+                        <form onSubmit={handleCreateSubmit} className="p-6 space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Auteur
                                 </label>
                                 <select
                                     value={createForm.authorId}
                                     onChange={(e) => setCreateForm({ ...createForm, authorId: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white"
                                     required
                                 >
                                     <option value="">Sélectionner un auteur</option>
@@ -236,43 +337,44 @@ const OffersManagementPage = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Contenu de l'offre
                                 </label>
                                 <textarea
                                     value={createForm.content}
                                     onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
                                     rows="4"
+                                    placeholder="Décrivez votre offre d'emploi..."
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Visibilité
                                 </label>
                                 <select
                                     value={createForm.visibility}
                                     onChange={(e) => setCreateForm({ ...createForm, visibility: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white"
                                 >
                                     <option value="public">Public</option>
                                     <option value="private">Privé</option>
                                 </select>
                             </div>
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end space-x-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                                    className="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors duration-200 font-medium"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                    className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-200 font-medium shadow-lg"
                                 >
-                                    Créer
+                                    Créer l'offre
                                 </button>
                             </div>
                         </form>
@@ -282,56 +384,54 @@ const OffersManagementPage = () => {
 
             {/* Modal de modification d'offre */}
             {editingOffer && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold">Modifier l'offre</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center p-6 border-b border-slate-200">
+                            <h2 className="text-2xl font-bold text-slate-900">Modifier l'offre</h2>
                             <button
                                 onClick={() => setEditingOffer(null)}
-                                className="text-gray-400 hover:text-gray-500"
+                                className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition-colors"
                             >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <X className="h-6 w-6" />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Contenu de l'offre
                                 </label>
                                 <textarea
                                     value={editForm.content}
                                     onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
                                     rows="4"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Visibilité
                                 </label>
                                 <select
                                     value={editForm.visibility}
                                     onChange={(e) => setEditForm({ ...editForm, visibility: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white"
                                 >
                                     <option value="public">Public</option>
                                     <option value="private">Privé</option>
                                 </select>
                             </div>
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end space-x-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setEditingOffer(null)}
-                                    className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                                    className="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors duration-200 font-medium"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                    className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-200 font-medium shadow-lg"
                                 >
                                     Enregistrer
                                 </button>
@@ -341,74 +441,278 @@ const OffersManagementPage = () => {
                 </div>
             )}
 
-            {/* MODALE DÉTAILLÉE DE L'OFFRE */}
+            {/* Modal détaillée de l'offre */}
             {selectedOffer && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
-                        <button
-                            onClick={() => setSelectedOffer(null)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-                            aria-label="Fermer"
-                        >
-                            ×
-                        </button>
-                        <h2 className="text-2xl font-bold mb-4 text-green-700 flex items-center gap-2">
-                            {selectedOffer.titre}
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-bold text-white ml-2 ${selectedOffer.typeContrat === 'CDI' ? 'bg-green-600' : selectedOffer.typeContrat === 'CDD' ? 'bg-blue-500' : selectedOffer.typeContrat === 'Stage' ? 'bg-yellow-500' : selectedOffer.typeContrat === 'Freelance' ? 'bg-purple-500' : 'bg-gray-400'}`}>{selectedOffer.typeContrat}</span>
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                            <div>
-                                <div className="mb-2"><b>Auteur :</b> {selectedOffer.author?.name || selectedOffer.author || '-'}</div>
-                                <div className="mb-2"><b>Description :</b> {selectedOffer.description}</div>
-                                <div className="mb-2"><b>Localisation :</b> {selectedOffer.localisation}</div>
-                                <div className="mb-2"><b>Date d'expiration :</b> {selectedOffer.dateExpiration ? new Date(selectedOffer.dateExpiration).toLocaleDateString('fr-FR') : '-'}</div>
-                                <div className="mb-2"><b>Compétences requises :</b> {selectedOffer.competencesRequises?.length > 0 ? selectedOffer.competencesRequises.join(', ') : '-'}</div>
-                            </div>
-                            <div>
-                                <div className="mb-2"><b>Médias :</b> {selectedOffer.medias?.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2 mt-1">
-                                        {selectedOffer.medias.map((media, idx) => (
-                                            <a key={idx} href={media} target="_blank" rel="noopener noreferrer">
-                                                <img src={media} alt={`media-${idx}`} className="w-20 h-20 object-cover rounded border" onError={e => {e.target.style.display='none'}} />
-                                            </a>
-                                        ))}
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <div className="relative">
+                            {/* Header avec image */}
+                            <div className="relative h-64 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-t-2xl overflow-hidden">
+                                {selectedOffer.medias && selectedOffer.medias.length > 0 ? (
+                                    <img 
+                                        src={selectedOffer.medias[0]} 
+                                        alt={selectedOffer.titre}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <Building2 className="h-24 w-24 text-white opacity-80" />
                                     </div>
-                                ) : '-'}</div>
-                                <div className="mb-2"><b>Likes :</b> {selectedOffer.likes?.length || 0}</div>
-                                <div className="mb-2"><b>Créée le :</b> {selectedOffer.createdAt ? new Date(selectedOffer.createdAt).toLocaleString('fr-FR') : '-'}</div>
-                                <div className="mb-2"><b>Modifiée le :</b> {selectedOffer.updatedAt ? new Date(selectedOffer.updatedAt).toLocaleString('fr-FR') : '-'}</div>
+                                )}
+                                <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                                <button
+                                    onClick={() => setSelectedOffer(null)}
+                                    className="absolute top-6 right-6 bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-opacity-30 transition-all"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                                <div className="absolute bottom-6 left-6 right-6">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className={`px-3 py-1 rounded-full text-white text-sm font-bold ${getContractTypeColor(selectedOffer.typeContrat)} shadow-lg`}>
+                                            {selectedOffer.typeContrat || 'Non spécifié'}
+                                        </span>
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-white mb-2">{selectedOffer.titre}</h2>
+                                    <div className="flex items-center gap-2 text-white text-opacity-90">
+                                        <User className="h-4 w-4" />
+                                        <span>{selectedOffer.author?.name || selectedOffer.author || 'Auteur non spécifié'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contenu */}
+                            <div className="p-8">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* Informations principales */}
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-900 mb-3">Informations générales</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-start gap-3">
+                                                    <FileText className="h-5 w-5 text-slate-400 mt-0.5" />
+                                                    <div>
+                                                        <p className="font-medium text-slate-700">Description</p>
+                                                        <p className="text-slate-600 text-sm">{selectedOffer.description || 'Aucune description'}</p>
+                                                    </div>
+                                                </div>
+                                                {selectedOffer.localisation && (
+                                                    <div className="flex items-center gap-3">
+                                                        <MapPin className="h-5 w-5 text-slate-400" />
+                                                        <div>
+                                                            <p className="font-medium text-slate-700">Localisation</p>
+                                                            <p className="text-slate-600 text-sm">{selectedOffer.localisation}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {selectedOffer.dateExpiration && (
+                                                    <div className="flex items-center gap-3">
+                                                        <Calendar className="h-5 w-5 text-slate-400" />
+                                                        <div>
+                                                            <p className="font-medium text-slate-700">Date d'expiration</p>
+                                                            <p className="text-slate-600 text-sm">{new Date(selectedOffer.dateExpiration).toLocaleDateString('fr-FR')}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {selectedOffer.competencesRequises && selectedOffer.competencesRequises.length > 0 && (
+                                                    <div className="flex items-start gap-3">
+                                                        <Users className="h-5 w-5 text-slate-400 mt-0.5" />
+                                                        <div>
+                                                            <p className="font-medium text-slate-700 mb-2">Compétences requises</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {selectedOffer.competencesRequises.map((competence, idx) => (
+                                                                    <span key={idx} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                                                                        {competence}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Statistiques */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-900 mb-3">Statistiques</h3>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div className="bg-red-50 p-4 rounded-xl text-center">
+                                                    <Heart className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                                                    <p className="text-2xl font-bold text-red-600">{selectedOffer.likes?.length || 0}</p>
+                                                    <p className="text-xs text-red-600">Likes</p>
+                                                </div>
+                                                <div className="bg-blue-50 p-4 rounded-xl text-center">
+                                                    <MessageCircle className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                                                    <p className="text-2xl font-bold text-blue-600">{selectedOffer.comments?.length || 0}</p>
+                                                    <p className="text-xs text-blue-600">Commentaires</p>
+                                                </div>
+                                                <div className="bg-emerald-50 p-4 rounded-xl text-center">
+                                                    <Users className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
+                                                    <p className="text-2xl font-bold text-emerald-600">{selectedOffer.candidatures?.length || 0}</p>
+                                                    <p className="text-xs text-emerald-600">Candidatures</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Dates */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-900 mb-3">Historique</h3>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                                                    <span className="text-sm text-slate-600">Créée le</span>
+                                                    <span className="text-sm font-medium text-slate-900">
+                                                        {selectedOffer.createdAt ? new Date(selectedOffer.createdAt).toLocaleString('fr-FR') : '-'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center py-2">
+                                                    <span className="text-sm text-slate-600">Modifiée le</span>
+                                                    <span className="text-sm font-medium text-slate-900">
+                                                        {selectedOffer.updatedAt ? new Date(selectedOffer.updatedAt).toLocaleString('fr-FR') : '-'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Détails secondaires */}
+                                    <div className="space-y-6">
+                                        {/* Médias */}
+                                        {selectedOffer.medias && selectedOffer.medias.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-900 mb-3">Médias</h3>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {selectedOffer.medias.map((media, idx) => (
+                                                        <a 
+                                                            key={idx} 
+                                                            href={media} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="block group"
+                                                        >
+                                                            <img 
+                                                                src={media} 
+                                                                alt={`media-${idx}`} 
+                                                                className="w-full h-24 object-cover rounded-lg border border-slate-200 group-hover:border-emerald-300 transition-colors" 
+                                                                onError={(e) => {e.target.style.display='none'}} 
+                                                            />
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Commentaires */}
+                                        {selectedOffer.comments && selectedOffer.comments.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-900 mb-3">Commentaires récents</h3>
+                                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                                    {selectedOffer.comments.slice(0, 5).map((comment, idx) => (
+                                                        <div key={idx} className="bg-slate-50 p-4 rounded-lg">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+                                                                    <User className="h-3 w-3 text-emerald-600" />
+                                                                </div>
+                                                                <span className="font-medium text-slate-900 text-sm">
+                                                                    {comment.user?.name || comment.user || 'Utilisateur'}
+                                                                </span>
+                                                                <span className="text-xs text-slate-500">
+                                                                    {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString('fr-FR') : ''}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-slate-700 text-sm">{comment.content}</p>
+                                                        </div>
+                                                    ))}
+                                                    {selectedOffer.comments.length > 5 && (
+                                                        <p className="text-center text-slate-500 text-sm">
+                                                            Et {selectedOffer.comments.length - 5} commentaire(s) de plus...
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Candidatures */}
+                                        {selectedOffer.candidatures && selectedOffer.candidatures.length > 0 && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-900 mb-3">Candidatures</h3>
+                                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                                    {selectedOffer.candidatures.slice(0, 5).map((candidature, idx) => (
+                                                        <div key={idx} className="bg-slate-50 p-4 rounded-lg">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                                                        <User className="h-3 w-3 text-blue-600" />
+                                                                    </div>
+                                                                    <span className="font-medium text-slate-900 text-sm">
+                                                                        {candidature.laureat?.name || candidature.laureat || 'Candidat'}
+                                                                    </span>
+                                                                </div>
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                                    candidature.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                                                    candidature.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                                    'bg-yellow-100 text-yellow-700'
+                                                                }`}>
+                                                                    {candidature.status === 'accepted' ? 'Accepté' :
+                                                                     candidature.status === 'rejected' ? 'Rejeté' : 'En attente'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 text-xs text-slate-600">
+                                                                <span>
+                                                                    {candidature.datePostulation ? new Date(candidature.datePostulation).toLocaleDateString('fr-FR') : ''}
+                                                                </span>
+                                                                {candidature.cv && (
+                                                                    <a href={candidature.cv} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">
+                                                                        CV
+                                                                    </a>
+                                                                )}
+                                                                {candidature.lettreMotivation && (
+                                                                    <a href={candidature.lettreMotivation} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">
+                                                                        Lettre
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {selectedOffer.candidatures.length > 5 && (
+                                                        <p className="text-center text-slate-500 text-sm">
+                                                            Et {selectedOffer.candidatures.length - 5} candidature(s) de plus...
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-slate-200">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedOffer(null);
+                                            handleEdit(selectedOffer);
+                                        }}
+                                        className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-medium"
+                                    >
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Modifier
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')) {
+                                                deleteOffer(selectedOffer._id);
+                                                setSelectedOffer(null);
+                                            }
+                                        }}
+                                        className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
+                                    >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Supprimer
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        {/* Commentaires */}
-                        {selectedOffer.comments?.length > 0 && (
-                            <div className="mb-4">
-                                <b>Commentaires :</b>
-                                <ul className="list-disc ml-6 max-h-32 overflow-y-auto text-xs mt-1">
-                                    {selectedOffer.comments.map((comment, idx) => (
-                                        <li key={idx} className="mb-1">
-                                            <b>{comment.user?.name || comment.user || '-'}</b> : {comment.content}
-                                            <span className="text-[10px] text-gray-400 ml-2">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('fr-FR') : '-'}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {/* Candidatures */}
-                        {selectedOffer.candidatures?.length > 0 && (
-                            <div className="mb-4">
-                                <b>Candidatures :</b>
-                                <ul className="list-disc ml-6 max-h-32 overflow-y-auto text-xs mt-1">
-                                    {selectedOffer.candidatures.map((candid, idx) => (
-                                        <li key={idx} className="mb-1">
-                                            <b>{candid.laureat?.name || candid.laureat || '-'}</b> - <span className={`ml-2 px-2 py-0.5 rounded text-white text-[10px] ${candid.status === 'accepted' ? 'bg-green-600' : candid.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}>{candid.status}</span>
-                                            <span className="text-[10px] text-gray-400 ml-2">{candid.datePostulation ? new Date(candid.datePostulation).toLocaleString('fr-FR') : '-'}</span>
-                                            <br/>CV : {candid.cv ? <a href={candid.cv} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">CV</a> : '-'}
-                                            <br/>Lettre de motivation : {candid.lettreMotivation ? <a href={candid.lettreMotivation} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Lettre de motivation</a> : '-'}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
@@ -416,4 +720,4 @@ const OffersManagementPage = () => {
     );
 };
 
-export default OffersManagementPage; 
+export default OffersManagementPage;

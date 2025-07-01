@@ -186,7 +186,7 @@ const ProfilPage = () => {
                     <div className="absolute bottom-4 left-6 flex items-end space-x-4">
                         <div className="relative">
                             <img
-                                src={profileImagePreview || profile.profilePicture || "/avatar.png"}
+                                src={ profile.companyLogo || "/avatar.png"}
                                 alt="Photo de profil"
                                 className="w-24 h-24 rounded-full border-4 border-white object-cover"
                             />

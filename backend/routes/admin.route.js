@@ -16,6 +16,8 @@ import {
 	deleteConnection
 } from "../controllers/admin.controller.js";
 import { getAllOffers } from "../controllers/offres.controller.js";
+import { getStats } from "../controllers/admin.controller.js";
+
 
 const router = express.Router();
 
@@ -38,5 +40,9 @@ router.delete("/posts/:postId", protect, admin, deletePost);
 
 // Ajout route pour récupérer toutes les offres côté admin
 router.get("/offres", protect, admin, getAllOffers);
+
+// Route pour les statistiques admin
+router.get("/stats", protect, admin, getStats);
+
 
 export default router; 
