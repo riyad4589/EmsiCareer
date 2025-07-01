@@ -58,14 +58,19 @@ const NetworkPage = () => {
 		enabled: !!user,
 	});
 
-	const { data: connectionRequestsData, isLoading: requestsLoading } = useQuery({
-		queryKey: ["connectionRequests"],
-		queryFn: async () => {
-			const response = await axiosInstance.get("/connections/requests");
-			return response.data;
-		},
-		enabled: !!user,
-	});
+	const { 
+			data: connectionRequestsData, 
+			isLoading: requestsLoading, 
+			refetch: refetchRequests 
+		} = useQuery({
+			queryKey: ["connectionRequests"],
+			queryFn: async () => {
+				const response = await axiosInstance.get("/connections/requests");
+				return response.data;
+			},
+			enabled: !!user,
+		});
+
 
 	const connectMutation = useMutation({
 		mutationFn: async (userId) => {
@@ -90,10 +95,11 @@ const NetworkPage = () => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(["connections"]);
-			queryClient.invalidateQueries(["connectionRequests"]);
 			queryClient.invalidateQueries(["suggestions"]);
+			refetchRequests(); // 👈 force le rechargement immédiat des demandes
 			toast.success("Demande de connexion acceptée");
 		},
+
 		onError: (error) => {
 			console.error("Erreur lors de l'acceptation:", error);
 			toast.error(error.response?.data?.message || "Erreur lors de l'acceptation de la demande");
