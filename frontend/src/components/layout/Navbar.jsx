@@ -71,7 +71,11 @@ const Navbar = () => {
 				<div className='flex justify-between items-center py-3'>
 					<div className='flex items-center space-x-4'>
 						<Link to='/'>
-							<img className='h-8 rounded hover:opacity-90 transition-opacity duration-200' src='/emsi.svg' alt='LinkedIn' />
+							<img
+							src="/logo_emsi.png"
+							alt="Portail EMSI"
+							className="h-12 max-h-16 w-auto rounded hover:opacity-90 transition-opacity duration-200 object-contain"
+							/>
 						</Link>
 					</div>
 					<div className='flex items-center gap-2 md:gap-6'>

@@ -34,7 +34,7 @@ const AdminNavbar = () => {
 						<Link to="/admin" className="flex-shrink-0">
 							<img
 								className="h-8 w-auto"
-								src="/logo1.png"
+								src="/logo_emsi.png"
 								alt="Admin Dashboard"
 							/>
 						</Link>

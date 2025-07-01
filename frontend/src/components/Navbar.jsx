@@ -51,14 +51,15 @@ const Navbar = () => {
 			<div className="max-w-7xl mx-auto px-4">
 				<div className="flex justify-between h-16">
 					<div className="flex items-center">
-						<Link to="/" className="flex-shrink-0">
-							<img
-								className="h-8 w-auto"
-								src="/logo1.png"
-								alt="LinkedIn Clone"
-							/>
-						</Link>
+					<Link to="/" className="flex-shrink-0">
+						<img
+						src="/logo-emsi.png"
+						alt="Portail EMSI"
+					className="h-14 max-h-16 w-auto object-contain"
+						/>
+					</Link>
 					</div>
+
 
 					<div className="flex items-center space-x-4">
 						{navItems.map((item) => {
