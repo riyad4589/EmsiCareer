@@ -7,6 +7,7 @@ import { sendValidationSuccessEmail } from "../emails/emailHandlers.js";
 import { sendRejectionEmail } from "../emails/emailHandlers.js";
 import Connection from "../models/connection.model.js";
 import { uploadMediaToAzure } from "../utils/azureBlob.js";
+import Offre from "../models/offre.model.js";
 
 // Obtenir tous les utilisateurs
 export const getAllUsers = async (req, res) => {
@@ -410,29 +411,25 @@ export const getStats = async (req, res) => {
         const totalUsers = await User.countDocuments({ role: "user" });
         const totalRecruiters = await User.countDocuments({ role: "recruteur" });
         const totalPosts = await Post.countDocuments({ author: { $in: await User.find({ role: "user" }).select('_id') } });
-        
-        // Récupérer les IDs des recruteurs et admins
-        const recruiterAndAdminIds = await User.find({ 
-            role: { $in: ["recruteur", "admin"] } 
-        }).select('_id');
-        
-        // Compter les posts de ces utilisateurs
-        const totalOffers = await Post.countDocuments({ 
-            author: { $in: recruiterAndAdminIds.map(user => user._id) } 
-        });
+        const totalOffers = await Offre.countDocuments();
+        // Nombre d'offres créées par des recruteurs
+        const recruiterIds = await User.find({ role: "recruteur" }).select('_id');
+        const totalOffersByRecruiters = await Offre.countDocuments({ author: { $in: recruiterIds.map(u => u._id) } });
 
         console.log("Statistiques calculées:", {
             totalUsers,
             totalRecruiters,
             totalPosts,
-            totalOffers
+            totalOffers,
+            totalOffersByRecruiters
         });
 
         res.json({
-            totalUsers,
-            totalRecruiters,
-            totalPosts,
-            totalOffers
+            totalUsers: totalUsers ?? 0,
+            totalRecruiters: totalRecruiters ?? 0,
+            totalPosts: totalPosts ?? 0,
+            totalOffers: totalOffers ?? 0,
+            totalOffersByRecruiters: totalOffersByRecruiters ?? 0
         });
     } catch (error) {
         console.error("Erreur lors de la récupération des statistiques:", error);

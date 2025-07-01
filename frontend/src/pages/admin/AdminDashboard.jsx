@@ -33,6 +33,18 @@ const AdminDashboard = () => {
         },
     });
 
+    const { data: stats, isLoading: isLoadingStats } = useQuery({
+        queryKey: ["admin-stats"],
+        queryFn: async () => {
+            const response = await axiosInstance.get("/admin/stats");
+            return response.data;
+        },
+        staleTime: 1000 * 60 * 5,
+        cacheTime: 1000 * 60 * 30,
+        retry: 3,
+        refetchOnWindowFocus: true,
+    });
+
     const { mutate: validateUser } = useMutation({
         mutationFn: (userId) => axiosInstance.put(`/admin/validate/${userId}`),
         onSuccess: () => {
@@ -55,7 +67,7 @@ const AdminDashboard = () => {
         },
     });
 
-    if (isLoadingUsers || isLoadingPosts || isLoadingPendingUsers) {
+    if (isLoadingUsers || isLoadingPosts || isLoadingPendingUsers || isLoadingStats) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
@@ -70,7 +82,7 @@ const AdminDashboard = () => {
     const totalUsers = users?.filter(user => user.role === "user").length || 0;
     const totalRecruteurs = users?.filter(user => user.role === "recruteur").length || 0;
     const totalPosts = posts?.length || 0;
-    const totalOffers = posts?.filter(post => post.author?.role === "recruteur" || post.author?.role === "admin").length || 0;
+    const totalOffers = typeof stats?.totalOffers === 'number' ? stats.totalOffers : 0;
 
     console.log("Statistiques calculées:", {
         totalUsers,
@@ -134,7 +146,8 @@ const AdminDashboard = () => {
                             </div>
                             <div className="ml-4">
                                 <h2 className="text-sm font-medium text-gray-600">Offres</h2>
-                                <p className="text-2xl font-semibold text-gray-900">{totalOffers}</p>
+                                <p className="text-2xl font-semibold text-gray-900">{typeof stats?.totalOffers === 'number' ? stats.totalOffers : 'Non disponible'}</p>
+                                <p className="text-xs text-gray-500">dont {stats?.totalOffersByRecruiters ?? 0} par des recruteurs</p>
                             </div>
                         </div>
                     </div>

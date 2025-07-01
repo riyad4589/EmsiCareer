@@ -16,6 +16,8 @@ const OffersManagementPage = () => {
         visibility: "public",
         authorId: ""
     });
+    const [expandedRow, setExpandedRow] = useState(null);
+    const [selectedOffer, setSelectedOffer] = useState(null);
 
     const queryClient = useQueryClient();
 
@@ -37,15 +39,21 @@ const OffersManagementPage = () => {
     const { data: offersData, isLoading, error } = useQuery({
         queryKey: ["offers"],
         queryFn: async () => {
-            try {
-                const response = await axiosInstance.get("/admin/posts");
-                return response.data.filter(post => 
-                    post.author.role === "recruteur" || post.author.role === "admin"
-                );
-            } catch (error) {
-                console.error("Erreur lors de la récupération des offres:", error);
-                throw new Error(error.response?.data?.message || "Une erreur est survenue lors du chargement des offres");
-            }
+            const response = await axiosInstance.get("/admin/offres");
+            console.log('Réponse API /admin/offres:', response.data);
+            return response.data.data || response.data.offers || response.data;
+        },
+        staleTime: 1000 * 60 * 5,
+        cacheTime: 1000 * 60 * 30,
+        retry: 3,
+        refetchOnWindowFocus: true,
+    });
+
+    const { data: stats } = useQuery({
+        queryKey: ["admin-stats"],
+        queryFn: async () => {
+            const response = await axiosInstance.get("/admin/stats");
+            return response.data;
         },
         staleTime: 1000 * 60 * 5,
         cacheTime: 1000 * 60 * 30,
@@ -147,7 +155,15 @@ const OffersManagementPage = () => {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">Gestion des Offres</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-4">
+                        Gestion des Offres
+                        
+                        {offersData && (
+                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-base font-semibold align-middle">
+                                {offersData.length} Offre{offersData.length > 1 ? 's' : ''}
+                            </span>
+                        )}
+                    </h1>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -157,86 +173,25 @@ const OffersManagementPage = () => {
                     </button>
                 </div>
 
-                <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="bg-white shadow rounded-lg overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Auteur
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Contenu
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Visibilité
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auteur</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {offersData && offersData.length > 0 ? (
-                                offersData.map((offer) => (
-                                    <tr key={offer._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10">
-                                                    <img
-                                                        className="h-10 w-10 rounded-full"
-                                                        src={offer.author.profilePicture || "/avatar.png"}
-                                                        alt={offer.author.name}
-                                                    />
-                                                </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{offer.author.name}</div>
-                                                    <div className="text-sm text-gray-500">@{offer.author.username}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900 line-clamp-2">{offer.content}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                offer.visibility === "public"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : "bg-green-100 text-green-800"
-                                            }`}>
-                                                {offer.visibility === "public" ? "Public" : "Privé"}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(offer.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div className="flex items-center justify-end space-x-4">
-                                                <button
-                                                    onClick={() => handleEdit(offer)}
-                                                    className="text-green-600 hover:text-green-900"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        if (window.confirm("Êtes-vous sûr de vouloir supprimer cette offre ?")) {
-                                                            deleteOffer(offer._id);
-                                                        }
-                                                    }}
-                                                    className="text-red-600 hover:text-red-900"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
+                                offersData.map((offre, idx) => (
+                                    <tr key={offre._id} className={idx % 2 === 0 ? "bg-white cursor-pointer" : "bg-gray-50 hover:bg-green-50 cursor-pointer"} onClick={() => setSelectedOffer(offre)}>
+                                        <td className="px-4 py-3 whitespace-nowrap">{offre.author?.name || offre.author || '-'}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap font-semibold">{offre.titre}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                                    <td colSpan="2" className="px-6 py-4 text-center text-gray-500">
                                         Aucune offre trouvée
                                     </td>
                                 </tr>
@@ -382,6 +337,78 @@ const OffersManagementPage = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODALE DÉTAILLÉE DE L'OFFRE */}
+            {selectedOffer && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-3xl relative overflow-y-auto max-h-[90vh]">
+                        <button
+                            onClick={() => setSelectedOffer(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                            aria-label="Fermer"
+                        >
+                            ×
+                        </button>
+                        <h2 className="text-2xl font-bold mb-4 text-green-700 flex items-center gap-2">
+                            {selectedOffer.titre}
+                            <span className={`inline-block px-2 py-1 rounded text-xs font-bold text-white ml-2 ${selectedOffer.typeContrat === 'CDI' ? 'bg-green-600' : selectedOffer.typeContrat === 'CDD' ? 'bg-blue-500' : selectedOffer.typeContrat === 'Stage' ? 'bg-yellow-500' : selectedOffer.typeContrat === 'Freelance' ? 'bg-purple-500' : 'bg-gray-400'}`}>{selectedOffer.typeContrat}</span>
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                            <div>
+                                <div className="mb-2"><b>Auteur :</b> {selectedOffer.author?.name || selectedOffer.author || '-'}</div>
+                                <div className="mb-2"><b>Description :</b> {selectedOffer.description}</div>
+                                <div className="mb-2"><b>Localisation :</b> {selectedOffer.localisation}</div>
+                                <div className="mb-2"><b>Date d'expiration :</b> {selectedOffer.dateExpiration ? new Date(selectedOffer.dateExpiration).toLocaleDateString('fr-FR') : '-'}</div>
+                                <div className="mb-2"><b>Compétences requises :</b> {selectedOffer.competencesRequises?.length > 0 ? selectedOffer.competencesRequises.join(', ') : '-'}</div>
+                            </div>
+                            <div>
+                                <div className="mb-2"><b>Médias :</b> {selectedOffer.medias?.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2 mt-1">
+                                        {selectedOffer.medias.map((media, idx) => (
+                                            <a key={idx} href={media} target="_blank" rel="noopener noreferrer">
+                                                <img src={media} alt={`media-${idx}`} className="w-20 h-20 object-cover rounded border" onError={e => {e.target.style.display='none'}} />
+                                            </a>
+                                        ))}
+                                    </div>
+                                ) : '-'}</div>
+                                <div className="mb-2"><b>Likes :</b> {selectedOffer.likes?.length || 0}</div>
+                                <div className="mb-2"><b>Créée le :</b> {selectedOffer.createdAt ? new Date(selectedOffer.createdAt).toLocaleString('fr-FR') : '-'}</div>
+                                <div className="mb-2"><b>Modifiée le :</b> {selectedOffer.updatedAt ? new Date(selectedOffer.updatedAt).toLocaleString('fr-FR') : '-'}</div>
+                            </div>
+                        </div>
+                        {/* Commentaires */}
+                        {selectedOffer.comments?.length > 0 && (
+                            <div className="mb-4">
+                                <b>Commentaires :</b>
+                                <ul className="list-disc ml-6 max-h-32 overflow-y-auto text-xs mt-1">
+                                    {selectedOffer.comments.map((comment, idx) => (
+                                        <li key={idx} className="mb-1">
+                                            <b>{comment.user?.name || comment.user || '-'}</b> : {comment.content}
+                                            <span className="text-[10px] text-gray-400 ml-2">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('fr-FR') : '-'}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {/* Candidatures */}
+                        {selectedOffer.candidatures?.length > 0 && (
+                            <div className="mb-4">
+                                <b>Candidatures :</b>
+                                <ul className="list-disc ml-6 max-h-32 overflow-y-auto text-xs mt-1">
+                                    {selectedOffer.candidatures.map((candid, idx) => (
+                                        <li key={idx} className="mb-1">
+                                            <b>{candid.laureat?.name || candid.laureat || '-'}</b> - <span className={`ml-2 px-2 py-0.5 rounded text-white text-[10px] ${candid.status === 'accepted' ? 'bg-green-600' : candid.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}>{candid.status}</span>
+                                            <span className="text-[10px] text-gray-400 ml-2">{candid.datePostulation ? new Date(candid.datePostulation).toLocaleString('fr-FR') : '-'}</span>
+                                            <br/>CV : {candid.cv ? <a href={candid.cv} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">CV</a> : '-'}
+                                            <br/>Lettre de motivation : {candid.lettreMotivation ? <a href={candid.lettreMotivation} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Lettre de motivation</a> : '-'}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

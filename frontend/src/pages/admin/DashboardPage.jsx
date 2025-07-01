@@ -95,7 +95,7 @@ const DashboardPage = () => {
                             </div>
                             <div className="ml-4">
                                 <h2 className="text-sm font-medium text-gray-600">Offres</h2>
-                                <p className="text-2xl font-semibold text-gray-900">{stats?.totalOffers || 0}</p>
+                                <p className="text-2xl font-semibold text-gray-900">{stats?.totalOffers ?? 0}</p>
                             </div>
                         </div>
                     </div>

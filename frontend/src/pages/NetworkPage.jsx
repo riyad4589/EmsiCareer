@@ -169,14 +169,12 @@ const NetworkPage = () => {
 		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				{/* Demandes de connexion */}
-				<div className="lg:col-span-2">
-					<h2 className="text-2xl font-bold mb-6">Demandes de connexion</h2>
-					<div className="bg-white rounded-lg shadow p-6">
-						<div className="space-y-4">
-							{connectionRequests.length === 0 ? (
-								<div className="text-center text-gray-500">Aucune demande de connexion à afficher</div>
-							) : (
-								connectionRequests.map((request) => (
+				{connectionRequests.length > 0 && (
+					<div className="lg:col-span-2">
+						<h2 className="text-2xl font-bold mb-6">Demandes de connexion</h2>
+						<div className="bg-white rounded-lg shadow p-6">
+							<div className="space-y-4">
+								{connectionRequests.map((request) => (
 									<div
 										key={request._id}
 										className="flex items-center justify-between p-4 border rounded-lg"
@@ -198,44 +196,24 @@ const NetworkPage = () => {
 											<button
 												onClick={() => acceptMutation.mutate(request._id)}
 												disabled={acceptMutation.isPending}
-												className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+												className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
 											>
-												{acceptMutation.isPending ? (
-													<>
-														<Loader size={16} className="animate-spin" />
-														Acceptation...
-													</>
-												) : (
-													<>
-														<Check size={16} />
-														Accepter
-													</>
-												)}
+												<Check className="inline mr-1" /> Accepter
 											</button>
 											<button
 												onClick={() => rejectMutation.mutate(request._id)}
 												disabled={rejectMutation.isPending}
-												className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+												className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
 											>
-												{rejectMutation.isPending ? (
-													<>
-														<Loader size={16} className="animate-spin" />
-														Refus...
-													</>
-												) : (
-													<>
-														<X size={16} />
-														Refuser
-													</>
-												)}
+												<X className="inline mr-1" /> Refuser
 											</button>
 										</div>
 									</div>
-								))
-							)}
+								))}
+							</div>
 						</div>
 					</div>
-				</div>
+				)}
 
 				{/* Connexions */}
 				<div className="lg:col-span-2">

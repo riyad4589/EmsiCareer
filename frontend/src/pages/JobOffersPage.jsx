@@ -10,7 +10,7 @@ const JobOffersPage = () => {
 		queryKey: ["offres"],
 		queryFn: async () => {
 			const response = await axiosInstance.get("/offres");
-			return response.data.offers || response.data.data;
+			return response.data.data || response.data.offers || response.data;
 		},
 		enabled: !!user,
 	});
@@ -33,7 +33,7 @@ const JobOffersPage = () => {
 
 	return (
 		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-			<OfferList offres={offres} />
+			<OfferList offres={offres || []} />
 		</div>
 	);
 };

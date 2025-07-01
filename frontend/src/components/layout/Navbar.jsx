@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase } from "lucide-react";
+import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase, LogIn } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const Navbar = () => {
