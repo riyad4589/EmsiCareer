@@ -20,6 +20,17 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: false,
 		},
+		// Nouveaux champs pour les informations de contact
+		email: {
+			type: String,
+			default: function() {
+				return this.emailEdu || "";
+			},
+		},
+		phone: {
+			type: String,
+			default: "",
+		},
 		password: {
 			type: String,
 			required: true,
@@ -47,6 +58,11 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			default: "",
 		},
+		// Section À propos
+		about: {
+			type: String,
+			default: "",
+		},
 		// Champs spécifiques aux recruteurs
 		companyName: {
 			type: String,
@@ -70,6 +86,10 @@ const userSchema = new mongoose.Schema(
 				return this.role === "recruteur";
 			}
 		},
+		companyDescription: {
+			type: String,
+			default: "",
+		},
 		website: {
 			type: String,
 			default: ""
@@ -79,6 +99,15 @@ const userSchema = new mongoose.Schema(
 			required: function() {
 				return this.role === "recruteur";
 			}
+		},
+		// Nouveaux champs pour les réseaux sociaux
+		linkedin: {
+			type: String,
+			default: "",
+		},
+		github: {
+			type: String,
+			default: "",
 		},
 		socialLinks: {
 			linkedin: {
@@ -94,6 +123,64 @@ const userSchema = new mongoose.Schema(
 				default: ""
 			}
 		},
+		// Section Expérience
+		experience: [{
+			title: {
+				type: String,
+				default: "",
+			},
+			company: {
+				type: String,
+				default: "",
+			},
+			startDate: {
+				type: String,
+				default: "",
+			},
+			endDate: {
+				type: String,
+				default: "",
+			},
+			description: {
+				type: String,
+				default: "",
+			},
+		}],
+		// Section Éducation
+		education: [{
+			degree: {
+				type: String,
+				default: "",
+			},
+			school: {
+				type: String,
+				default: "",
+			},
+			startDate: {
+				type: String,
+				default: "",
+			},
+			endDate: {
+				type: String,
+				default: "",
+			},
+			description: {
+				type: String,
+				default: "",
+			},
+		}],
+		// Section Compétences
+		skills: [{
+			name: {
+				type: String,
+				default: "",
+			},
+			level: {
+				type: String,
+				enum: ["débutant", "intermédiaire", "avancé", "expert"],
+				default: "débutant",
+			},
+		}],
 		cv: {
 			type: String,
 			default: ""

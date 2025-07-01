@@ -62,7 +62,7 @@ const HomePage = () => {
 	}
 
 	return (
-		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			{profile && (
 				<div className="flex items-center gap-4 p-4 rounded-lg bg-white shadow-sm border border-gray-100 mb-6">
 					<div className="flex-shrink-0">

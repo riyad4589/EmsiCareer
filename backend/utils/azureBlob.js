@@ -25,7 +25,7 @@ export const uploadToAzure = async (filePath, originalName, prefix = "fichier") 
     const blockBlobClient = candidaturesClient.getBlockBlobClient(finalName);
 
     await blockBlobClient.uploadFile(filePath, {
-      blobHTTPHeaders: { blobContentType: mimeType || "application/octet-stream" }
+      blobHTTPHeaders: { blobContentType: "application/pdf" }
     });
 
     return blockBlobClient.url;

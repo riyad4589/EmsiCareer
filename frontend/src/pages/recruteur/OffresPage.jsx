@@ -450,22 +450,7 @@ const OffresPage = () => {
                                     multiple
                                     accept="image/*"
                                     onChange={handleMediaChange}
-                                    className="w-full p-2 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                 />
-                                <div className="flex flex-wrap gap-4 mt-4">
-                                    {mediaPreviews.map((preview, index) => (
-                                        <div key={index} className="relative">
-                                            {mediaTypes[index] === 'video' ? (
-                                                <video src={preview} controls className="w-32 h-32 object-cover rounded-lg" />
-                                            ) : (
-                                                <img src={preview} alt="Aperçu" className="w-32 h-32 object-cover rounded-lg" />
-                                            )}
-                                            <button type="button" onClick={() => handleRemoveMedia(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1">
-                                                <X size={14} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
                             </div>
                             <div className="flex justify-end pt-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="mr-4 px-6 py-2 rounded-lg border">Annuler</button>
