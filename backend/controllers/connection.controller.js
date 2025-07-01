@@ -6,24 +6,27 @@ import Connection from "../models/connection.model.js";
 export const sendConnectionRequest = async (req, res) => {
 	try {
 		const { userId } = req.params;
+		console.log("=== DÉBUT sendConnectionRequest ===");
 		console.log("Tentative d'envoi de demande de connexion:", {
 			sender: req.user._id,
 			recipient: userId,
+			senderName: req.user.name
 		});
 
 		// Vérifier si l'utilisateur existe
 		const recipient = await User.findById(userId);
 		if (!recipient) {
-			console.error("Destinataire non trouvé:", userId);
+			console.error("❌ Destinataire non trouvé:", userId);
 			return res.status(404).json({
 				success: false,
 				message: "Utilisateur non trouvé",
 			});
 		}
+		console.log("✅ Destinataire trouvé:", recipient.name);
 
 		// Vérifier si l'utilisateur ne s'envoie pas une demande à lui-même
 		if (req.user._id.toString() === userId) {
-			console.error("Tentative d'envoi de demande à soi-même");
+			console.error("❌ Tentative d'envoi de demande à soi-même");
 			return res.status(400).json({
 				success: false,
 				message: "Vous ne pouvez pas vous envoyer une demande de connexion",
@@ -40,12 +43,13 @@ export const sendConnectionRequest = async (req, res) => {
 		});
 
 		if (existingConnection) {
-			console.error("Connexion déjà existante");
+			console.error("❌ Connexion déjà existante");
 			return res.status(400).json({
 				success: false,
 				message: "Vous êtes déjà connecté avec cet utilisateur",
 			});
 		}
+		console.log("✅ Aucune connexion existante trouvée");
 
 		// Vérifier si une demande en attente existe déjà
 		const existingRequest = await ConnectionRequest.findOne({
@@ -57,23 +61,31 @@ export const sendConnectionRequest = async (req, res) => {
 		});
 
 		if (existingRequest) {
-			console.error("Demande en attente déjà existante");
+			console.error("❌ Demande en attente déjà existante");
 			return res.status(400).json({
 				success: false,
 				message: "Une demande de connexion est déjà en attente",
 			});
 		}
+		console.log("✅ Aucune demande en attente trouvée");
 
 		// Créer la demande de connexion
+		console.log("🔄 Création de la demande de connexion...");
 		const connectionRequest = await ConnectionRequest.create({
 			sender: req.user._id,
 			recipient: userId,
 			status: "pending",
 		});
 
-		console.log("Demande de connexion créée:", connectionRequest._id);
+		console.log("✅ Demande de connexion créée avec succès:", {
+			id: connectionRequest._id,
+			sender: connectionRequest.sender,
+			recipient: connectionRequest.recipient,
+			status: connectionRequest.status
+		});
 
 		// Créer une notification pour le destinataire
+		console.log("🔄 Création de la notification...");
 		await Notification.create({
 			sender: req.user._id,
 			recipient: userId,
@@ -81,7 +93,8 @@ export const sendConnectionRequest = async (req, res) => {
 			message: `${req.user.name} vous a envoyé une demande de connexion`,
 		});
 
-		console.log("Notification créée pour la demande de connexion");
+		console.log("✅ Notification créée pour la demande de connexion");
+		console.log("=== FIN sendConnectionRequest - SUCCÈS ===");
 
 		res.json({
 			success: true,
@@ -89,9 +102,11 @@ export const sendConnectionRequest = async (req, res) => {
 			data: connectionRequest,
 		});
 	} catch (error) {
-		console.error("Erreur détaillée lors de l'envoi de la demande:", {
+		console.error("❌ ERREUR dans sendConnectionRequest:", {
 			error: error.message,
 			stack: error.stack,
+			userId: req.params.userId,
+			senderId: req.user._id
 		});
 		res.status(500).json({
 			success: false,
@@ -121,18 +136,29 @@ export const acceptConnectionRequest = async (req, res) => {
 			});
 		}
 
-		// Créer la connexion
-		const newConnection = await Connection.create({
-			user1: request.sender,
-			user2: request.recipient,
+		// Vérifier si la connexion existe déjà
+		const existingConnection = await Connection.findOne({
+			$or: [
+				{ user1: request.sender, user2: request.recipient },
+				{ user1: request.recipient, user2: request.sender },
+			],
 			status: "accepted",
 		});
 
-		console.log("Nouvelle connexion créée:", newConnection);
+		if (existingConnection) {
+			console.log("Connexion déjà existante lors de l'acceptation de la demande.");
+		} else {
+			// Créer la connexion
+			const newConnection = await Connection.create({
+				user1: request.sender,
+				user2: request.recipient,
+				status: "accepted",
+			});
+			console.log("Nouvelle connexion créée lors de l'acceptation:", newConnection);
+		}
 
 		// Supprimer la demande
 		await request.deleteOne();
-
 		console.log("Demande de connexion supprimée:", request._id);
 
 		// Créer une notification pour l'expéditeur

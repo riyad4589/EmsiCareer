@@ -60,7 +60,7 @@ const PostList = ({ posts }) => {
 		}));
 	};
 
-	if (!posts?.data || posts.data.length === 0) {
+	if (!posts || posts.length === 0) {
 		return (
 			<div className="text-center py-8">
 				<p className="text-gray-600">Aucun post pour le moment</p>
@@ -68,8 +68,7 @@ const PostList = ({ posts }) => {
 		);
 	}
 
-	
-	const validPosts = posts.data.filter(post => post.author && post.author.name);
+	const validPosts = posts.filter(post => post.author && post.author.name);
 
 	return (
 		<div className="space-y-6">

@@ -47,6 +47,7 @@ const OffresPage = () => {
     const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
     const [loadingApplications, setLoadingApplications] = useState(false);
     const [applicationsError, setApplicationsError] = useState("");
+    const [imageError, setImageError] = useState(null);
 
     // Fonction pour forcer le téléchargement depuis Cloudinary
     const downloadFile = async (url, filename) => {
@@ -348,6 +349,7 @@ const OffresPage = () => {
         setApplications([]);
     };
 
+    console.log('OFFRES RECUES:', offres);
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -469,73 +471,100 @@ const OffresPage = () => {
                 <div className="space-y-6">
                     <div className="flex flex-col gap-6">
                         {offres && offres.length > 0 ? (
-                            offres.map((offre) => (
-                                <div key={offre._id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transform hover:-translate-y-1 transition-transform duration-300">
-                                {offre.medias?.length > 0 ? (
-                                offre.medias[0].includes(".mp4") || offre.medias[0].includes("video") ? (
-                                    <video
-                                    src={offre.medias[0]}
-                                    controls
-                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover"
-                                    />
-                                ) : (
-                                    <img
-                                    src={offre.medias[0]}
-                                    alt={offre.titre}
-                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover"
-                                    />
-                                )
-                                ) : (
-                                <img
-                                    src="/placeholder-offre.png"
-                                    alt="Image indisponible"
-                                    className="w-full sm:w-48 h-48 sm:h-auto object-cover opacity-40"
-                                />
-                                )}
-                                    <div className="p-5 flex flex-col justify-between flex-grow">
-                                        <div>
-                                            <h3 className="font-bold text-xl mb-2 text-gray-800">{offre.titre}</h3>
-                                            <p className="text-gray-600 text-sm mb-1 flex items-center gap-2"><Briefcase size={14}/> {offre.typeContrat}</p>
-                                            <p className="text-gray-600 text-sm mb-1 flex items-center gap-2"><MapPin size={14}/> {offre.localisation}</p>
-                                            <p className="text-gray-500 text-xs mb-3">Expire le: {new Date(offre.dateExpiration).toLocaleDateString()}</p>
-                                            
-                                            <div className="mb-3">
-                                                <p className="font-semibold text-sm">Compétences :</p>
+                            <div className="flex flex-col gap-6">
+                                {offres.map((offre) => (
+                                    <div
+                                        key={offre._id}
+                                        className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col items-stretch transform hover:-translate-y-1 transition-transform duration-300 w-full max-w-3xl mx-auto"
+                                    >
+                                        {/* Affichage du média principal sans fond gris */}
+                                        <div className="w-full flex items-center justify-center overflow-hidden" style={{ minHeight: '200px' }}>
+                                            {offre.medias?.length > 0 ? (
+                                                offre.medias[0].includes('.mp4') || offre.medias[0].includes('video') ? (
+                                                    <video
+                                                        src={offre.medias[0]}
+                                                        controls
+                                                        className="max-w-full max-h-[400px] object-contain"
+                                                        style={{ width: '100%', height: 'auto' }}
+                                                    />
+                                                ) : (
+                                                    <img
+                                                        src={offre.medias[0]}
+                                                        alt={offre.titre}
+                                                        className="max-w-full max-h-[400px] object-contain"
+                                                        style={{ width: '100%', height: 'auto' }}
+                                                    />
+                                                )
+                                            ) : (
+                                                <img
+                                                    src="/placeholder-offre.png"
+                                                    alt="Image indisponible"
+                                                    className="max-w-full max-h-[400px] object-contain opacity-40"
+                                                    style={{ width: '100%', height: 'auto' }}
+                                                />
+                                            )}
+                                        </div>
+                                        {/* Bloc d'informations détaillées sous la photo */}
+                                        <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
+                                            <h3 className="font-bold text-xl mb-1 text-gray-800">{offre.titre}</h3>
+                                            <p className="text-gray-700 mb-1">
+                                                <span className="font-semibold">Description :</span> {offre.description}
+                                            </p>
+                                            <div className="flex flex-wrap gap-4 mb-1">
+                                                <span className="flex items-center gap-1 text-sm text-gray-600">
+                                                    <Briefcase size={14} /> {offre.typeContrat}
+                                                </span>
+                                                <span className="flex items-center gap-1 text-sm text-gray-600">
+                                                    <MapPin size={14} /> {offre.localisation}
+                                                </span>
+                                                <span className="flex items-center gap-1 text-sm text-gray-600">
+                                                    <Calendar size={14} /> Expire le : {new Date(offre.dateExpiration).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <div className="mb-1">
+                                                <span className="font-semibold text-sm">Compétences :</span>
                                                 <div className="flex flex-wrap gap-2 mt-1">
                                                     {offre.competencesRequises?.map((comp, idx) => (
-                                                        <span key={idx} className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{comp}</span>
+                                                        <span
+                                                            key={idx}
+                                                            className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                                                        >
+                                                            {comp}
+                                                        </span>
                                                     ))}
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="mt-4 flex justify-between items-center">
-                                            <button
-                                                onClick={() => openApplicationsModal(offre)}
-                                                className="text-sm bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
-                                            >
-                                                <Users size={16} /> Voir les candidatures ({offre.candidatures?.length || 0})
-                                            </button>
-                                            <div className="flex gap-2">
+                                        {/* Actions */}
+                                        <div className="p-5 flex flex-col justify-between flex-grow">
+                                            <div className="mt-4 flex justify-between items-center">
                                                 <button
-                                                    onClick={() => openEditModal(offre)}
-                                                    className="p-2 text-gray-500 hover:text-green-600 transition-colors"
-                                                    aria-label="Modifier l'offre"
+                                                    onClick={() => openApplicationsModal(offre)}
+                                                    className="text-sm bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
                                                 >
-                                                    <Edit size={20} />
+                                                    <Users size={16} /> Voir les candidatures ({offre.candidatures?.length || 0})
                                                 </button>
-                                                <button
-                                                    onClick={() => handleDeleteOffer(offre._id, offre.titre)}
-                                                    className="p-2 text-gray-500 hover:text-red-600 transition-colors"
-                                                    aria-label="Supprimer l'offre"
-                                                >
-                                                    <Trash2 size={20} />
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(offre)}
+                                                        className="p-2 text-gray-500 hover:text-green-600 transition-colors"
+                                                        aria-label="Modifier l'offre"
+                                                    >
+                                                        <Edit size={20} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteOffer(offre._id, offre.titre)}
+                                                        className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                                                        aria-label="Supprimer l'offre"
+                                                    >
+                                                        <Trash2 size={20} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                            </div>
                         ) : (
                             <div className="text-center py-10">
                                 <p className="text-gray-500">Vous n'avez pas encore créé d'offres.</p>
@@ -670,6 +699,117 @@ const OffresPage = () => {
                                     onChange={(e) => setEditingOffer({ ...editingOffer, competencesRequises: e.target.value.split(',').map(s => s.trim()) })}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Photo ou vidéo de l'offre <span className="text-xs text-gray-400">(1536x1024px recommandé)</span></label>
+                                {imageError && (
+                                    <div className="text-red-600 text-xs mb-1">L'image doit être exactement 1536x1024 pixels.</div>
+                                )}
+                                {(editingOffer.medias && editingOffer.medias.length > 0) || editMediaPreview ? (
+                                    <div className="mb-2 flex flex-col items-start gap-2">
+                                        <div className="relative" style={{ width: '1536px', height: '1024px', maxWidth: '100%' }}>
+                                            {editMediaPreview ? (
+                                                editMediaFile && editMediaFile.type.startsWith('video') ? (
+                                                    <video src={editMediaPreview} controls className="object-contain rounded shadow w-full h-full bg-white" style={{ width: '1536px', height: '1024px', maxWidth: '100%' }} />
+                                                ) : (
+                                                    <img src={editMediaPreview} alt="Nouveau média" className="object-contain rounded shadow w-full h-full bg-white" style={{ width: '1536px', height: '1024px', maxWidth: '100%' }} />
+                                                )
+                                            ) : (
+                                                editingOffer.medias[0].includes('.mp4') || editingOffer.medias[0].includes('video') ? (
+                                                    <video src={editingOffer.medias[0]} controls className="object-contain rounded shadow w-full h-full bg-white" style={{ width: '1536px', height: '1024px', maxWidth: '100%' }} />
+                                                ) : (
+                                                    <img src={editingOffer.medias[0]} alt="Aperçu" className="object-contain rounded shadow w-full h-full bg-white" style={{ width: '1536px', height: '1024px', maxWidth: '100%' }} />
+                                                )
+                                            )}
+                                            {/* Bouton de suppression */}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingOffer({ ...editingOffer, medias: [] });
+                                                    setEditMediaFile(null);
+                                                    setEditMediaPreview(null);
+                                                    setImageError(null);
+                                                }}
+                                                className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700"
+                                                title="Supprimer le média"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                        <label className="inline-block cursor-pointer text-green-700 hover:underline text-sm font-medium">
+                                            Changer la photo/vidéo
+                                            <input
+                                                type="file"
+                                                accept="image/*,video/*"
+                                                onChange={async e => {
+                                                    const file = e.target.files[0];
+                                                    if (file && file.type.startsWith('image')) {
+                                                        const img = new window.Image();
+                                                        const url = URL.createObjectURL(file);
+                                                        img.src = url;
+                                                        await new Promise(resolve => { img.onload = resolve; });
+                                                        if (img.width !== 1536 || img.height !== 1024) {
+                                                            setImageError("L'image doit être exactement 1536x1024 pixels.");
+                                                            setEditMediaFile(null);
+                                                            setEditMediaPreview(null);
+                                                            setEditingOffer({ ...editingOffer, medias: [] });
+                                                            return;
+                                                        } else {
+                                                            setImageError(null);
+                                                        }
+                                                        setEditMediaFile(file);
+                                                        setEditMediaPreview(url);
+                                                        setEditingOffer({ ...editingOffer, medias: [url] });
+                                                    } else if (file && file.type.startsWith('video')) {
+                                                        setImageError(null);
+                                                        const url = URL.createObjectURL(file);
+                                                        setEditMediaFile(file);
+                                                        setEditMediaPreview(url);
+                                                        setEditingOffer({ ...editingOffer, medias: [url] });
+                                                    }
+                                                }}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+                                ) : (
+                                    <label className="inline-block cursor-pointer text-green-700 hover:underline text-sm font-medium">
+                                        Ajouter une photo/vidéo
+                                        <input
+                                            type="file"
+                                            accept="image/*,video/*"
+                                            onChange={async e => {
+                                                const file = e.target.files[0];
+                                                if (file && file.type.startsWith('image')) {
+                                                    const img = new window.Image();
+                                                    const url = URL.createObjectURL(file);
+                                                    img.src = url;
+                                                    await new Promise(resolve => { img.onload = resolve; });
+                                                    if (img.width !== 1536 || img.height !== 1024) {
+                                                        setImageError("L'image doit être exactement 1536x1024 pixels.");
+                                                        setEditMediaFile(null);
+                                                        setEditMediaPreview(null);
+                                                        setEditingOffer({ ...editingOffer, medias: [] });
+                                                        return;
+                                                    } else {
+                                                        setImageError(null);
+                                                    }
+                                                    setEditMediaFile(file);
+                                                    setEditMediaPreview(url);
+                                                    setEditingOffer({ ...editingOffer, medias: [url] });
+                                                } else if (file && file.type.startsWith('video')) {
+                                                    setImageError(null);
+                                                    const url = URL.createObjectURL(file);
+                                                    setEditMediaFile(file);
+                                                    setEditMediaPreview(url);
+                                                    setEditingOffer({ ...editingOffer, medias: [url] });
+                                                }
+                                            }}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-4 pt-4">

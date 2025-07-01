@@ -148,7 +148,12 @@ const NetworkPage = () => {
 
 	const connections = connectionsData || [];
 	const suggestions = suggestionsData?.data || [];
-	const connectionRequests = connectionRequestsData?.data || [];
+	const connectionRequests = Array.isArray(connectionRequestsData?.data?.data)
+		? connectionRequestsData.data.data
+		: [];
+	console.log("connectionRequestsData", connectionRequestsData);
+	console.log("connectionRequests", connectionRequests);
+	console.log("connections", connections);
 
 	const handleConnect = (userId) => {
 		connectMutation.mutate(userId);
@@ -164,12 +169,14 @@ const NetworkPage = () => {
 		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				{/* Demandes de connexion */}
-				{connectionRequests.length > 0 && (
-					<div className="lg:col-span-2">
-						<h2 className="text-2xl font-bold mb-6">Demandes de connexion</h2>
-						<div className="bg-white rounded-lg shadow p-6">
-							<div className="space-y-4">
-								{connectionRequests.map((request) => (
+				<div className="lg:col-span-2">
+					<h2 className="text-2xl font-bold mb-6">Demandes de connexion</h2>
+					<div className="bg-white rounded-lg shadow p-6">
+						<div className="space-y-4">
+							{connectionRequests.length === 0 ? (
+								<div className="text-center text-gray-500">Aucune demande de connexion à afficher</div>
+							) : (
+								connectionRequests.map((request) => (
 									<div
 										key={request._id}
 										className="flex items-center justify-between p-4 border rounded-lg"
@@ -224,22 +231,22 @@ const NetworkPage = () => {
 											</button>
 										</div>
 									</div>
-								))}
-							</div>
+								))
+							)}
 						</div>
 					</div>
-				)}
+				</div>
 
 				{/* Connexions */}
 				<div className="lg:col-span-2">
-					<h2 className="text-2xl font-bold mb-6">Mes connexions</h2>
+					<h2 className="text-2xl font-bold mb-6">Mes connexions ({connections.length})</h2>
 					<div className="bg-white rounded-lg shadow p-6">
 						{connectionsLoading ? (
 							<div className="flex items-center justify-center p-8">
 								<Spinner />
 							</div>
 						) : connections.length === 0 ? (
-							<p className="text-center text-gray-500">Aucune connexion pour le moment</p>
+							<p className="text-center text-gray-500 font-semibold text-lg">Vous n'avez aucune connexion pour le moment.<br/>Acceptez des demandes ou connectez-vous avec d'autres utilisateurs pour les voir ici.</p>
 						) : (
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{connections.map((connection) => (
