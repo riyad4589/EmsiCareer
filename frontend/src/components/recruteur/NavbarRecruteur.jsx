@@ -32,7 +32,7 @@ const NavbarRecruteur = () => {
                     <div className="flex items-center">
                         <Link to="/RecruteurDashboard" className="flex-shrink-0">
                             <img
-                                src="/logo-emsi.png"
+                                src="/logo_emsi.png"
                                 alt="Portail EMSI"
                                 className="h-14 max-h-16 w-auto object-contain"
                             />
