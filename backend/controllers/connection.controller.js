@@ -6,121 +6,99 @@ import Connection from "../models/connection.model.js";
 export const sendConnectionRequest = async (req, res) => {
 	try {
 		const { userId } = req.params;
-		console.log("=== DÉBUT sendConnectionRequest ===");
-		console.log("Tentative d'envoi de demande de connexion:", {
-			sender: req.user._id,
-			recipient: userId,
-			senderName: req.user.name
-		});
+		const senderId = req.user._id.toString();
 
-		// Vérifier si l'utilisateur existe
+		console.log("=== 📤 Envoi de demande de connexion ===");
+		console.log("Demande de :", senderId, " → ", userId);
+
+		// 1. Vérifier que le destinataire existe
 		const recipient = await User.findById(userId);
 		if (!recipient) {
-			console.error("❌ Destinataire non trouvé:", userId);
 			return res.status(404).json({
 				success: false,
-				message: "Utilisateur non trouvé",
+				message: "Utilisateur destinataire introuvable",
 			});
 		}
-		console.log("✅ Destinataire trouvé:", recipient.name);
 
-		// Vérifier si l'utilisateur ne s'envoie pas une demande à lui-même
-		if (req.user._id.toString() === userId) {
-			console.error("❌ Tentative d'envoi de demande à soi-même");
+		// 2. Interdire l’auto-demande
+		if (senderId === userId) {
 			return res.status(400).json({
 				success: false,
-				message: "Vous ne pouvez pas vous envoyer une demande de connexion",
+				message: "Vous ne pouvez pas vous connecter avec vous-même",
 			});
 		}
 
-		// Vérifier si une connexion existe déjà
+		// 3. Vérifier si une connexion acceptée existe déjà
 		const existingConnection = await Connection.findOne({
 			$or: [
-				{ user1: req.user._id, user2: userId },
-				{ user1: userId, user2: req.user._id },
+				{ user1: senderId, user2: userId },
+				{ user1: userId, user2: senderId },
 			],
 			status: "accepted",
 		});
 
 		if (existingConnection) {
-			console.error("❌ Connexion déjà existante");
 			return res.status(400).json({
 				success: false,
-				message: "Vous êtes déjà connecté avec cet utilisateur",
+				message: "Vous êtes déjà connecté à cet utilisateur",
 			});
 		}
-		console.log("✅ Aucune connexion existante trouvée");
 
-		// Vérifier si une demande en attente existe déjà
+		// // 4. Vérifier s'il existe une demande en attente entre ces deux utilisateurs
 		const existingRequest = await ConnectionRequest.findOne({
-			$or: [
-				{ sender: req.user._id, recipient: userId },
-				{ sender: userId, recipient: req.user._id },
-			],
-			status: "pending",
-		});
+		 	$or: [
+		 		{ sender: senderId, recipient: userId },
+		 		{ sender: userId, recipient: senderId },
+		 	],
+		 	status: "pending",
+		 });
 
-		if (existingRequest) {
-			console.error("❌ Demande en attente déjà existante");
-			return res.status(400).json({
-				success: false,
-				message: "Une demande de connexion est déjà en attente",
+		 if (existingRequest) {
+		 	return res.status(400).json({
+		 		success: false,
+				message: "Une demande de connexion est déjà en attente entre vous deux",
 			});
-		}
-		console.log("✅ Aucune demande en attente trouvée");
+		 }
 
-		// Créer la demande de connexion
-		console.log("🔄 Création de la demande de connexion...");
+		// 5. Créer la demande de connexion
 		const connectionRequest = await ConnectionRequest.create({
-			sender: req.user._id,
+			sender: senderId,
 			recipient: userId,
 			status: "pending",
 		});
 
-		console.log("✅ Demande de connexion créée avec succès:", {
-			id: connectionRequest._id,
-			sender: connectionRequest.sender,
-			recipient: connectionRequest.recipient,
-			status: connectionRequest.status
-		});
-
-		// Créer une notification pour le destinataire
-		console.log("🔄 Création de la notification...");
+		// 6. Créer une notification
 		await Notification.create({
-			sender: req.user._id,
+			sender: senderId,
 			recipient: userId,
 			type: "connection_request",
 			message: `${req.user.name} vous a envoyé une demande de connexion`,
 		});
 
-		console.log("✅ Notification créée pour la demande de connexion");
-		console.log("=== FIN sendConnectionRequest - SUCCÈS ===");
+		console.log("✅ Demande et notification enregistrées");
 
-		res.json({
+		return res.status(201).json({
 			success: true,
 			message: "Demande de connexion envoyée",
 			data: connectionRequest,
 		});
 	} catch (error) {
-		console.error("❌ ERREUR dans sendConnectionRequest:", {
-			error: error.message,
-			stack: error.stack,
-			userId: req.params.userId,
-			senderId: req.user._id
-		});
-		res.status(500).json({
+		console.error("❌ ERREUR dans sendConnectionRequest:", error);
+		return res.status(500).json({
 			success: false,
-			message: "Erreur lors de l'envoi de la demande de connexion",
+			message: "Erreur interne lors de la demande de connexion",
 			details: error.message,
 		});
 	}
 };
 
+
 export const acceptConnectionRequest = async (req, res) => {
 	try {
 		const requestId = req.params.requestId;
-		const userId = req.user._id;
+		const userId = req.user._id.toString();
 
+		// 1. Trouver la demande
 		const request = await ConnectionRequest.findById(requestId);
 		if (!request) {
 			return res.status(404).json({
@@ -129,179 +107,213 @@ export const acceptConnectionRequest = async (req, res) => {
 			});
 		}
 
-		if (request.recipient.toString() !== userId.toString()) {
+		// 2. Vérifier l’autorisation
+		if (request.recipient.toString() !== userId) {
 			return res.status(403).json({
 				success: false,
-				message: "Non autorisé à accepter cette demande",
+				message: "Vous n'êtes pas autorisé à accepter cette demande",
 			});
 		}
 
-		// Vérifier si la connexion existe déjà
+		const senderId = request.sender.toString();
+		let created = false;
+
+		// 3. Vérifier si la connexion existe déjà
 		const existingConnection = await Connection.findOne({
 			$or: [
-				{ user1: request.sender, user2: request.recipient },
-				{ user1: request.recipient, user2: request.sender },
+				{ user1: senderId, user2: userId },
+				{ user1: userId, user2: senderId },
 			],
 			status: "accepted",
 		});
 
-		if (existingConnection) {
-			console.log("Connexion déjà existante lors de l'acceptation de la demande.");
-		} else {
-			// Créer la connexion
-			const newConnection = await Connection.create({
-				user1: request.sender,
-				user2: request.recipient,
+		if (!existingConnection) {
+			// 4. Créer la connexion
+			await Connection.create({
+				user1: senderId,
+				user2: userId,
 				status: "accepted",
 			});
-			console.log("Nouvelle connexion créée lors de l'acceptation:", newConnection);
+			created = true;
+			console.log("✅ Connexion créée entre", senderId, "et", userId);
+		} else {
+			console.log("ℹ️ Connexion déjà existante");
 		}
 
-		// Supprimer la demande
+		// 5. Supprimer la demande acceptée
 		await request.deleteOne();
-		console.log("Demande de connexion supprimée:", request._id);
+		console.log("🗑️ Demande supprimée :", request._id);
 
-		// Créer une notification pour l'expéditeur
-		await Notification.create({
-			recipient: request.sender,
+		// 6. Supprimer toute autre demande miroir (inverse)
+		await ConnectionRequest.deleteMany({
 			sender: userId,
+			recipient: senderId,
+			status: "pending"
+		});
+
+		// 7. Notification à l'expéditeur
+		await Notification.create({
+			sender: userId,
+			recipient: senderId,
 			type: "connection_accepted",
 			message: `${req.user.name} a accepté votre demande de connexion`,
 		});
 
-		res.status(200).json({
+		// 8. Réponse
+		return res.status(200).json({
 			success: true,
-			message: "Demande de connexion acceptée",
+			message: created
+				? "Connexion acceptée avec succès"
+				: "Connexion déjà existante, mais la demande a été nettoyée",
 		});
 	} catch (error) {
-		console.error("Erreur lors de l'acceptation de la demande:", error);
-		res.status(500).json({
+		console.error("❌ Erreur dans acceptConnectionRequest:", error);
+		return res.status(500).json({
 			success: false,
-			message: error.message,
+			message: "Erreur lors de l'acceptation de la demande",
+			error: error.message
 		});
 	}
 };
 
+
 export const rejectConnectionRequest = async (req, res) => {
 	try {
 		const { requestId } = req.params;
-		console.log("Tentative de rejet de la demande:", requestId);
+		const userId = req.user._id.toString();
 
+		console.log("📛 Rejet de la demande de connexion:", requestId);
+
+		// 1. Trouver la demande
 		const request = await ConnectionRequest.findById(requestId);
 		if (!request) {
-			console.error("Demande non trouvée:", requestId);
 			return res.status(404).json({
 				success: false,
 				message: "Demande de connexion non trouvée",
 			});
 		}
 
-		if (request.recipient.toString() !== req.user._id.toString()) {
-			console.error("Non autorisé à rejeter cette demande");
+		// 2. Vérifier l’autorisation
+		if (request.recipient.toString() !== userId) {
 			return res.status(403).json({
 				success: false,
-				message: "Non autorisé à rejeter cette demande",
+				message: "Vous n'êtes pas autorisé à rejeter cette demande",
 			});
 		}
 
+		// 3. Vérifier que la demande est encore valide
 		if (request.status !== "pending") {
-			console.error("La demande n'est plus en attente");
 			return res.status(400).json({
 				success: false,
-				message: "Cette demande n'est plus en attente",
+				message: "Cette demande n'est plus active",
 			});
 		}
 
-		// Mettre à jour le statut de la demande
-		request.status = "rejected";
-		await request.save();
+		// 4. Supprimer la demande rejetée
+		await request.deleteOne();
 
-		// Créer une notification pour l'expéditeur
+		// 5. Supprimer notification de type "connection_request" si existante
+		await Notification.deleteMany({
+			sender: request.sender,
+			recipient: userId,
+			type: "connection_request"
+		});
+
+		// 6. Créer une nouvelle notification de rejet
 		await Notification.create({
-			sender: req.user._id,
+			sender: userId,
 			recipient: request.sender,
 			type: "connection_rejected",
 			message: `${req.user.name} a rejeté votre demande de connexion`,
 		});
 
-		res.json({
+		return res.json({
 			success: true,
-			message: "Demande de connexion rejetée",
+			message: "Demande de connexion rejetée avec succès",
 		});
 	} catch (error) {
-		console.error("Erreur détaillée lors du rejet:", {
-			error: error.message,
-			stack: error.stack,
-		});
-		res.status(500).json({
+		console.error("❌ Erreur dans rejectConnectionRequest:", error);
+		return res.status(500).json({
 			success: false,
-			message: "Erreur lors du rejet de la demande",
+			message: "Erreur interne lors du rejet de la demande",
 			details: error.message,
 		});
 	}
 };
 
+
 export const getConnectionRequests = async (req, res) => {
 	try {
-		const requests = await ConnectionRequest.find({
-			recipient: req.user._id,
-			status: "pending",
-		})
-			.populate("sender", "name profilePicture headline")
-			.sort({ createdAt: -1 });
+		const userId = req.user._id;
 
-		res.json({
+		console.log("📥 Récupération des demandes de connexion pour :", userId);
+
+		const requests = await ConnectionRequest.find({
+			recipient: userId,
+			status: "pending"
+		})
+		.populate("sender", "name profilePicture headline")
+		.sort({ createdAt: -1 });
+
+		console.log(`✅ ${requests.length} demande(s) trouvée(s)`);
+
+		res.status(200).json({
 			success: true,
-			data: requests,
+			message: "Demandes de connexion récupérées avec succès",
+			data: requests
 		});
 	} catch (error) {
-		console.error("Erreur lors de la récupération des demandes:", error);
+		console.error("❌ Erreur lors de la récupération des demandes:", error);
 		res.status(500).json({
 			success: false,
 			message: "Erreur lors de la récupération des demandes de connexion",
+			details: error.message
 		});
 	}
 };
 
+
 export const getUserConnections = async (req, res) => {
 	try {
-		const userId = req.user._id;
+		const userId = req.user._id.toString();
+		console.log("🔗 Récupération des connexions pour :", userId);
 
-		// Trouver toutes les connexions acceptées de l'utilisateur
+		// 1. Récupérer toutes les connexions acceptées liées à l'utilisateur
 		const connections = await Connection.find({
 			$or: [
 				{ user1: userId, status: "accepted" },
 				{ user2: userId, status: "accepted" }
 			]
 		})
-		.populate({
-			path: 'user1 user2',
-			select: 'name username profilePicture headline',
-			lean: true
-		})
+		.populate("user1", "name username profilePicture headline")
+		.populate("user2", "name username profilePicture headline")
 		.lean();
 
-		// Transformer les connexions en liste d'utilisateurs connectés
+		console.log(`✅ ${connections.length} connexion(s) trouvée(s)`);
+
+		// 2. Extraire l’autre utilisateur de chaque relation
 		const connectedUsers = connections.map(connection => {
-			const connectedUser = connection.user1._id.toString() === userId.toString()
-				? connection.user2
-				: connection.user1;
+			const isUser1 = connection.user1._id.toString() === userId;
+			const other = isUser1 ? connection.user2 : connection.user1;
+
 			return {
-				_id: connectedUser._id,
-				name: connectedUser.name,
-				username: connectedUser.username,
-				profilePicture: connectedUser.profilePicture,
-				headline: connectedUser.headline
+				_id: other._id,
+				name: other.name,
+				username: other.username,
+				profilePicture: other.profilePicture,
+				headline: other.headline
 			};
 		});
 
-		res.json({
+		return res.status(200).json({
 			success: true,
+			message: "Connexions récupérées avec succès",
+			total: connectedUsers.length,
 			data: connectedUsers
 		});
 	} catch (error) {
-		console.error("Error in getUserConnections controller:", error);
-		res.status(500).json({ 
+		console.error("❌ Erreur dans getUserConnections:", error);
+		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la récupération des connexions",
 			error: error.message
@@ -309,51 +321,35 @@ export const getUserConnections = async (req, res) => {
 	}
 };
 
+
 export const removeConnection = async (req, res) => {
 	try {
-		const myId = req.user._id;
+		const myId = req.user._id.toString();
 		const { userId } = req.params;
 
-		console.log("Tentative de suppression de la connexion:", {
-			user1: myId,
-			user2: userId
-		});
+		console.log("🔁 Suppression de connexion entre", myId, "et", userId);
 
-		// Vérifier si les utilisateurs existent
-		const [user1, user2] = await Promise.all([
-			User.findById(myId),
-			User.findById(userId)
-		]);
-
-		if (!user1 || !user2) {
-			console.error("Un des utilisateurs n'existe pas");
-			return res.status(404).json({
-				success: false,
-				message: "Utilisateur non trouvé"
-			});
-		}
-
-		// Vérifier si une connexion existe dans la collection Connection
+		// 1. Vérifier si une connexion existe
 		const connection = await Connection.findOne({
 			$or: [
 				{ user1: myId, user2: userId },
 				{ user1: userId, user2: myId }
 			]
-		});
+		}).lean();
 
 		if (!connection) {
-			console.log("Aucune connexion trouvée");
+			console.warn("⚠️ Aucune connexion existante entre les deux utilisateurs");
 			return res.status(404).json({
 				success: false,
 				message: "Aucune connexion trouvée entre ces utilisateurs"
 			});
 		}
 
-		// Supprimer la connexion
+		// 2. Supprimer la connexion
 		await Connection.deleteOne({ _id: connection._id });
-		console.log("Connexion supprimée de la collection Connection");
+		console.log("✅ Connexion supprimée :", connection._id);
 
-		// Créer une notification pour l'autre utilisateur
+		// 3. Créer une notification pour l'autre utilisateur
 		await Notification.create({
 			sender: myId,
 			recipient: userId,
@@ -361,19 +357,12 @@ export const removeConnection = async (req, res) => {
 			message: `${req.user.name} a supprimé la connexion avec vous`,
 		});
 
-		console.log("Connexion supprimée avec succès");
-
 		return res.json({
 			success: true,
 			message: "Connexion supprimée avec succès"
 		});
 	} catch (error) {
-		console.error("Erreur détaillée lors de la suppression de la connexion:", {
-			error: error.message,
-			stack: error.stack,
-			userId: req.params.userId,
-			myId: req.user._id
-		});
+		console.error("❌ Erreur lors de la suppression de la connexion :", error);
 		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la suppression de la connexion",
@@ -382,39 +371,46 @@ export const removeConnection = async (req, res) => {
 	}
 };
 
+
 export const getConnectionStatus = async (req, res) => {
 	try {
-		const userId = req.params.userId;
-		console.log("Vérification du statut de connexion entre:", {
-			user1: req.user._id,
-			user2: userId
+		const currentUserId = req.user._id.toString();
+		const otherUserId = req.params.userId.toString();
+
+		console.log("🔍 Vérification du statut de connexion :", {
+			currentUserId,
+			otherUserId
 		});
 
+		// Chercher une connexion acceptée
 		const connection = await Connection.findOne({
 			$or: [
-				{ user1: req.user._id, user2: userId },
-				{ user1: userId, user2: req.user._id }
+				{ user1: currentUserId, user2: otherUserId },
+				{ user1: otherUserId, user2: currentUserId }
 			],
 			status: "accepted"
-		});
-
-		console.log("Résultat de la vérification:", connection);
+		}).lean();
 
 		if (!connection) {
-			return res.json({
+			console.log("❌ Aucune connexion trouvée");
+			return res.status(200).json({
 				success: true,
-				status: "not_connected"
+				status: "not_connected",
+				message: "Aucune connexion n'existe entre ces deux utilisateurs"
 			});
 		}
 
-		res.json({
+		console.log("✅ Connexion trouvée :", connection._id);
+
+		return res.status(200).json({
 			success: true,
 			status: "accepted",
+			message: "Les utilisateurs sont connectés",
 			connection
 		});
 	} catch (error) {
-		console.error("Erreur lors de la vérification du statut:", error);
-		res.status(500).json({
+		console.error("❌ Erreur dans getConnectionStatus :", error);
+		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la vérification du statut de connexion",
 			error: error.message
@@ -422,31 +418,30 @@ export const getConnectionStatus = async (req, res) => {
 	}
 };
 
+
 export const getFriends = async (req, res) => {
 	try {
-		console.log("Récupération des amis pour l'utilisateur:", req.user._id);
+		const userId = req.user._id.toString();
+		console.log("📥 Récupération des amis pour :", userId);
 
-		// Trouver toutes les connexions acceptées avec une seule requête
+		// Requête pour les connexions acceptées
 		const connections = await Connection.find({
 			$or: [
-				{ user1: req.user._id, status: "accepted" },
-				{ user2: req.user._id, status: "accepted" }
+				{ user1: userId, status: "accepted" },
+				{ user2: userId, status: "accepted" }
 			]
 		})
-		.populate({
-			path: 'user1 user2',
-			select: 'name username profilePicture headline',
-			lean: true // Utiliser lean() pour obtenir des objets JavaScript simples au lieu de documents Mongoose
-		})
-		.lean(); // Utiliser lean() pour la requête principale aussi
+		.populate("user1", "name username profilePicture headline")
+		.populate("user2", "name username profilePicture headline")
+		.lean(); // lean global uniquement après populate
 
-		console.log("Connexions trouvées:", connections.length);
+		console.log(`🔗 ${connections.length} connexion(s) acceptée(s) trouvée(s)`);
 
-		// Transformer les connexions en liste d'amis
-		const friends = connections.map(connection => {
-			const friend = connection.user1._id.toString() === req.user._id.toString()
-				? connection.user2
-				: connection.user1;
+		// Identifier l'ami dans chaque relation
+		const friends = connections.map(conn => {
+			const isUser1 = conn.user1._id.toString() === userId;
+			const friend = isUser1 ? conn.user2 : conn.user1;
+
 			return {
 				_id: friend._id,
 				name: friend.name,
@@ -456,15 +451,16 @@ export const getFriends = async (req, res) => {
 			};
 		});
 
-		console.log("Amis trouvés:", friends.length);
+		console.log(`👥 ${friends.length} ami(s) trouvé(s)`);
 
-		res.json({
+		return res.status(200).json({
 			success: true,
+			message: "Liste des amis récupérée avec succès",
 			data: friends
 		});
 	} catch (error) {
-		console.error("Erreur lors de la récupération des amis:", error);
-		res.status(500).json({ 
+		console.error("❌ Erreur dans getFriends:", error);
+		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la récupération des amis",
 			error: error.message
@@ -472,33 +468,46 @@ export const getFriends = async (req, res) => {
 	}
 };
 
-// Vérifier la connexion avec un utilisateur
 export const checkConnection = async (req, res) => {
 	try {
-		const { userId } = req.params;
-		console.log("Vérification de la connexion entre:", {
-			user1: req.user._id,
-			user2: userId
+		const currentUserId = req.user._id.toString();
+		const otherUserId = req.params.userId.toString();
+
+		console.log("🔍 Vérification de la connexion entre :", {
+			user1: currentUserId,
+			user2: otherUserId
 		});
 
+		// Chercher la connexion dans les deux sens
 		const connection = await Connection.findOne({
 			$or: [
-				{ user1: req.user._id, user2: userId },
-				{ user1: userId, user2: req.user._id }
+				{ user1: currentUserId, user2: otherUserId },
+				{ user1: otherUserId, user2: currentUserId }
 			]
-		});
+		}).lean();
 
-		console.log("Résultat de la vérification:", connection);
+		if (!connection) {
+			console.log("❌ Pas de connexion trouvée");
+			return res.status(200).json({
+				success: true,
+				exists: false,
+				status: null,
+				message: "Aucune connexion n'existe entre ces utilisateurs"
+			});
+		}
 
-		res.json({
+		console.log("✅ Connexion trouvée avec statut :", connection.status);
+
+		return res.status(200).json({
 			success: true,
-			exists: !!connection,
-			status: connection?.status || null,
-			connection
+			exists: true,
+			status: connection.status,
+			connection,
+			message: `Connexion ${connection.status}`
 		});
 	} catch (error) {
-		console.error("Erreur lors de la vérification de la connexion:", error);
-		res.status(500).json({
+		console.error("❌ Erreur dans checkConnection :", error);
+		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la vérification de la connexion",
 			error: error.message
@@ -506,49 +515,52 @@ export const checkConnection = async (req, res) => {
 	}
 };
 
+
 // Récupérer les connexions d'un utilisateur spécifique (pour l'administration)
 export const getUserConnectionsById = async (req, res) => {
 	try {
-		const { userId } = req.params;
+		const userId = req.params.userId.toString();
 
-		// Trouver toutes les connexions acceptées de l'utilisateur
+		console.log("🔍 Récupération des connexions pour l'utilisateur admin :", userId);
+
 		const connections = await Connection.find({
 			$or: [
 				{ user1: userId, status: "accepted" },
 				{ user2: userId, status: "accepted" }
 			]
 		})
-		.populate({
-			path: 'user1 user2',
-			select: 'name username profilePicture headline',
-			lean: true
-		})
-		.lean();
+		.populate("user1", "name username profilePicture headline")
+		.populate("user2", "name username profilePicture headline")
+		.lean(); // ← placer lean global ici uniquement
 
-		// Transformer les connexions en liste d'utilisateurs connectés
+		console.log(`🔗 ${connections.length} connexion(s) trouvée(s)`);
+
 		const connectedUsers = connections.map(connection => {
-			const connectedUser = connection.user1._id.toString() === userId.toString()
-				? connection.user2
-				: connection.user1;
+			const isUser1 = connection.user1._id.toString() === userId;
+			const user = isUser1 ? connection.user2 : connection.user1;
+
 			return {
-				_id: connectedUser._id,
-				name: connectedUser.name,
-				username: connectedUser.username,
-				profilePicture: connectedUser.profilePicture,
-				headline: connectedUser.headline
+				_id: user._id,
+				name: user.name,
+				username: user.username,
+				profilePicture: user.profilePicture,
+				headline: user.headline
 			};
 		});
 
-		res.json({
+		return res.status(200).json({
 			success: true,
+			message: "Connexions récupérées avec succès",
+			total: connectedUsers.length,
 			data: connectedUsers
 		});
 	} catch (error) {
-		console.error("Error in getUserConnectionsById controller:", error);
-		res.status(500).json({ 
+		console.error("❌ Erreur dans getUserConnectionsById :", error);
+		return res.status(500).json({
 			success: false,
 			message: "Erreur lors de la récupération des connexions",
 			error: error.message
 		});
 	}
 };
+
