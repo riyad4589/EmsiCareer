@@ -190,31 +190,32 @@ const OfferList = ({ offres }) => {
             )}
 
             {/* Media section */}
-            {offre.medias?.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Médias</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {offre.medias.map((mediaUrl, idx) => (
-                    <div key={idx} className="relative group overflow-hidden rounded-xl">
-                      {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                        <video 
-                          src={mediaUrl} 
-                          controls 
-                          className="w-full h-48 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow duration-300" 
-                        />
-                      ) : (
-                        <img 
-                          src={mediaUrl} 
-                          alt="Média de l'offre" 
-                          className="w-full h-48 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105" 
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-xl"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+{offre.medias?.length > 0 && (
+  <div className="mb-6">
+    <h4 className="text-sm font-semibold text-gray-700 mb-3">Médias</h4>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {offre.medias.map((mediaUrl, idx) => (
+        <div key={idx} className="relative group overflow-hidden rounded-xl">
+          {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+            <video 
+              src={mediaUrl} 
+              controls 
+              className="w-full h-64 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow duration-300" 
+            />
+          ) : (
+            <img 
+              src={mediaUrl} 
+              alt="Média de l'offre" 
+  className="w-full aspect-[3/2] object-contain rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105 bg-white"
+            />
+          )}
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-xl"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
 
             {/* Action buttons */}
             <div className="flex items-center justify-between py-4 border-t border-gray-100">

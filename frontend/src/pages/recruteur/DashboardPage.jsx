@@ -53,20 +53,29 @@ const DashboardPage = () => {
             {/* Message de bienvenue et infos entreprise */}
             {profile && (
                 <div className="flex items-center gap-6 mb-8 bg-white rounded-lg shadow p-6">
-                    <img
-                        src={profile.companyLogo || "/logo.png"}
-                        alt={profile.companyName}
-                        className="w-20 h-20 rounded-full object-cover border-2 border-primary"
-                    />
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-1">Bienvenue, <span className="text-primary">{profile.name}</span> !</h2>
-                        <p className="text-gray-700 font-medium">{profile.companyName} <span className="text-gray-400">|</span> {profile.industry}</p>
-                        <div className="flex items-center gap-2 mt-1 text-gray-500">
-                            <MapPin className="w-4 h-4" />
-                            <span>{profile.location}</span>
-                        </div>
-                    </div>
-                </div>
+<div className="w-20 h-20 rounded-full bg-white border border-gray-300 flex items-center justify-center overflow-hidden shadow-sm">
+  <img
+    src={profile.companyLogo || "/default-logo.png"}
+    alt={profile.companyName}
+  className="w-full h-full object-contain p-2"
+  />
+</div>
+
+
+  <div>
+    <h2 className="text-xl font-bold text-gray-900 mb-1">
+      Bienvenue, <span className="text-primary">{profile.name}</span> !
+    </h2>
+    <p className="text-gray-700 font-medium">
+      {profile.companyName} <span className="text-gray-400">|</span> {profile.industry}
+    </p>
+    <div className="flex items-center gap-2 mt-1 text-gray-500">
+      <MapPin className="w-4 h-4" />
+      <span>{profile.location}</span>
+    </div>
+  </div>
+</div>
+
             )}
             <h1 className="text-2xl font-bold text-gray-900 mb-8">Tableau de bord recruteur</h1>
 
