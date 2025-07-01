@@ -184,7 +184,7 @@ export const applyToOffer = async (req, res) => {
     await offer.save();
 
     // ✅ Détermination de l'email du recruteur
-    const recruteurEmail = offer.author.emailPersonelle || offer.author.emailEdu;
+    const recruteurEmail = offer.author.emailPersonelle;
     const recruteurNom = offer.author.name;
 
     // ✅ Envoi du mail de notification
