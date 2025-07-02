@@ -19,15 +19,18 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: ./backend
         run: npm install
 
       - name: Build backend (if applicable)
+        working-directory: ./backend
         run: npm run build --if-present
 
-      - name: Zip backend only (without node_modules or frontend)
-        run: zip -r release.zip . -x "node_modules/*" "frontend/*" ".git/*" "*.gitignore"
-
+      - name: Zip backend folder (sans node_modules)
+        run: |
+          cd backend
+          zip -r ../release.zip . -x "node_modules/*"
 
       - name: Deploy to Azure Web App using Publish Profile
         uses: azure/webapps-deploy@v3
