@@ -1,4 +1,4 @@
-name: Deploy EMSI PFA App (Frontend + Backend)
+name: Deploy Backend (Node.js) to Azure App Service
 
 on:
   push:
@@ -7,42 +7,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      # 3. Install backend dependencies
-      - name: Install backend dependencies
+      - name: Install dependencies
         working-directory: ./backend
         run: npm install
 
-      # 4. Optional: build backend if needed
-      - name: Build backend (if present)
-        working-directory: ./backend
-        run: npm run build --if-present
-
-      # 5. Cleanup nested node_modules
-      - name: Cleanup nested node_modules
-        run: |
-          find . -type d -name "node_modules" -prune -exec rm -rf '{}' +
-
-      # 6. Zip backend for deployment (exclude node_modules & frontend)
       - name: Archive backend for deployment
         run: |
           cd backend
           zip -r ../release.zip . -x "**/node_modules/*" "**/.env" "../frontend/*"
 
-      # 7. Deploy to Azure Web App (App Service)
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
