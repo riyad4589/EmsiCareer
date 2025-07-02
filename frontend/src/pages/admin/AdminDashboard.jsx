@@ -123,7 +123,6 @@ const AdminDashboard = () => {
                         value={totalUsers} 
                         gradient="from-green-500 to-emerald-500"
                         bgGradient="from-green-50 to-emerald-50"
-                        trend="+12%"
                     />
                     <StatCard 
                         icon={<Users className="w-7 h-7" />} 
@@ -131,7 +130,6 @@ const AdminDashboard = () => {
                         value={totalRecruteurs} 
                         gradient="from-emerald-500 to-teal-500"
                         bgGradient="from-emerald-50 to-teal-50"
-                        trend="+8%"
                     />
                     <StatCard 
                         icon={<FileText className="w-7 h-7" />} 
@@ -139,7 +137,6 @@ const AdminDashboard = () => {
                         value={totalPosts} 
                         gradient="from-teal-500 to-cyan-500"
                         bgGradient="from-teal-50 to-cyan-50"
-                        trend="+24%"
                     />
                     <StatCard
                         icon={<Briefcase className="w-7 h-7" />}
@@ -148,7 +145,6 @@ const AdminDashboard = () => {
                         gradient="from-lime-500 to-green-500"
                         bgGradient="from-lime-50 to-green-50"
                         subtext={`Dont ${stats?.totalOffersByRecruiters ?? 0} par des recruteurs`}
-                        trend="+15%"
                     />
                 </section>
 

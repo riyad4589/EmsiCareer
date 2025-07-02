@@ -331,13 +331,22 @@ const OffersManagementPage = () => {
                                     
                                     {/* Auteur */}
                                     <div className="flex items-center gap-2 mb-3">
-                                        <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-                                            <User className="h-4 w-4 text-slate-600" />
-                                        </div>
-                                        <span className="text-slate-600 font-medium text-sm">
-                                            {offre.author?.name || offre.author || 'Auteur non spécifié'}
-                                        </span>
-                                    </div>
+  {offre.author?.companyLogo ? (
+    <img
+      src={offre.author.companyLogo}
+      alt="Logo entreprise"
+      className="w-8 h-8 rounded-full object-cover bg-white"
+    />
+  ) : (
+    <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-sm text-gray-500">
+      ?
+    </div>
+  )}
+  <span className="text-slate-600 font-medium text-sm">
+    {offre.author?.name || "Auteur non spécifié"}
+  </span>
+</div>
+
 
                                     {/* Localisation */}
                                     {offre.localisation && (
