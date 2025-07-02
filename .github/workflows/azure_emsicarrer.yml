@@ -1,4 +1,4 @@
-name: Deploy Node.js backend to Azure Web App - EmsiCarrer
+name: Deploy EMSI PFA App (Frontend + Backend)
 
 on:
   push:
@@ -11,30 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1. Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
+      # 3. Install backend dependencies
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm install
 
-      - name: Build backend (if applicable)
+      # 4. Optional: build backend if needed
+      - name: Build backend (if present)
         working-directory: ./backend
         run: npm run build --if-present
 
+      # 5. Cleanup nested node_modules
       - name: Cleanup nested node_modules
         run: |
           find . -type d -name "node_modules" -prune -exec rm -rf '{}' +
 
-      - name: Zip artifact for deployment
-        run: zip -r ../release.zip . -x "**/node_modules/**" "**/.env" "**/.git/**"
-        
-      - name: Deploy to Azure Web App using Publish Profile
+      # 6. Zip backend for deployment (exclude node_modules & frontend)
+      - name: Archive backend for deployment
+        run: |
+          cd backend
+          zip -r ../release.zip . -x "**/node_modules/*" "**/.env" "../frontend/*"
+
+      # 7. Deploy to Azure Web App (App Service)
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'EmsiCarrer'
