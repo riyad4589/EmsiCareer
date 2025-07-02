@@ -32,8 +32,10 @@ const JobOffersPage = () => {
 	}
 
 	return (
-		<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-			<OfferList offres={offres || []} />
+		<div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+			<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+				<OfferList offres={offres || []} />
+			</div>
 		</div>
 	);
 };

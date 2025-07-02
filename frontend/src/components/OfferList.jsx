@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
-import { Heart, MessageCircle, Send, Briefcase, MapPin, Clock, Users, Star, Upload, FileText, Calendar, Building2, Target, ChevronDown, ChevronUp } from "lucide-react";
+import { Heart, MessageCircle, Send, Briefcase, MapPin, Clock, Users, Star, Upload, FileText, Calendar, Building2, Target, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
 // Helper function to format dates
 const formatDistanceToNow = (date) => {
   const now = new Date();
@@ -28,6 +28,7 @@ const OfferList = ({ offres }) => {
   const [commentContent, setCommentContent] = useState({});
   const [showComments, setShowComments] = useState({});
   const [expandedOffers, setExpandedOffers] = useState({});
+  const [imageModal, setImageModal] = useState({ isOpen: false, currentImage: null, images: [], currentIndex: 0 });
 
   const applyMutation = useMutation({
     mutationFn: async ({ offreId, cvFile, lettreFile }) => {
@@ -76,6 +77,74 @@ const OfferList = ({ offres }) => {
     },
   });
 
+  const openImageModal = (images, currentIndex = 0) => {
+    setImageModal({
+      isOpen: true,
+      currentImage: images[currentIndex],
+      images: images,
+      currentIndex: currentIndex
+    });
+  };
+
+  const closeImageModal = () => {
+    setImageModal({ isOpen: false, currentImage: null, images: [], currentIndex: 0 });
+  };
+
+  const nextImage = () => {
+    const nextIndex = (imageModal.currentIndex + 1) % imageModal.images.length;
+    setImageModal(prev => ({
+      ...prev,
+      currentIndex: nextIndex,
+      currentImage: prev.images[nextIndex]
+    }));
+  };
+
+  const prevImage = () => {
+    const prevIndex = imageModal.currentIndex === 0 ? imageModal.images.length - 1 : imageModal.currentIndex - 1;
+    setImageModal(prev => ({
+      ...prev,
+      currentIndex: prevIndex,
+      currentImage: prev.images[prevIndex]
+    }));
+  };
+
+  const handleKeyDown = (e) => {
+    if (!imageModal.isOpen) return;
+    
+    if (e.key === 'Escape') {
+      closeImageModal();
+    } else if (e.key === 'ArrowRight') {
+      nextImage();
+    } else if (e.key === 'ArrowLeft') {
+      prevImage();
+    }
+  };
+
+  // Gestion des événements clavier
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (!imageModal.isOpen) return;
+      
+      if (e.key === 'Escape') {
+        closeImageModal();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
+    };
+
+    if (imageModal.isOpen) {
+      document.addEventListener('keydown', handleGlobalKeyDown);
+      document.body.style.overflow = 'hidden'; // Empêcher le scroll
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+      document.body.style.overflow = 'unset'; // Restaurer le scroll
+    };
+  }, [imageModal.isOpen]);
+
   if (!offres || offres.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -100,7 +169,7 @@ const OfferList = ({ offres }) => {
       {offres.map((offre, index) => (
         <div
           key={offre._id}
-          className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
+          className="group relative bg-white/80 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100/50"
           style={{
             animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
           }}
@@ -192,24 +261,57 @@ const OfferList = ({ offres }) => {
             {/* Media section */}
 {offre.medias?.length > 0 && (
   <div className="mb-6">
-    <h4 className="text-sm font-semibold text-gray-700 mb-3">Médias</h4>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+      Galerie photos
+    </h4>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {offre.medias.map((mediaUrl, idx) => (
-        <div key={idx} className="relative group overflow-hidden rounded-xl">
+        <div key={idx} className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100">
           {mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-            <video 
-              src={mediaUrl} 
-              controls 
-              className="w-full h-64 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow duration-300" 
-            />
+            <div className="relative">
+              <video 
+                src={mediaUrl} 
+                controls 
+                className="w-full h-48 object-cover rounded-2xl shadow-sm group-hover:shadow-lg transition-all duration-300" 
+              />
+              <div className="absolute top-3 left-3 bg-black bg-opacity-60 text-white px-2 py-1 rounded-full text-xs font-medium">
+                Vidéo
+              </div>
+            </div>
           ) : (
-            <img 
-              src={mediaUrl} 
-              alt="Média de l'offre" 
-  className="w-full aspect-[3/2] object-contain rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105 bg-white"
-            />
+            <div 
+              onClick={() => {
+                const imageUrls = offre.medias.filter(url => !url.match(/\.(mp4|webm|ogg|mov)$/i));
+                openImageModal(imageUrls, imageUrls.indexOf(mediaUrl));
+              }}
+              className="relative cursor-pointer group/image"
+            >
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                <img 
+                  src={mediaUrl} 
+                  alt="Photo de l'offre" 
+                  className="w-full h-full object-cover group-hover/image:scale-110 transition-all duration-500 ease-out"
+                  loading="lazy"
+                />
+              </div>
+              
+              {/* Overlay avec effet de zoom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-all duration-300 rounded-2xl"></div>
+              
+              {/* Indicateur de zoom */}
+              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-700 p-2 rounded-full opacity-0 group-hover/image:opacity-100 transition-all duration-300 transform scale-75 group-hover/image:scale-100">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                </svg>
+              </div>
+              
+              {/* Badge image */}
+              <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                Photo
+              </div>
+            </div>
           )}
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-xl"></div>
         </div>
       ))}
     </div>
@@ -401,6 +503,77 @@ const OfferList = ({ offres }) => {
           </div>
         </div>
       ))}
+
+      {/* Image Modal */}
+      {imageModal.isOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+          onClick={closeImageModal}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+        >
+          <div className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
+            {/* Close button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-6 right-6 z-20 bg-white/90 text-gray-800 p-3 rounded-full hover:bg-white transition-all duration-200 border border-gray-200 hover:scale-110 shadow-lg"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Navigation buttons */}
+            {imageModal.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
+                  className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 text-gray-800 p-4 rounded-full hover:bg-white transition-all duration-200 border border-gray-200 hover:scale-110 shadow-lg"
+                >
+                  <ChevronLeft size={28} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                  className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 text-gray-800 p-4 rounded-full hover:bg-white transition-all duration-200 border border-gray-200 hover:scale-110 shadow-lg"
+                >
+                  <ChevronRight size={28} />
+                </button>
+              </>
+            )}
+
+            {/* Image counter */}
+            {imageModal.images.length > 1 && (
+              <div className="absolute top-6 left-6 z-20 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 shadow-lg">
+                {imageModal.currentIndex + 1} / {imageModal.images.length}
+              </div>
+            )}
+
+            {/* Image container */}
+            <div className="relative w-full h-full flex items-center justify-center p-8">
+              <img
+                src={imageModal.currentImage}
+                alt="Image en plein écran"
+                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxHeight: 'calc(100vh - 4rem)',
+                  maxWidth: 'calc(100vw - 4rem)'
+                }}
+              />
+            </div>
+
+            {/* Instructions */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm font-medium border border-gray-200 opacity-0 hover:opacity-100 transition-opacity duration-300 shadow-lg">
+              <span className="hidden sm:inline">Utilisez les flèches ou cliquez pour naviguer • Échap pour fermer</span>
+              <span className="sm:hidden">Tapez pour naviguer • Échap pour fermer</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       <style jsx>{`
         @keyframes fadeInUp {

@@ -4,7 +4,7 @@ import NavbarRecruteur from "../recruteur/NavbarRecruteur";
 
 const LayoutRecruteur = () => {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-green-50">
             <NavbarRecruteur />
             <div className="flex pt-16">
                 {/* <div className="w-64">

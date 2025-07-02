@@ -87,7 +87,7 @@ const AdminDashboard = () => {
     const totalOffers = typeof stats?.totalOffers === "number" ? stats.totalOffers : 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <div className="min-h-screen bg-green-100">
             {/* Header avec effet glassmorphism */}
             <header className="bg-white/80 backdrop-blur-lg shadow-xl border-b border-green-100/50 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-6">

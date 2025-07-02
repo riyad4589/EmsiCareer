@@ -359,7 +359,7 @@ const OffresPage = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="p-8 bg-green-50 min-h-screen">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-4xl font-bold text-gray-800">Mes Offres d'Emploi</h1>
                 <button

@@ -4,8 +4,21 @@ export const queryChatbot = async (req, res) => {
     try {
         const { prompt, messages = [] } = req.body;
         const apiKey = process.env.OPENROUTER_API_KEY;
+        
+        // Récupérer l'utilisateur connecté depuis req.user
+        const user = req.user;
+        
         if (!apiKey) {
             return res.status(500).json({ error: 'Clé API OpenRouter manquante' });
+        }
+
+        // Détecter si le message contient "bonjour" (insensible à la casse)
+        const isGreeting = /bonjour|hello|salut|hi/i.test(prompt.trim());
+        
+        if (isGreeting && user) {
+            // Réponse personnalisée avec le nom de l'utilisateur
+            const botReply = `Bonjour ${user.name} ! Comment puis-je vous aider aujourd'hui ?`;
+            return res.json({ response: botReply });
         }
 
         // Prépare l'historique pour OpenRouter
