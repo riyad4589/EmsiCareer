@@ -31,6 +31,11 @@ if (!process.env.MONGO_URI) {
 const app = express();
 const httpServer = createServer(app);
 
+// route de test
+app.get("/", (req, res) => {
+  res.send("✅ Backend EMSI en ligne !");
+});
+
 // Configuration CORS
 const corsOptions = {
 	origin: process.env.CLIENT_URL || "http://localhost:5173",
