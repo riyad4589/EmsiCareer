@@ -984,7 +984,7 @@ const OffersManagementPage = () => {
                                                                         <User className="h-3 w-3 text-blue-600" />
                                                                     </div>
                                                                     <span className="font-medium text-slate-900 text-sm">
-                                                                        {candidature.laureat?.name || candidature.laureat || 'Candidat'}
+                                                                        {candidature.laureat.name || 'Candidat'}
                                                                     </span>
                                                                 </div>
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${

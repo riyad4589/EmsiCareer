@@ -210,7 +210,8 @@ export const getJobPostApplications = async (req, res) => {
     console.log("Récupération des candidatures pour l'offre:", req.params.id);
     console.log("Utilisateur connecté:", req.user._id);
     
-    const offre = await Offre.findById(req.params.id).populate({
+    const offre = await Offre.findById(req.params.id)
+    .populate({
       path: "candidatures.laureat",
       select: "name email emailEdu"
     });
