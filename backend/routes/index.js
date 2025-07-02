@@ -7,23 +7,24 @@ import recruteurRoutes from "./recruteur.route.js";
 import offresRoutes from "./offres.route.js";
 import { queryChatbot } from '../controllers/chatbot.controller.js';
 import { uploadMedia } from '../controllers/upload.controller.js';
+import { protect } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
 // Routes publiques
 router.use("/auth", authRoutes);
-router.use("/offres", offresRoutes);
 
 // Routes protégées
-router.use("/users", userRoutes);
-router.use("/posts", postRoutes);
-router.use("/admin", adminRoutes);
-router.use("/recruteur", recruteurRoutes);
+router.use("/users", protect, userRoutes);
+router.use("/posts", protect, postRoutes);
+router.use("/admin", protect, adminRoutes);
+router.use("/recruteur", protect, recruteurRoutes);
+router.use("/offres", protect, offresRoutes);
 
 // Route pour l'upload de médias
-router.post('/upload/media', uploadMedia);
+router.post('/upload/media', protect, uploadMedia);
 
-// Route pour le chatbot
-router.post('/chatbot/query', queryChatbot);
+// Route pour le chatbot (protégée)
+router.post('/chatbot/query', protect, queryChatbot);
 
 export default router; 
