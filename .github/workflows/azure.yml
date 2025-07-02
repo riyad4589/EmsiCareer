@@ -27,11 +27,13 @@ jobs:
         working-directory: ./backend
         run: npm run build --if-present
 
-      - name: Zip backend folder (sans node_modules)
+      - name: Cleanup nested node_modules
         run: |
-          cd backend
-          zip -r ../release.zip . -x "node_modules/*"
+          find . -type d -name "node_modules" -prune -exec rm -rf '{}' +
 
+      - name: Zip artifact for deployment
+        run: zip -r ../release.zip . -x "**/node_modules/**" "**/.env" "**/.git/**"
+        
       - name: Deploy to Azure Web App using Publish Profile
         uses: azure/webapps-deploy@v3
         with:
