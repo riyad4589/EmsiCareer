@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-hot-toast";
 import { Edit, Trash2, Lock, Plus, Eye, EyeOff, Users, X, LayoutDashboard, Building2, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { invalidateConnectionQueries } from "../../utils/queryUtils";
 
@@ -30,6 +30,7 @@ const UsersManagementPage = () => {
 		emailPersonelle: "",
 		role: "",
 		status: "",
+		profilePicture: null,
 	});
 	const [createForm, setCreateForm] = useState({
 		name: "",
@@ -37,19 +38,46 @@ const UsersManagementPage = () => {
 		emailPersonelle: "",
 		username: "",
 		password: "",
+		confirmPassword: "",
 		role: "user",
 		status: "active",
+		phone: "",
+		about: "",
+		headline: "",
+		// Réseaux sociaux
+		linkedin: "",
+		github: "",
+		socialLinks: {
+			linkedin: "",
+			twitter: "",
+			facebook: ""
+		},
+		// Champs spécifiques aux recruteurs
 		companyName: "",
+		companyLogo: "",
 		industry: "",
 		location: "",
-		companySize: "",
+		description: "",
 		companyDescription: "",
+		website: "",
+		// Champs spécifiques aux utilisateurs
+		skills: [],
+		cv: "",
+		// Champs spécifiques aux admins
+		permissions: [],
+		department: "",
+		// Photo de profil
+		profilePicture: null,
 	});
 	const [passwordForm, setPasswordForm] = useState({
 		password: "",
 		confirmPassword: "",
 	});
 	const [passwordMatch, setPasswordMatch] = useState(true);
+	const [createPasswordStrength, setCreatePasswordStrength] = useState(0);
+	const [createPasswordMatch, setCreatePasswordMatch] = useState(true);
+	const [showCreatePassword, setShowCreatePassword] = useState(false);
+	const [showCreateConfirmPassword, setShowCreateConfirmPassword] = useState(false);
 
 	const queryClient = useQueryClient();
 
@@ -77,7 +105,18 @@ const UsersManagementPage = () => {
 
 	const { mutate: updateUser } = useMutation({
 		mutationFn: (userData) => {
-			const { _id, ...updateData } = userData;
+			const { _id, formData, ...updateData } = userData;
+			
+			// Si on a un FormData (avec fichier), l'utiliser
+			if (formData) {
+				return axiosInstance.put(`/admin/users/${_id}`, formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				});
+			}
+			
+			// Sinon, utiliser les données simples
 			return axiosInstance.put(`/admin/users/${_id}`, updateData);
 		},
 		onSuccess: () => {
@@ -128,7 +167,19 @@ const UsersManagementPage = () => {
 	});
 
 	const { mutate: createUser } = useMutation({
-		mutationFn: (userData) => axiosInstance.post("/admin/users", userData),
+		mutationFn: (userData) => {
+			// Si c'est un FormData (avec fichier), utiliser les headers multipart
+			if (userData instanceof FormData) {
+				return axiosInstance.post("/admin/users", userData, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				});
+			}
+			
+			// Sinon, utiliser les données simples
+			return axiosInstance.post("/admin/users", userData);
+		},
 		onSuccess: () => {
 			queryClient.invalidateQueries(["usersWithConnections"]);
 			toast.success("Utilisateur créé avec succès");
@@ -139,13 +190,31 @@ const UsersManagementPage = () => {
 				emailPersonelle: "",
 				username: "",
 				password: "",
+				confirmPassword: "",
 				role: "user",
 				status: "active",
+				phone: "",
+				about: "",
+				headline: "",
+				linkedin: "",
+				github: "",
+				socialLinks: {
+					linkedin: "",
+					twitter: "",
+					facebook: ""
+				},
 				companyName: "",
+				companyLogo: "",
 				industry: "",
 				location: "",
-				companySize: "",
+				description: "",
 				companyDescription: "",
+				website: "",
+				skills: [],
+				cv: "",
+				permissions: [],
+				department: "",
+				profilePicture: null,
 			});
 		},
 		onError: (error) => {
@@ -229,17 +298,105 @@ const UsersManagementPage = () => {
 			emailPersonelle: user.emailPersonelle,
 			role: user.role,
 			status: user.status,
+			profilePicture: null, // Pour la nouvelle image sélectionnée
 		});
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		updateUser({ _id: editingUser, name: editForm.name, emailEdu: editForm.emailEdu, emailPersonelle: editForm.emailPersonelle, role: editForm.role, status: editForm.status });
+		
+		try {
+			const formData = new FormData();
+			formData.append('name', editForm.name);
+			formData.append('emailEdu', editForm.emailEdu);
+			formData.append('emailPersonelle', editForm.emailPersonelle);
+			formData.append('role', editForm.role);
+			formData.append('status', editForm.status);
+			
+			// Ajouter la photo de profil si une nouvelle a été sélectionnée
+			if (editForm.profilePicture instanceof File) {
+				formData.append('profilePicture', editForm.profilePicture);
+			}
+			
+			await updateUser({ _id: editingUser, formData });
+			setEditingUser(null);
+		} catch (error) {
+			console.error("Erreur lors de la modification:", error);
+		}
 	};
 
-	const handleCreateSubmit = (e) => {
+	const handleCreateSubmit = async (e) => {
 		e.preventDefault();
-		createUser(createForm);
+		
+		// Validation des mots de passe
+		if (createForm.password !== createForm.confirmPassword) {
+			toast.error("Les mots de passe ne correspondent pas");
+			return;
+		}
+
+		if (createPasswordStrength < 3) {
+			toast.error("Le mot de passe doit être au moins moyen (3/5)");
+			return;
+		}
+
+		// Validation des champs requis selon le rôle
+		if (createForm.role === "recruteur") {
+			if (!createForm.companyName) {
+				toast.error("Le nom de l'entreprise est requis pour les recruteurs");
+				return;
+			}
+			if (!createForm.industry) {
+				toast.error("Le secteur d'activité est requis pour les recruteurs");
+				return;
+			}
+			if (!createForm.location) {
+				toast.error("La localisation est requise pour les recruteurs");
+				return;
+			}
+			if (!createForm.description) {
+				toast.error("La description de l'entreprise est requise pour les recruteurs");
+				return;
+			}
+		}
+
+		try {
+			const formData = new FormData();
+			
+			// Ajouter tous les champs textuels
+			formData.append('name', createForm.name);
+			formData.append('emailEdu', createForm.emailEdu);
+			formData.append('emailPersonelle', createForm.emailPersonelle);
+			formData.append('username', createForm.username);
+			formData.append('password', createForm.password);
+			formData.append('role', createForm.role);
+			formData.append('status', createForm.status);
+			formData.append('phone', createForm.phone);
+			formData.append('about', createForm.about);
+			formData.append('headline', createForm.headline);
+			formData.append('linkedin', createForm.linkedin);
+			formData.append('github', createForm.github);
+			formData.append('socialLinks', JSON.stringify(createForm.socialLinks));
+			formData.append('companyName', createForm.companyName);
+			formData.append('companyLogo', createForm.companyLogo);
+			formData.append('industry', createForm.industry);
+			formData.append('location', createForm.location);
+			formData.append('description', createForm.description);
+			formData.append('companyDescription', createForm.companyDescription);
+			formData.append('website', createForm.website);
+			formData.append('skills', JSON.stringify(createForm.skills));
+			formData.append('cv', createForm.cv);
+			formData.append('permissions', JSON.stringify(createForm.permissions));
+			formData.append('department', createForm.department);
+			
+			// Ajouter la photo de profil si sélectionnée
+			if (createForm.profilePicture instanceof File) {
+				formData.append('profilePicture', createForm.profilePicture);
+			}
+
+			await createUser(formData);
+		} catch (error) {
+			console.error("Erreur lors de la création:", error);
+		}
 	};
 
 	// Filtrer les utilisateurs en fonction du rôle sélectionné
@@ -302,6 +459,28 @@ const UsersManagementPage = () => {
 			</div>
 		);
 	};
+
+	// Validation du mot de passe
+	const validatePassword = (password) => {
+		let strength = 0;
+		if (password.length >= 8) strength++;
+		if (/[a-z]/.test(password)) strength++;
+		if (/[A-Z]/.test(password)) strength++;
+		if (/[0-9]/.test(password)) strength++;
+		if (/[^A-Za-z0-9]/.test(password)) strength++;
+		return strength;
+	};
+
+	// Vérification de la correspondance des mots de passe
+	useEffect(() => {
+		setCreatePasswordMatch(createForm.password === createForm.confirmPassword);
+		setCreatePasswordStrength(validatePassword(createForm.password));
+	}, [createForm.password, createForm.confirmPassword]);
+
+	// Vérification de la correspondance des mots de passe pour la modification
+	useEffect(() => {
+		setPasswordMatch(passwordForm.password === passwordForm.confirmPassword);
+	}, [passwordForm.password, passwordForm.confirmPassword]);
 
 	if (isLoading) {
 		return (
@@ -461,6 +640,52 @@ const UsersManagementPage = () => {
 																	</div>
 																</div>
 															</div>
+															
+															{/* Photo de profil */}
+															<div className="mt-6">
+																<label className="block text-sm font-medium text-gray-700 mb-2">
+																	Photo de profil
+																</label>
+																<div className="flex items-center space-x-4">
+																	<div className="relative">
+																		<img
+																			src={editForm.profilePicture ? URL.createObjectURL(editForm.profilePicture) : (user.profilePicture || "/avatar.png")}
+																			alt="Photo de profil"
+																			className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+																		/>
+																		{editForm.profilePicture && (
+																			<button
+																				type="button"
+																				onClick={() => setEditForm({ ...editForm, profilePicture: null })}
+																				className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+																			>
+																				×
+																			</button>
+																		)}
+																	</div>
+																	<div className="flex-1">
+																		<input
+																			type="file"
+																			accept="image/*"
+																			onChange={(e) => {
+																				const file = e.target.files[0];
+																				if (file) {
+																					if (file.size > 5 * 1024 * 1024) {
+																						toast.error("L'image ne doit pas dépasser 5MB");
+																						return;
+																					}
+																					setEditForm({ ...editForm, profilePicture: file });
+																				}
+																			}}
+																			className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+																		/>
+																		<p className="text-xs text-gray-500 mt-1">
+																			Formats acceptés : JPG, PNG, GIF. Taille max : 5MB
+																		</p>
+																	</div>
+																</div>
+															</div>
+															
 															<div className="mt-8 flex justify-end space-x-3">
 																<button
 																	type="button"
@@ -688,8 +913,8 @@ const UsersManagementPage = () => {
 			{/* Modal de création d'utilisateur */}
 			{isCreating && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-					<div className="bg-white rounded-xl max-w-4xl w-full shadow-2xl">
-						<div className="p-6 border-b border-gray-200">
+					<div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] shadow-2xl flex flex-col">
+						<div className="p-6 border-b border-gray-200 flex-shrink-0">
 							<div className="flex justify-between items-center">
 								<div>
 									<h2 className="text-2xl font-bold text-gray-900">Créer un nouvel utilisateur</h2>
@@ -705,205 +930,592 @@ const UsersManagementPage = () => {
 								</button>
 							</div>
 						</div>
-						<form onSubmit={handleCreateSubmit} className="p-6">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<div className="space-y-4">
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Nom complet <span className="text-red-500">*</span>
-										</label>
-										<input
-											type="text"
-											value={createForm.name}
-											onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-											required
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Email Professionnelle <span className="text-red-500">*</span>
-										</label>
-										<input
-											type="email"
-											value={createForm.emailEdu}
-											onChange={(e) => setCreateForm({ ...createForm, emailEdu: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-											required
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Nom d'utilisateur <span className="text-red-500">*</span>
-										</label>
-										<input
-											type="text"
-											value={createForm.username}
-											onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-											required
-										/>
-									</div>
-								</div>
-								<div className="space-y-4">
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Mot de passe <span className="text-red-500">*</span>
-										</label>
-										<div className="relative">
-											<input
-												type={showPassword ? "text" : "password"}
-												value={createForm.password}
-												onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-												className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-												required
-											/>
-											<button
-												type="button"
-												onClick={() => setShowPassword(!showPassword)}
-												className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
-											>
-												{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-											</button>
-										</div>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Rôle <span className="text-red-500">*</span>
-										</label>
-										<select
-											value={createForm.role}
-											onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-										>
-											<option value="user">Utilisateur</option>
-											<option value="recruteur">Recruteur</option>
-											<option value="admin">Administrateur</option>
-										</select>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-gray-700 mb-1">
-											Statut <span className="text-red-500">*</span>
-										</label>
-										<select
-											value={createForm.status}
-											onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
-											className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-										>
-											<option value="active">Actif</option>
-											<option value="pending">En attente</option>
-											<option value="rejected">Rejeté</option>
-										</select>
-									</div>
-								</div>
-							</div>
-
-							{/* Champs spécifiques aux recruteurs */}
-							{createForm.role === "recruteur" && (
-								<div className="mt-6 border-t border-gray-200 pt-6">
-									<h3 className="text-lg font-medium text-gray-900 mb-4">Informations de l'entreprise</h3>
+						<div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+							<form id="createUserForm" onSubmit={handleCreateSubmit} className="p-6">
+								<div className="space-y-6">
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div className="space-y-4">
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-1">
-													Nom de l'entreprise <span className="text-red-500">*</span>
+													Nom complet <span className="text-red-500">*</span>
 												</label>
 												<input
 													type="text"
-													value={createForm.companyName}
-													onChange={(e) => setCreateForm({ ...createForm, companyName: e.target.value })}
+													value={createForm.name}
+													onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
 													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-													required={createForm.role === "recruteur"}
+													required
 												/>
 											</div>
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-1">
-													Secteur d'activité <span className="text-red-500">*</span>
+													Email Professionnelle <span className="text-red-500">*</span>
 												</label>
-												<select
-													value={createForm.industry}
-													onChange={(e) => setCreateForm({ ...createForm, industry: e.target.value })}
+												<input
+													type="email"
+													value={createForm.emailEdu}
+													onChange={(e) => setCreateForm({ ...createForm, emailEdu: e.target.value })}
 													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-													required={createForm.role === "recruteur"}
-												>
-													<option value="">Sélectionnez un secteur</option>
-													<option value="tech">Technologie</option>
-													<option value="finance">Finance</option>
-													<option value="healthcare">Santé</option>
-													<option value="education">Éducation</option>
-													<option value="retail">Commerce</option>
-													<option value="manufacturing">Industrie</option>
-													<option value="other">Autre</option>
-												</select>
+													required
+												/>
 											</div>
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-1">
-													Localisation <span className="text-red-500">*</span>
+													Email Personnel
 												</label>
 												<input
-													type="text"
-													value={createForm.location}
-													onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
+													type="email"
+													value={createForm.emailPersonelle}
+													onChange={(e) => setCreateForm({ ...createForm, emailPersonelle: e.target.value })}
 													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-													placeholder="Ville, Pays"
-													required={createForm.role === "recruteur"}
 												/>
 											</div>
 										</div>
 										<div className="space-y-4">
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-1">
-													Taille de l'entreprise <span className="text-red-500">*</span>
+													Nom d'utilisateur <span className="text-red-500">*</span>
 												</label>
-												<select
-													value={createForm.companySize}
-													onChange={(e) => setCreateForm({ ...createForm, companySize: e.target.value })}
+												<input
+													type="text"
+													value={createForm.username}
+													onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
 													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-													required={createForm.role === "recruteur"}
-												>
-													<option value="">Sélectionnez une taille</option>
-													<option value="1-10">1-10 employés</option>
-													<option value="11-50">11-50 employés</option>
-													<option value="51-200">51-200 employés</option>
-													<option value="201-500">201-500 employés</option>
-													<option value="501-1000">501-1000 employés</option>
-													<option value="1000+">Plus de 1000 employés</option>
-												</select>
+													required
+												/>
 											</div>
 											<div>
 												<label className="block text-sm font-medium text-gray-700 mb-1">
-													Description de l'entreprise <span className="text-red-500">*</span>
+													Mot de passe *
 												</label>
-												<textarea
-													value={createForm.companyDescription}
-													onChange={(e) => setCreateForm({ ...createForm, companyDescription: e.target.value })}
-													className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
-													rows="4"
-													placeholder="Décrivez brièvement votre entreprise..."
-													required={createForm.role === "recruteur"}
-												/>
+												<div className="relative">
+													<input
+														type={showCreatePassword ? "text" : "password"}
+														value={createForm.password}
+														onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														required
+													/>
+													<button
+														type="button"
+														onClick={() => setShowCreatePassword(!showCreatePassword)}
+														className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+													>
+														{showCreatePassword ? <EyeOff size={20} /> : <Eye size={20} />}
+													</button>
+												</div>
+												{/* Indicateur de force du mot de passe */}
+												{createForm.password && (
+													<div className="mt-2">
+														<div className="flex space-x-1">
+															{[...Array(5)].map((_, i) => (
+																<div
+																	key={i}
+																	className={`h-1 flex-1 rounded ${
+																		i < createPasswordStrength
+																			? createPasswordStrength <= 2
+																				? "bg-red-500"
+																				: createPasswordStrength <= 3
+																				? "bg-yellow-500"
+																				: "bg-green-500"
+																			: "bg-gray-200"
+																	}`}
+																/>
+															))}
+														</div>
+														<p className={`text-xs mt-1 ${
+															createPasswordStrength <= 2
+																? "text-red-600"
+																: createPasswordStrength <= 3
+																? "text-yellow-600"
+																: "text-green-600"
+														}`}>
+															{createPasswordStrength <= 2
+																? "Faible"
+																: createPasswordStrength <= 3
+																? "Moyen"
+																: "Fort"}
+														</p>
+													</div>
+												)}
+											</div>
+
+											<div>
+												<label className="block text-sm font-medium text-gray-700 mb-1">
+													Confirmer le mot de passe *
+												</label>
+												<div className="relative">
+													<input
+														type={showCreateConfirmPassword ? "text" : "password"}
+														value={createForm.confirmPassword}
+														onChange={(e) => setCreateForm({ ...createForm, confirmPassword: e.target.value })}
+														className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+															createForm.confirmPassword
+																? createPasswordMatch
+																	? "border-green-300 focus:ring-green-500"
+																	: "border-red-300 focus:ring-red-500"
+																: "border-gray-300 focus:ring-blue-500"
+														}`}
+														required
+													/>
+													<button
+														type="button"
+														onClick={() => setShowCreateConfirmPassword(!showCreateConfirmPassword)}
+														className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+													>
+														{showCreateConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+													</button>
+												</div>
+												{createForm.confirmPassword && !createPasswordMatch && (
+													<p className="text-red-600 text-sm mt-1">Les mots de passe ne correspondent pas</p>
+												)}
+												{createForm.confirmPassword && createPasswordMatch && (
+													<p className="text-green-600 text-sm mt-1">Les mots de passe correspondent</p>
+												)}
 											</div>
 										</div>
 									</div>
-								</div>
-							)}
 
-							<div className="mt-8 flex justify-end space-x-3">
+									{/* Photo de profil pour tous les utilisateurs */}
+									<div className="bg-gray-50 p-4 rounded-lg">
+										<h3 className="text-lg font-semibold text-gray-800 mb-3">Photo de profil</h3>
+										<div className="flex items-center space-x-4">
+											<div className="relative">
+												<img
+													src={createForm.profilePicture ? URL.createObjectURL(createForm.profilePicture) : "/avatar.png"}
+													alt="Photo de profil"
+													className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+												/>
+												{createForm.profilePicture && (
+													<button
+														type="button"
+														onClick={() => setCreateForm({ ...createForm, profilePicture: null })}
+														className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+													>
+														×
+													</button>
+												)}
+											</div>
+											<div className="flex-1">
+												<input
+													type="file"
+													accept="image/*"
+													onChange={(e) => {
+														const file = e.target.files[0];
+														if (file) {
+															if (file.size > 5 * 1024 * 1024) {
+																toast.error("L'image ne doit pas dépasser 5MB");
+																return;
+															}
+															setCreateForm({ ...createForm, profilePicture: file });
+														}
+													}}
+													className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+												/>
+												<p className="text-xs text-gray-500 mt-1">
+													Formats acceptés : JPG, PNG, GIF. Taille max : 5MB
+												</p>
+											</div>
+										</div>
+									</div>
+
+									{/* Champs spécifiques selon le rôle */}
+									{createForm.role === "recruteur" && (
+										<>
+											{/* Informations de l'entreprise */}
+											<div className="bg-blue-50 p-4 rounded-lg mb-4">
+												<h3 className="text-lg font-semibold text-blue-800 mb-3">Informations de l'entreprise</h3>
+												
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Nom de l'entreprise *
+														</label>
+														<input
+															type="text"
+															value={createForm.companyName}
+															onChange={(e) => setCreateForm({ ...createForm, companyName: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															required
+														/>
+													</div>
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Logo de l'entreprise
+														</label>
+														<input
+															type="url"
+															value={createForm.companyLogo}
+															onChange={(e) => setCreateForm({ ...createForm, companyLogo: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="https://example.com/logo.png"
+														/>
+													</div>
+												</div>
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Secteur d'activité *
+														</label>
+														<select
+															value={createForm.industry}
+															onChange={(e) => setCreateForm({ ...createForm, industry: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															required
+														>
+															<option value="">Sélectionner un secteur</option>
+															<option value="technology">Technologie</option>
+															<option value="healthcare">Santé</option>
+															<option value="finance">Finance</option>
+															<option value="education">Éducation</option>
+															<option value="manufacturing">Industrie</option>
+															<option value="retail">Commerce</option>
+															<option value="consulting">Conseil</option>
+															<option value="marketing">Marketing</option>
+															<option value="design">Design</option>
+															<option value="sales">Ventes</option>
+															<option value="hr">Ressources Humaines</option>
+															<option value="legal">Juridique</option>
+															<option value="other">Autre</option>
+														</select>
+													</div>
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Localisation *
+														</label>
+														<input
+															type="text"
+															value={createForm.location}
+															onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="Ville, Pays"
+															required
+														/>
+													</div>
+												</div>
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														Site web
+													</label>
+													<input
+														type="url"
+														value={createForm.website}
+														onChange={(e) => setCreateForm({ ...createForm, website: e.target.value })}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="https://www.example.com"
+													/>
+												</div>
+											</div>
+
+											{/* Descriptions */}
+											<div className="bg-green-50 p-4 rounded-lg mb-4">
+												<h3 className="text-lg font-semibold text-green-800 mb-3">Descriptions</h3>
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														Description de l'entreprise *
+													</label>
+													<textarea
+														value={createForm.description}
+														onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+														rows={3}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="Décrivez votre entreprise, sa mission, ses valeurs..."
+														required
+													/>
+												</div>
+												<div className="mt-4">
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														Description complète
+													</label>
+													<textarea
+														value={createForm.companyDescription}
+														onChange={(e) => setCreateForm({ ...createForm, companyDescription: e.target.value })}
+														rows={4}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="Description détaillée de l'entreprise, son histoire, ses réalisations..."
+													/>
+												</div>
+											</div>
+
+											{/* Informations de contact professionnel */}
+											<div className="bg-purple-50 p-4 rounded-lg mb-4">
+												<h3 className="text-lg font-semibold text-purple-800 mb-3">Contact professionnel</h3>
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Téléphone professionnel
+														</label>
+														<input
+															type="tel"
+															value={createForm.phone}
+															onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="+33 1 23 45 67 89"
+														/>
+													</div>
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Titre professionnel
+														</label>
+														<input
+															type="text"
+															value={createForm.headline}
+															onChange={(e) => setCreateForm({ ...createForm, headline: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="ex: Responsable RH, Directeur Commercial..."
+														/>
+													</div>
+												</div>
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														À propos du recruteur
+													</label>
+													<textarea
+														value={createForm.about}
+														onChange={(e) => setCreateForm({ ...createForm, about: e.target.value })}
+														rows={3}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="Présentez-vous en tant que recruteur..."
+													/>
+												</div>
+											</div>
+
+											{/* Réseaux sociaux professionnels */}
+											<div className="bg-orange-50 p-4 rounded-lg mb-4">
+												<h3 className="text-lg font-semibold text-orange-800 mb-3">Réseaux sociaux professionnels</h3>
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															LinkedIn
+														</label>
+														<input
+															type="url"
+															value={createForm.linkedin}
+															onChange={(e) => setCreateForm({ ...createForm, linkedin: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="https://linkedin.com/in/username"
+														/>
+													</div>
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															GitHub
+														</label>
+														<input
+															type="url"
+															value={createForm.github}
+															onChange={(e) => setCreateForm({ ...createForm, github: e.target.value })}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="https://github.com/username"
+														/>
+													</div>
+												</div>
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Twitter
+														</label>
+														<input
+															type="url"
+															value={createForm.socialLinks.twitter}
+															onChange={(e) => setCreateForm({ 
+																...createForm, 
+																socialLinks: { ...createForm.socialLinks, twitter: e.target.value }
+															})}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="https://twitter.com/username"
+														/>
+													</div>
+													<div>
+														<label className="block text-sm font-medium text-gray-700 mb-1">
+															Facebook
+														</label>
+														<input
+															type="url"
+															value={createForm.socialLinks.facebook}
+															onChange={(e) => setCreateForm({ 
+																...createForm, 
+																socialLinks: { ...createForm.socialLinks, facebook: e.target.value }
+															})}
+															className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+															placeholder="https://facebook.com/username"
+														/>
+													</div>
+												</div>
+											</div>
+										</>
+									)}
+
+									{createForm.role === "user" && (
+										<>
+											<div>
+												<label className="block text-sm font-medium text-gray-700 mb-1">
+													Téléphone
+												</label>
+												<input
+													type="tel"
+													value={createForm.phone}
+													onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
+													className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+													placeholder="+33 1 23 45 67 89"
+												/>
+											</div>
+											<div>
+												<label className="block text-sm font-medium text-gray-700 mb-1">
+													Titre professionnel
+												</label>
+												<input
+													type="text"
+													value={createForm.headline}
+													onChange={(e) => setCreateForm({ ...createForm, headline: e.target.value })}
+													className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+													placeholder="ex: Développeur Full Stack"
+												/>
+											</div>
+											<div>
+												<label className="block text-sm font-medium text-gray-700 mb-1">
+													À propos
+												</label>
+												<textarea
+													value={createForm.about}
+													onChange={(e) => setCreateForm({ ...createForm, about: e.target.value })}
+													rows={3}
+													className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+													placeholder="Parlez-nous de vous..."
+												/>
+											</div>
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														LinkedIn
+													</label>
+													<input
+														type="url"
+														value={createForm.linkedin}
+														onChange={(e) => setCreateForm({ ...createForm, linkedin: e.target.value })}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="https://linkedin.com/in/username"
+													/>
+												</div>
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														GitHub
+													</label>
+													<input
+														type="url"
+														value={createForm.github}
+														onChange={(e) => setCreateForm({ ...createForm, github: e.target.value })}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="https://github.com/username"
+													/>
+												</div>
+											</div>
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														Twitter
+													</label>
+													<input
+														type="url"
+														value={createForm.socialLinks.twitter}
+														onChange={(e) => setCreateForm({ 
+															...createForm, 
+															socialLinks: { ...createForm.socialLinks, twitter: e.target.value }
+														})}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="https://twitter.com/username"
+													/>
+												</div>
+												<div>
+													<label className="block text-sm font-medium text-gray-700 mb-1">
+														Facebook
+													</label>
+													<input
+														type="url"
+														value={createForm.socialLinks.facebook}
+														onChange={(e) => setCreateForm({ 
+															...createForm, 
+															socialLinks: { ...createForm.socialLinks, facebook: e.target.value }
+														})}
+														className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+														placeholder="https://facebook.com/username"
+													/>
+												</div>
+											</div>
+										</>
+									)}
+
+									{createForm.role === "admin" && (
+										<>
+											<div>
+												<label className="block text-sm font-medium text-gray-700 mb-1">
+													Département
+												</label>
+												<select
+													value={createForm.department}
+													onChange={(e) => setCreateForm({ ...createForm, department: e.target.value })}
+													className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+												>
+													<option value="">Sélectionner un département</option>
+													<option value="technical">Technique</option>
+													<option value="marketing">Marketing</option>
+													<option value="sales">Ventes</option>
+													<option value="hr">Ressources Humaines</option>
+													<option value="finance">Finance</option>
+													<option value="operations">Opérations</option>
+												</select>
+											</div>
+										</>
+									)}
+
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-1">
+												Rôle *
+											</label>
+											<select
+												value={createForm.role}
+												onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+												className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+											>
+												<option value="user">Utilisateur</option>
+												<option value="recruteur">Recruteur</option>
+												<option value="admin">Administrateur</option>
+											</select>
+										</div>
+										<div>
+											<label className="block text-sm font-medium text-gray-700 mb-1">
+												Statut *
+											</label>
+											<select
+												value={createForm.status}
+												onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
+												className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+											>
+												<option value="active">Actif</option>
+												<option value="pending">En attente</option>
+												<option value="rejected">Rejeté</option>
+											</select>
+										</div>
+																</div>
+								</div>
 								<button
-									type="button"
-									onClick={() => setIsCreating(false)}
-									className="px-6 py-2.5 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+									onClick={() => {
+										const form = document.getElementById('createUserForm');
+										if (form) {
+											form.requestSubmit();
+										}
+									}}
+									disabled={!createPasswordMatch || createPasswordStrength < 3}
+									className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+										!createPasswordMatch || createPasswordStrength < 3
+											? "bg-gray-400 cursor-not-allowed"
+											: "bg-blue-600 hover:bg-blue-700"
+									}`}
 								>
-									Annuler
+									Crée l'utilisateur
 								</button>
-								<button
-									type="submit"
-									className="px-6 py-2.5 bg-green-600 text-sm font-medium text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-								>
-									Créer
-								</button>
-							</div>
-						</form>
+							</form>
+						</div>
 					</div>
 				</div>
 			)}
