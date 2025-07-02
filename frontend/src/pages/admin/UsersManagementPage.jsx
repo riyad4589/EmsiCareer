@@ -330,7 +330,7 @@ const UsersManagementPage = () => {
 			<AdminNavbar />
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div className="flex justify-between items-center mb-6">
-					<h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+					<h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs test</h1>
 					<div className="flex items-center space-x-4">
 						{/* Filtre par rôle */}
 						<div className="flex items-center space-x-2">
