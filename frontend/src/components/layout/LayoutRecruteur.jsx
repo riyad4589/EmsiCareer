@@ -7,9 +7,9 @@ const LayoutRecruteur = () => {
         <div className="min-h-screen bg-gray-50">
             <NavbarRecruteur />
             <div className="flex pt-16">
-                <div className="w-64">
+                {/* <div className="w-64">
                     <SidebarRecruteur />
-                </div>
+                </div> */}
                 <main className="flex-1 max-w-7xl mx-auto px-4 py-6 md:px-6 lg:px-8">
                     <Outlet />
                 </main>

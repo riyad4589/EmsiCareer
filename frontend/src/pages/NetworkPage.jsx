@@ -6,6 +6,8 @@ import { toast } from "react-hot-toast";
 import { Check, X, Loader, MessageSquare, UserMinus, UserPlus, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { invalidateConnectionQueries } from "../utils/queryUtils";
+import { useState, useEffect } from "react";
+
 
 const Avatar = ({ user, className = "" }) => {
 	if (user.profilePicture) {
@@ -39,6 +41,7 @@ const NetworkPage = () => {
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
+	const [localConnectionRequests, setLocalConnectionRequests] = useState([]);
 
 	const { data: connectionsData, isLoading: connectionsLoading } = useQuery({
 		queryKey: ["connections"],
@@ -80,6 +83,7 @@ const NetworkPage = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries(["connections"]);
 			queryClient.invalidateQueries(["suggestions"]);
+			queryClient.invalidateQueries(["connectionRequests"]);
 			toast.success("Demande de connexion envoyée avec succès");
 		},
 		onError: (error) => {
@@ -93,16 +97,34 @@ const NetworkPage = () => {
 			const response = await axiosInstance.post(`/connections/accept/${requestId}`);
 			return response.data;
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries(["connections"]);
-			queryClient.invalidateQueries(["suggestions"]);
-			refetchRequests(); // 👈 force le rechargement immédiat des demandes
-			toast.success("Demande de connexion acceptée");
+		onMutate: async (requestId) => {
+			console.log("🔄 onMutate - Suppression optimiste de la demande:", requestId);
+			
+			// Supprimer immédiatement de l'état local
+			setLocalConnectionRequests(prev => prev.filter(request => request._id !== requestId));
+			
+			// Annuler les requêtes en cours
+			await queryClient.cancelQueries(["connectionRequests"]);
+			
+			// Sauvegarder l'ancien état
+			const previousRequests = queryClient.getQueryData(["connectionRequests"]);
+			console.log("📦 État précédent:", previousRequests);
+			
+			return { previousRequests };
 		},
-
-		onError: (error) => {
+		onError: (error, requestId, context) => {
+			// Restaurer l'ancien état en cas d'erreur
+			if (context?.previousRequests) {
+				queryClient.setQueryData(["connectionRequests"], context.previousRequests);
+			}
 			console.error("Erreur lors de l'acceptation:", error);
 			toast.error(error.response?.data?.message || "Erreur lors de l'acceptation de la demande");
+		},
+		onSuccess: () => {
+			// Invalider seulement après succès pour s'assurer de la cohérence
+			queryClient.invalidateQueries(["connections"]);
+			queryClient.invalidateQueries(["suggestions"]);
+			toast.success("Demande de connexion acceptée");
 		},
 	});
 
@@ -111,14 +133,39 @@ const NetworkPage = () => {
 			const response = await axiosInstance.post(`/connections/reject/${requestId}`);
 			return response.data;
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries(["connectionRequests"]);
-			toast.success("Demande de connexion refusée");
+		onMutate: async (requestId) => {
+			console.log("🔄 onMutate - Suppression optimiste de la demande:", requestId);
+			
+			// Supprimer immédiatement de l'état local
+			setLocalConnectionRequests(prev => prev.filter(request => request._id !== requestId));
+			
+			// Annuler les requêtes en cours
+			await queryClient.cancelQueries(["connectionRequests"]);
+			
+			// Sauvegarder l'ancien état
+			const previousRequests = queryClient.getQueryData(["connectionRequests"]);
+			console.log("📦 État précédent:", previousRequests);
+			
+			return { previousRequests };
 		},
-		onError: (error) => {
+		onError: (error, requestId, context) => {
+			// Restaurer l'ancien état en cas d'erreur
+			if (context?.previousRequests) {
+				queryClient.setQueryData(["connectionRequests"], context.previousRequests);
+			}
 			toast.error(error.response?.data?.message || "Erreur lors du refus de la demande");
 		},
+		onSuccess: () => {
+			toast.success("Demande de connexion refusée");
+		},
 	});
+
+	// Synchroniser l'état local avec les données de l'API
+	useEffect(() => {
+		if (connectionRequestsData?.data?.data) {
+			setLocalConnectionRequests(connectionRequestsData.data.data);
+		}
+	}, [connectionRequestsData]);
 
 	const removeConnectionMutation = useMutation({
 		mutationFn: async (userId) => {
@@ -154,11 +201,10 @@ const NetworkPage = () => {
 
 	const connections = connectionsData || [];
 	const suggestions = suggestionsData?.data || [];
-	const connectionRequests = Array.isArray(connectionRequestsData?.data?.data)
-		? connectionRequestsData.data.data
-		: [];
+	const connectionRequests = localConnectionRequests.length > 0 ? localConnectionRequests : (Array.isArray(connectionRequestsData?.data?.data) ? connectionRequestsData.data.data : []);
 	console.log("connectionRequestsData", connectionRequestsData);
-	console.log("connectionRequests", connectionRequests);
+	console.log("localConnectionRequests", localConnectionRequests);
+	console.log("connectionRequests final", connectionRequests);
 	console.log("connections", connections);
 
 	const handleConnect = (userId) => {

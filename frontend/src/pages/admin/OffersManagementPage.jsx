@@ -1,23 +1,35 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-hot-toast";
-import { Edit, Trash2, Plus, Users, Calendar, MapPin, Eye, X, Building2, Clock, Heart, MessageCircle, FileText, User } from "lucide-react";
-import { useState } from "react";
+import { Edit, Trash2, Plus, Users, Calendar, MapPin, Eye, X, Building2, Clock, Heart, MessageCircle, FileText, User, Upload, Image as ImageIcon } from "lucide-react";
+import { useState, useRef } from "react";
 
 const OffersManagementPage = () => {
     const [editingOffer, setEditingOffer] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editForm, setEditForm] = useState({
-        content: "",
-        visibility: "public"
+        titre: "",
+        description: "",
+        localisation: "",
+        typeContrat: "CDI",
+        competencesRequises: [],
+        dateExpiration: "",
+        medias: []
     });
     const [createForm, setCreateForm] = useState({
-        content: "",
-        visibility: "public",
+        titre: "",
+        description: "",
+        localisation: "",
+        typeContrat: "CDI",
+        competencesRequises: [],
+        dateExpiration: "",
+        medias: [],
         authorId: ""
     });
     const [expandedRow, setExpandedRow] = useState(null);
     const [selectedOffer, setSelectedOffer] = useState(null);
+    const [uploadingMedia, setUploadingMedia] = useState(false);
+    const fileInputRef = useRef(null);
 
     const queryClient = useQueryClient();
 
@@ -94,8 +106,13 @@ const OffersManagementPage = () => {
             toast.success("Offre créée avec succès");
             setIsCreateModalOpen(false);
             setCreateForm({
-                content: "",
-                visibility: "public",
+                titre: "",
+                description: "",
+                localisation: "",
+                typeContrat: "CDI",
+                competencesRequises: [],
+                dateExpiration: "",
+                medias: [],
                 authorId: ""
             });
         },
@@ -107,8 +124,13 @@ const OffersManagementPage = () => {
     const handleEdit = (offer) => {
         setEditingOffer(offer._id);
         setEditForm({
-            content: offer.content,
-            visibility: offer.visibility
+            titre: offer.titre,
+            description: offer.description,
+            localisation: offer.localisation,
+            typeContrat: offer.typeContrat,
+            competencesRequises: offer.competencesRequises,
+            dateExpiration: offer.dateExpiration,
+            medias: offer.medias
         });
     };
 
@@ -135,8 +157,72 @@ const OffersManagementPage = () => {
             case 'CDD': return 'bg-blue-500';
             case 'Stage': return 'bg-orange-500';
             case 'Freelance': return 'bg-purple-500';
+            case 'Alternance': return 'bg-indigo-500';
             default: return 'bg-gray-500';
         }
+    };
+
+    const handleFileUpload = async (file, formType = 'create') => {
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('media', file);
+        
+        setUploadingMedia(true);
+        
+        try {
+            const response = await axiosInstance.post('/upload/media', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            
+            const mediaUrl = response.data.url;
+            
+            if (formType === 'create') {
+                setCreateForm(prev => ({
+                    ...prev,
+                    medias: [...prev.medias, mediaUrl]
+                }));
+            } else {
+                setEditForm(prev => ({
+                    ...prev,
+                    medias: [...prev.medias, mediaUrl]
+                }));
+            }
+            
+            toast.success('Média uploadé avec succès');
+        } catch (error) {
+            console.error('Erreur lors de l\'upload:', error);
+            toast.error('Erreur lors de l\'upload du média');
+        } finally {
+            setUploadingMedia(false);
+        }
+    };
+
+    const removeMedia = (index, formType = 'create') => {
+        if (formType === 'create') {
+            setCreateForm(prev => ({
+                ...prev,
+                medias: prev.medias.filter((_, i) => i !== index)
+            }));
+        } else {
+            setEditForm(prev => ({
+                ...prev,
+                medias: prev.medias.filter((_, i) => i !== index)
+            }));
+        }
+        toast.success('Média supprimé');
+    };
+
+    const triggerFileUpload = (formType = 'create') => {
+        fileInputRef.current.click();
+        fileInputRef.current.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file, formType);
+            }
+        };
     };
 
     if (isLoading) {
@@ -338,29 +424,150 @@ const OffersManagementPage = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Contenu de l'offre
+                                    Titre de l'offre
                                 </label>
-                                <textarea
-                                    value={createForm.content}
-                                    onChange={(e) => setCreateForm({ ...createForm, content: e.target.value })}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
-                                    rows="4"
-                                    placeholder="Décrivez votre offre d'emploi..."
+                                <input
+                                    type="text"
+                                    value={createForm.titre}
+                                    onChange={(e) => setCreateForm({ ...createForm, titre: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="Titre de l'offre d'emploi..."
                                     required
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Visibilité
+                                    Description
+                                </label>
+                                <textarea
+                                    value={createForm.description}
+                                    onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
+                                    rows="4"
+                                    placeholder="Description détaillée de l'offre d'emploi..."
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Localisation
+                                </label>
+                                <input
+                                    type="text"
+                                    value={createForm.localisation}
+                                    onChange={(e) => setCreateForm({ ...createForm, localisation: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="Ville, pays..."
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Type de contrat
                                 </label>
                                 <select
-                                    value={createForm.visibility}
-                                    onChange={(e) => setCreateForm({ ...createForm, visibility: e.target.value })}
+                                    value={createForm.typeContrat}
+                                    onChange={(e) => setCreateForm({ ...createForm, typeContrat: e.target.value })}
                                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white"
+                                    required
                                 >
-                                    <option value="public">Public</option>
-                                    <option value="private">Privé</option>
+                                    <option value="CDI">CDI</option>
+                                    <option value="CDD">CDD</option>
+                                    <option value="Stage">Stage</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Alternance">Alternance</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Compétences requises (séparées par des virgules)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={createForm.competencesRequises.join(', ')}
+                                    onChange={(e) => setCreateForm({ 
+                                        ...createForm, 
+                                        competencesRequises: e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill)
+                                    })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="JavaScript, React, Node.js..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Date d'expiration
+                                </label>
+                                <input
+                                    type="date"
+                                    value={createForm.dateExpiration}
+                                    onChange={(e) => setCreateForm({ ...createForm, dateExpiration: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Médias
+                                </label>
+                                <div className="space-y-4">
+                                    {/* Zone d'upload */}
+                                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => triggerFileUpload('create')}
+                                            disabled={uploadingMedia}
+                                            className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                        >
+                                            {uploadingMedia ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                            ) : (
+                                                <Upload className="h-4 w-4 mr-2" />
+                                            )}
+                                            {uploadingMedia ? 'Upload en cours...' : 'Ajouter une image'}
+                                        </button>
+                                        <p className="text-sm text-slate-500 mt-2">
+                                            Glissez-déposez une image ou cliquez pour sélectionner
+                                        </p>
+                                    </div>
+
+                                    {/* Prévisualisation des médias */}
+                                    {createForm.medias.length > 0 && (
+                                        <div>
+                                            <h4 className="text-sm font-medium text-slate-700 mb-3">Images uploadées :</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                {createForm.medias.map((media, index) => (
+                                                    <div key={index} className="relative group">
+                                                        <img
+                                                            src={media}
+                                                            alt={`media-${index}`}
+                                                            className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
+                                                        />
+                                                        <div className="hidden w-full h-24 bg-slate-100 rounded-lg border border-slate-200 items-center justify-center">
+                                                            <ImageIcon className="h-8 w-8 text-slate-400" />
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeMedia(index, 'create')}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex justify-end space-x-4 pt-4">
                                 <button
@@ -398,28 +605,150 @@ const OffersManagementPage = () => {
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Contenu de l'offre
+                                    Titre de l'offre
                                 </label>
-                                <textarea
-                                    value={editForm.content}
-                                    onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
-                                    rows="4"
+                                <input
+                                    type="text"
+                                    value={editForm.titre}
+                                    onChange={(e) => setEditForm({ ...editForm, titre: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="Titre de l'offre d'emploi..."
                                     required
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                    Visibilité
+                                    Description
+                                </label>
+                                <textarea
+                                    value={editForm.description}
+                                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
+                                    rows="4"
+                                    placeholder="Description détaillée de l'offre d'emploi..."
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Localisation
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editForm.localisation}
+                                    onChange={(e) => setEditForm({ ...editForm, localisation: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="Ville, pays..."
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Type de contrat
                                 </label>
                                 <select
-                                    value={editForm.visibility}
-                                    onChange={(e) => setEditForm({ ...editForm, visibility: e.target.value })}
+                                    value={editForm.typeContrat}
+                                    onChange={(e) => setEditForm({ ...editForm, typeContrat: e.target.value })}
                                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 bg-white"
+                                    required
                                 >
-                                    <option value="public">Public</option>
-                                    <option value="private">Privé</option>
+                                    <option value="CDI">CDI</option>
+                                    <option value="CDD">CDD</option>
+                                    <option value="Stage">Stage</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Alternance">Alternance</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Compétences requises (séparées par des virgules)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editForm.competencesRequises.join(', ')}
+                                    onChange={(e) => setEditForm({ 
+                                        ...editForm, 
+                                        competencesRequises: e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill)
+                                    })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    placeholder="JavaScript, React, Node.js..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Date d'expiration
+                                </label>
+                                <input
+                                    type="date"
+                                    value={editForm.dateExpiration ? editForm.dateExpiration.split('T')[0] : ''}
+                                    onChange={(e) => setEditForm({ ...editForm, dateExpiration: e.target.value })}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Médias
+                                </label>
+                                <div className="space-y-4">
+                                    {/* Zone d'upload */}
+                                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-emerald-400 transition-colors">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => triggerFileUpload('edit')}
+                                            disabled={uploadingMedia}
+                                            className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                        >
+                                            {uploadingMedia ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                            ) : (
+                                                <Upload className="h-4 w-4 mr-2" />
+                                            )}
+                                            {uploadingMedia ? 'Upload en cours...' : 'Ajouter une image'}
+                                        </button>
+                                        <p className="text-sm text-slate-500 mt-2">
+                                            Glissez-déposez une image ou cliquez pour sélectionner
+                                        </p>
+                                    </div>
+
+                                    {/* Prévisualisation des médias */}
+                                    {editForm.medias.length > 0 && (
+                                        <div>
+                                            <h4 className="text-sm font-medium text-slate-700 mb-3">Images uploadées :</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                {editForm.medias.map((media, index) => (
+                                                    <div key={index} className="relative group">
+                                                        <img
+                                                            src={media}
+                                                            alt={`media-${index}`}
+                                                            className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
+                                                        />
+                                                        <div className="hidden w-full h-24 bg-slate-100 rounded-lg border border-slate-200 items-center justify-center">
+                                                            <ImageIcon className="h-8 w-8 text-slate-400" />
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeMedia(index, 'edit')}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex justify-end space-x-4 pt-4">
                                 <button

@@ -20,7 +20,7 @@ export const sendConnectionRequest = async (req, res) => {
 			});
 		}
 
-		// 2. Interdire l’auto-demande
+		// 2. Interdire l'auto-demande
 		if (senderId === userId) {
 			return res.status(400).json({
 				success: false,
@@ -75,6 +75,16 @@ export const sendConnectionRequest = async (req, res) => {
 			message: `${req.user.name} vous a envoyé une demande de connexion`,
 		});
 
+		// 7. Émettre un événement socket.io au destinataire
+		const io = req.app.get("io");
+		if (io) {
+			io.to(userId).emit("newConnectionRequest", {
+				senderId,
+				recipientId: userId,
+				request: connectionRequest,
+			});
+		}
+
 		console.log("✅ Demande et notification enregistrées");
 
 		return res.status(201).json({
@@ -107,7 +117,7 @@ export const acceptConnectionRequest = async (req, res) => {
 			});
 		}
 
-		// 2. Vérifier l’autorisation
+		// 2. Vérifier l'autorisation
 		if (request.recipient.toString() !== userId) {
 			return res.status(403).json({
 				success: false,
@@ -193,7 +203,7 @@ export const rejectConnectionRequest = async (req, res) => {
 			});
 		}
 
-		// 2. Vérifier l’autorisation
+		// 2. Vérifier l'autorisation
 		if (request.recipient.toString() !== userId) {
 			return res.status(403).json({
 				success: false,
@@ -209,7 +219,7 @@ export const rejectConnectionRequest = async (req, res) => {
 			});
 		}
 
-		// 4. Supprimer la demande rejetée
+		// 4. Supprimer uniquement la demande rejetée
 		await request.deleteOne();
 
 		// 5. Supprimer notification de type "connection_request" si existante
@@ -291,7 +301,7 @@ export const getUserConnections = async (req, res) => {
 
 		console.log(`✅ ${connections.length} connexion(s) trouvée(s)`);
 
-		// 2. Extraire l’autre utilisateur de chaque relation
+		// 2. Extraire l'autre utilisateur de chaque relation
 		const connectedUsers = connections.map(connection => {
 			const isUser1 = connection.user1._id.toString() === userId;
 			const other = isUser1 ? connection.user2 : connection.user1;

@@ -6,6 +6,7 @@ import adminRoutes from "./admin.route.js";
 import recruteurRoutes from "./recruteur.route.js";
 import offresRoutes from "./offres.route.js";
 import { queryChatbot } from '../controllers/chatbot.controller.js';
+import { uploadMedia } from '../controllers/upload.controller.js';
 
 const router = express.Router();
 
@@ -18,6 +19,9 @@ router.use("/users", userRoutes);
 router.use("/posts", postRoutes);
 router.use("/admin", adminRoutes);
 router.use("/recruteur", recruteurRoutes);
+
+// Route pour l'upload de médias
+router.post('/upload/media', uploadMedia);
 
 // Route pour le chatbot
 router.post('/chatbot/query', queryChatbot);
