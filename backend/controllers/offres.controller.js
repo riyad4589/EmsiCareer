@@ -48,7 +48,8 @@ export const getOfferById = async (req, res) => {
     const offer = await Offre.findById(req.params.id)
       .populate("author", "name companyName companyLogo industry description")
       .populate("comments.user", "name profilePicture")
-      .populate("likes", "name profilePicture");
+      .populate("likes", "name profilePicture")
+      .populate("candidatures.laureat", "name email profilePicture");
     
     if (!offer) {
       return res.status(404).json({ message: "Offre non trouvée" });

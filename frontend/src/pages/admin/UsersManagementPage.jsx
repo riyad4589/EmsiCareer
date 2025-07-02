@@ -1530,4 +1530,3 @@ const UsersManagementPage = () => {
 };
 
 export default UsersManagementPage;
-
