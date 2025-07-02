@@ -1,3 +1,44 @@
+# name: Deploy Backend (Node.js) to Azure App Service
+
+# on:
+#   push:
+#     branches:
+#       - AZZAM
+#   workflow_dispatch:
+
+# jobs:
+#   deploy-backend:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '20.x'
+
+#       - name: Install dependencies
+#         working-directory: ./backend
+#         run: npm install
+
+#       - name: Archive backend for deployment
+#         run: |
+#           cd backend
+#           zip -r ../release.zip . -x "**/node_modules/*" "**/.env" "../frontend/*"
+
+#       - name: Deploy to Azure Web App
+#         uses: azure/webapps-deploy@v3
+#         with:
+#           app-name: 'EmsiCarrer'
+#           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+#           package: release.zip
+
+
+
+
+
 name: Deploy Backend (Node.js) to Azure App Service
 
 on:
@@ -11,26 +52,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Configurer Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: Install dependencies
+      # 3. Installer les dépendances backend
+      - name: Install backend dependencies
         working-directory: ./backend
         run: npm install
 
+      # 4. Archiver uniquement le backend
       - name: Archive backend for deployment
         run: |
           cd backend
           zip -r ../release.zip . -x "**/node_modules/*" "**/.env" "../frontend/*"
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+      # 5. Connexion à Azure
+      - name: Azure Login
+        uses: azure/login@v1
         with:
-          app-name: 'EmsiCarrer'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: release.zip
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 6. Déploiement manuel via Azure CLI
+      - name: Deploy using Azure CLI
+        run: |
+          az webapp deploy \
+            --resource-group emsi-pfa-rg \
+            --name EmsiCarrer \
+            --src-path release.zip \
+            --type zip
