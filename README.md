@@ -1,4 +1,4 @@
-# Emsi Carrer - PFA 2024 - 2025
+# Emsi Career - PFA 2024 - 2025
 
 Ce projet est une application web complète inspirée de LinkedIn, permettant la gestion de profils, de publications, de connexions, de messagerie en temps réel, d'offres d'emploi, de notifications, et d'administration. Il est conçu pour un usage académique ou comme base pour un réseau social professionnel.
 
