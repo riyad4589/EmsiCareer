@@ -40,6 +40,8 @@ router.delete("/posts/:postId", protect, admin, deletePost);
 
 // Ajout route pour récupérer toutes les offres côté admin
 router.get("/offres", protect, admin, getAllOffers);
+router.delete('/posts/:id', deletePost); // <- cette route doit exister
+
 
 // Route pour les statistiques admin
 router.get("/stats", protect, admin, getStats);

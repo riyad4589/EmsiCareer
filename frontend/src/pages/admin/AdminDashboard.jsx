@@ -176,7 +176,7 @@ const AdminDashboard = () => {
                                         <div className="flex items-center gap-6">
                                             <div className="relative">
                                                 <img
-                                                    src={user.profilePicture || "/default-avatar.png"}
+                                                    src={user.profilePicture || "/avatar.png"}
                                                     alt={user.name}
                                                     className="w-14 h-14 rounded-2xl object-cover shadow-lg border-2 border-green-100 group-hover:border-green-200 transition-colors"
                                                 />
