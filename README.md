@@ -165,6 +165,6 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 
 ## Documentation
 
-[📄 Télécharger le rapport complet (PDF)]((https://www.mediafire.com/file/gy4lhy72yztola3/Rapport_PFA_Majghirou_Mohamed_Riyad_-_Mohamed_Azzam.pdf/file))
+[📄 Télécharger le rapport complet (PDF)](https://www.mediafire.com/file/gy4lhy72yztola3/Rapport_PFA_Majghirou_Mohamed_Riyad_-_Mohamed_Azzam.pdf/file)
 
 **Projet réalisé par MAJGHIROU Mohamed Riyad et AZZAM Mohamed dans un but pédagogique.** 
