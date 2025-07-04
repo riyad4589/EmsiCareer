@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Heart, MessageCircle, Share2, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Send, Users } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
@@ -60,7 +60,7 @@ const PostList = ({ posts }) => {
 		}));
 	};
 
-	if (!posts?.data || posts.data.length === 0) {
+	if (!posts || posts.length === 0) {
 		return (
 			<div className="text-center py-8">
 				<p className="text-gray-600">Aucun post pour le moment</p>
@@ -68,18 +68,20 @@ const PostList = ({ posts }) => {
 		);
 	}
 
+	const validPosts = posts.filter(post => post.author && post.author.name);
+
 	return (
 		<div className="space-y-6">
-			{posts.data.map((post) => (
+			{validPosts.map((post) => (
 				<div key={post._id} className="bg-white rounded-lg shadow p-6">
 					<div className="flex items-center space-x-4 mb-4">
 						<img
-							src={post.author.profilePicture || "/default-avatar.png"}
-							alt={post.author.name}
+							src={post.author?.profilePicture || "/default-avatar.png"}
+							alt={post.author?.name || "Utilisateur"}
 							className="w-12 h-12 rounded-full"
 						/>
 						<div>
-							<h3 className="font-medium">{post.author.name}</h3>
+							<h3 className="font-medium">{post.author?.name || "Utilisateur inconnu"}</h3>
 							<p className="text-sm text-gray-500">
 								{formatDistanceToNow(new Date(post.createdAt), {
 									addSuffix: true,
@@ -113,7 +115,7 @@ const PostList = ({ posts }) => {
 						</button>
 						<button
 							onClick={() => toggleComments(post._id)}
-							className="flex items-center space-x-2 hover:text-blue-500"
+							className="flex items-center space-x-2 hover:text-green-500"
 						>
 							<MessageCircle size={20} />
 							<span>{post.comments.length}</span>
@@ -136,12 +138,12 @@ const PostList = ({ posts }) => {
 										}))
 									}
 									placeholder="Ajouter un commentaire..."
-									className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+									className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 								/>
 								<button
 									onClick={() => handleComment(post._id)}
 									disabled={commentMutation.isPending}
-									className="p-2 text-blue-500 hover:text-blue-600 disabled:opacity-50"
+									className="p-2 text-green-500 hover:text-green-600 disabled:opacity-50"
 								>
 									<Send size={20} />
 								</button>
@@ -154,14 +156,14 @@ const PostList = ({ posts }) => {
 										className="flex items-start space-x-3 bg-gray-50 p-3 rounded-lg"
 									>
 										<img
-											src={comment.user.profilePicture || "/default-avatar.png"}
-											alt={comment.user.name}
+											src={comment.user?.profilePicture || "/default-avatar.png"}
+											alt={comment.user?.name || "Utilisateur"}
 											className="w-8 h-8 rounded-full"
 										/>
 										<div className="flex-1">
 											<div className="flex items-center space-x-2">
 												<h4 className="font-medium text-sm">
-													{comment.user.name}
+													{comment.user?.name || "Utilisateur inconnu"}
 												</h4>
 												<span className="text-xs text-gray-500">
 													{formatDistanceToNow(new Date(comment.createdAt), {

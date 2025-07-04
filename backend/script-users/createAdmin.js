@@ -4,13 +4,13 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { User } from '../models/user.model.js'; // Vérifie que l'export est bien fait avec "export"
+import User from '../models/user.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Charger .env depuis le bon chemin
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const createAdminUser = async () => {
     const mongoUri = process.env.MONGO_URI;

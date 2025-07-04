@@ -10,12 +10,14 @@ import {
 	sharePost,
 	applyToJobPost,
 	getJobPostApplications,
+	getOnlyPosts,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
 
 router.post("/", protect, createPost);
 router.get("/", protect, getFeedPosts);
+router.get("/only", protect, getOnlyPosts);
 router.get("/:postId", protect, getPost);
 router.delete("/:postId", protect, deletePost);
 router.post("/:postId/comment", protect, addComment);

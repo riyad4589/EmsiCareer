@@ -80,7 +80,7 @@ const PostsManagementPage = () => {
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen">
-				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
 			</div>
 		);
 	}
@@ -162,7 +162,7 @@ const PostsManagementPage = () => {
 											<div className="flex items-center justify-end space-x-4">
 												<button
 													onClick={() => handleEdit(post)}
-													className="text-blue-600 hover:text-blue-900"
+													className="text-green-600 hover:text-green-900"
 												>
 													<Edit size={18} />
 												</button>
@@ -203,7 +203,7 @@ const PostsManagementPage = () => {
 									Contenu
 								</label>
 								<textarea
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
 									rows="4"
 									value={editForm.content}
 									onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
@@ -215,7 +215,7 @@ const PostsManagementPage = () => {
 									Visibilité
 								</label>
 								<select
-									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+									className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
 									value={editForm.visibility}
 									onChange={(e) => setEditForm({ ...editForm, visibility: e.target.value })}
 								>
@@ -233,7 +233,7 @@ const PostsManagementPage = () => {
 								</button>
 								<button
 									type="submit"
-									className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+									className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
 								>
 									Enregistrer
 								</button>

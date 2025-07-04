@@ -6,6 +6,12 @@ import { mailtrapClient,sender } from "../lib/mailtrap.js";
 import { createPendingValidationEmailTemplate } from "./emailTemplates.js"
 import { validationAccountleaureatTemplate } from "./emailTemplates.js"
 import { rejectionAccountTemplate } from "./emailTemplates.js"
+import { createNewOfferEmailTemplate } from "./emailTemplates.js";
+import { createCandidatureAcceptedEmailTemplate } from "./emailTemplates.js";
+import { createCandidatureRejectedEmailTemplate } from "./emailTemplates.js";
+import { createNewCandidatureNotificationTemplate } from "./emailTemplates.js";
+
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,30 +27,7 @@ const replacePlaceholders = (template, data) => {
 	return result;
 };
 
-// export const sendWelcomeEmail = async (email, name) => {
-// 	const recipient = { to: email };
 
-// 	try {
-// 		const emailContent = replacePlaceholders(emailTemplate, {
-// 			name: name.toUpperCase(),
-// 			email: email
-// 		});
-
-// 		const mailOptions = {
-// 			from: `"${sender.name}" <${sender.email}>`,
-// 			to: recipient.to,
-// 			subject: "Compte en attente de validation",
-// 			html: emailContent,
-// 		};
-
-// 		const info = await transporter.sendMail(mailOptions);
-
-// 		console.log("Email de bienvenue envoyé avec succès", info.messageId);
-// 	} catch (error) {
-// 		console.error("Erreur lors de l'envoi de l'email de bienvenue:", error);
-// 		throw error;
-// 	}
-// };
 
 
 
@@ -149,4 +132,124 @@ export const sendRejectionEmail = async (emailPersonelle, name, emailEdu) => {
 		throw error;
 	}
 };
+
+
+export const sendNewOfferEmailToLaureat = async (laureat, offer) => {
+  const targetEmail = laureat.emailPersonelle;
+
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    console.warn(`❌ Email invalide pour ${laureat.name}`);
+    return;
+  }
+
+
+  try {
+    const response = await mailtrapClient.send({
+      from: sender,
+      to: [{ email: targetEmail }],
+      subject: `📢 Nouvelle offre : ${offer.titre}`,
+      html: createNewOfferEmailTemplate(laureat.name, offer),
+      category: "new-offer"
+    });
+
+    console.log(`📬 Email envoyé à ${laureat.name} (${targetEmail})`);
+  } catch (error) {
+    console.error("Erreur lors de l’envoi de l’email : ", error.message);
+  }
+};
+
+
+
+export const sendCandidatureAcceptedEmail = async (recipientUser, offerTitle) => {
+  const targetEmail = recipientUser.emailPersonelle;
+
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    console.warn(`❌ Email invalide pour ${recipientUser.name}`);
+    return;
+  }
+
+  try {
+    await mailtrapClient.send({
+      from: sender,
+      to: [{ email: targetEmail }],
+      subject: `🎉 Votre candidature pour "${offerTitle}" a été acceptée`,
+      html: createCandidatureAcceptedEmailTemplate(recipientUser.name, offerTitle),
+      category: "candidature-accepted",
+    });
+
+    console.log(`📨 Email envoyé à ${recipientUser.name}`);
+  } catch (error) {
+    console.error("❌ Erreur envoi email:", error.message);
+  }
+};
+
+
+
+export const sendCandidatureRejectedEmail = async (recipientUser, offerTitle) => {
+  const targetEmail = recipientUser.emailPersonelle ;
+
+  if (!targetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(targetEmail)) {
+    console.warn(`❌ Email invalide pour ${recipientUser.name}`);
+    return;
+  }
+
+  try {
+    await mailtrapClient.send({
+      from: sender,
+      to: [{ email: targetEmail }],
+      subject: `🔔 Mise à jour concernant votre candidature à "${offerTitle}"`,
+      html: createCandidatureRejectedEmailTemplate(recipientUser.name, offerTitle),
+      category: "candidature-rejected",
+    });
+
+    console.log(`📨 Email de refus envoyé à ${recipientUser.name}`);
+  } catch (error) {
+    console.error("❌ Erreur envoi email (refus) :", error.message);
+  }
+};
+
+
+
+export const sendNewCandidatureEmail = async ({
+  recruteurEmail,
+  recruteurNom,
+  laureatNom,
+  offreTitre,
+  cvUrl,
+  lettreMotivationUrl
+}) => {
+  const emailToSend = recruteurEmail?.trim(); // 🧼 nettoie les espaces
+
+  console.log("🧪 Tentative d'envoi à :", emailToSend);
+
+  if (!emailToSend || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToSend)) {
+    console.warn("❌ Email du recruteur invalide :", emailToSend);
+    return;
+  }
+
+  const html = createNewCandidatureNotificationTemplate(
+    recruteurNom,
+    laureatNom,
+    offreTitre,
+    cvUrl,
+    lettreMotivationUrl
+  );
+
+  try {
+    const response = await mailtrapClient.send({
+      from: sender,
+      to: [{ email: emailToSend }],
+      subject: `📬 Nouvelle candidature pour "${offreTitre}"`,
+      html,
+      category: "new-candidature"
+    });
+
+    console.log("✅ Email de candidature envoyé à :", emailToSend);
+    console.log("📨 Réponse Mailtrap :", response);
+  } catch (error) {
+    console.error("❌ Erreur envoi email candidature :", error.message);
+    throw error;
+  }
+};
+
 

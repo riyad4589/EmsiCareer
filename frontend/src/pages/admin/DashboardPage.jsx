@@ -24,7 +24,7 @@ const DashboardPage = () => {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Chargement des statistiques...</p>
                 </div>
             </div>
@@ -51,7 +51,7 @@ const DashboardPage = () => {
                     {/* Carte des utilisateurs */}
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <div className="p-3 rounded-full bg-green-100 text-green-600">
                                 <Users className="h-6 w-6" />
                             </div>
                             <div className="ml-4">
@@ -95,7 +95,7 @@ const DashboardPage = () => {
                             </div>
                             <div className="ml-4">
                                 <h2 className="text-sm font-medium text-gray-600">Offres</h2>
-                                <p className="text-2xl font-semibold text-gray-900">{stats?.totalOffers || 0}</p>
+                                <p className="text-2xl font-semibold text-gray-900">{stats?.totalOffers ?? 0}</p>
                             </div>
                         </div>
                     </div>

@@ -5,6 +5,37 @@ import { toast } from "react-hot-toast";
 import { Loader, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const PasswordStrengthIndicator = ({ password }) => {
+	const getStrength = (password) => {
+		let strength = 0;
+		if (password.length >= 8) strength++;
+		if (password.match(/[a-z]/)) strength++;
+		if (password.match(/[A-Z]/)) strength++;
+		if (password.match(/[0-9]/)) strength++;
+		if (password.match(/[^a-zA-Z0-9]/)) strength++;
+		return strength;
+	};
+
+	const strength = getStrength(password);
+	const strengthLabels = ["Très faible", "Faible", "Moyen", "Fort", "Très fort", "Excellent"];
+	const strengthColors = ["bg-red-500", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500", "bg-green-600"];
+
+	return (
+		<div className="mt-1">
+			<div className="flex justify-between items-center mb-1">
+				<span className="text-xs text-gray-500">Force du mot de passe</span>
+				<span className={`text-xs font-semibold ${strength > 2 ? 'text-green-600' : 'text-red-600'}`}>{strengthLabels[strength]}</span>
+			</div>
+			<div className="w-full bg-gray-200 rounded-full h-2">
+				<div
+					className={`h-2 rounded-full ${strengthColors[strength]}`}
+					style={{ width: `${(strength / 5) * 100}%`, transition: 'width 0.3s' }}
+				></div>
+			</div>
+		</div>
+	);
+};
+
 const SignUpForm = () => {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -107,7 +138,7 @@ const SignUpForm = () => {
 						placeholder='Entrez votre nom complet'
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -121,7 +152,7 @@ const SignUpForm = () => {
 						placeholder='Choisissez un nom d\'utilisateur'
 						value={username}
 						onChange={(e) => setUsername(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -135,7 +166,7 @@ const SignUpForm = () => {
 						placeholder='Entrez votre email'
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary'
+						className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success'
 						required
 					/>
 				</div>
@@ -150,17 +181,18 @@ const SignUpForm = () => {
 							placeholder='Créez un mot de passe (6+ caractères)'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary pr-10'
+							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success pr-10'
 							required
 						/>
 						<button
 							type="button"
 							onClick={() => setShowPassword(!showPassword)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-primary transition-colors duration-200"
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-success transition-colors duration-200"
 						>
 							{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
 						</button>
 					</div>
+					{password && <PasswordStrengthIndicator password={password} />}
 				</div>
 				<div className="space-y-2">
 					<label htmlFor="confirmPassword" className="block text-sm font-medium text-info">
@@ -173,13 +205,13 @@ const SignUpForm = () => {
 							placeholder='Confirmez votre mot de passe'
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
-							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary pr-10'
+							className='input input-bordered w-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-success pr-10'
 							required
 						/>
 						<button
 							type="button"
 							onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-primary transition-colors duration-200"
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-info hover:text-success transition-colors duration-200"
 						>
 							{showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
 						</button>
@@ -189,7 +221,7 @@ const SignUpForm = () => {
 				<button 
 					type='submit' 
 					disabled={isLoading}
-					className='btn btn-primary w-full hover:bg-primary-dark transition-colors duration-200'
+					className='btn btn-success w-full hover:bg-success-dark transition-colors duration-200'
 				>
 					{isLoading ? (
 						<>
@@ -204,7 +236,7 @@ const SignUpForm = () => {
 			<div className="text-center text-sm text-info">
 				<p>
 					Déjà un compte ?{" "}
-					<Link to="/login" className="text-primary hover:text-primary-dark transition-colors duration-200">
+					<Link to="/login" className="text-success hover:text-success-dark transition-colors duration-200">
 						Se connecter
 					</Link>
 				</p>

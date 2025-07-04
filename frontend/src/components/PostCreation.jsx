@@ -128,7 +128,7 @@ const PostCreation = () => {
 						onClick={() => setShowJobForm(!showJobForm)}
 						className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
 							showJobForm 
-								? "bg-blue-50 border-blue-200 text-blue-700" 
+								? "bg-green-50 border-green-200 text-green-700" 
 								: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
 						}`}
 					>
@@ -140,8 +140,8 @@ const PostCreation = () => {
 
 			{/* Formulaire d'offre d'emploi */}
 			{showJobForm && (
-				<div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-					<h4 className="font-semibold text-blue-800 mb-3">Détails de l'offre d'emploi</h4>
+				<div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+					<h4 className="font-semibold text-green-800 mb-3">Détails de l'offre d'emploi</h4>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<label className="block text-sm font-medium text-gray-700 mb-1">
@@ -152,7 +152,7 @@ const PostCreation = () => {
 								value={jobDetails.titre}
 								onChange={(e) => setJobDetails(prev => ({ ...prev, titre: e.target.value }))}
 								placeholder="Ex: Développeur Full Stack"
-								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 							/>
 						</div>
 						<div>
@@ -164,7 +164,7 @@ const PostCreation = () => {
 								value={jobDetails.localisation}
 								onChange={(e) => setJobDetails(prev => ({ ...prev, localisation: e.target.value }))}
 								placeholder="Ex: Paris, France"
-								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 							/>
 						</div>
 						<div>
@@ -174,7 +174,7 @@ const PostCreation = () => {
 							<select
 								value={jobDetails.typeContrat}
 								onChange={(e) => setJobDetails(prev => ({ ...prev, typeContrat: e.target.value }))}
-								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 							>
 								<option value="CDI">CDI</option>
 								<option value="CDD">CDD</option>
@@ -194,12 +194,12 @@ const PostCreation = () => {
 									onChange={(e) => setNewCompetence(e.target.value)}
 									onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCompetence())}
 									placeholder="Ajouter une compétence"
-									className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+									className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
 								/>
 								<button
 									type="button"
 									onClick={handleAddCompetence}
-									className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+									className="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
 								>
 									+
 								</button>
@@ -207,12 +207,12 @@ const PostCreation = () => {
 							{jobDetails.competencesRequises.length > 0 && (
 								<div className="flex flex-wrap gap-1 mt-2">
 									{jobDetails.competencesRequises.map((comp, index) => (
-										<span key={index} className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+										<span key={index} className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
 											{comp}
 											<button
 												type="button"
 												onClick={() => handleRemoveCompetence(index)}
-												className="text-blue-600 hover:text-blue-800"
+												className="text-green-600 hover:text-green-800"
 											>
 												×
 											</button>
@@ -230,7 +230,7 @@ const PostCreation = () => {
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={showJobForm ? "Décrivez le poste, les responsabilités, l'environnement de travail..." : "Quoi de neuf ?"}
-					className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+					className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
 					rows="3"
 				/>
 				{imagePreview && (
@@ -260,12 +260,12 @@ const PostCreation = () => {
 							onChange={handleImageChange}
 							className="hidden"
 						/>
-						<ImageIcon className="text-gray-500 hover:text-blue-500" />
+						<ImageIcon className="text-gray-500 hover:text-green-500" />
 					</label>
 					<button
 						type="submit"
 						disabled={createPostMutation.isPending}
-						className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+						className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{createPostMutation.isPending ? (
 							<Loader className="animate-spin" />

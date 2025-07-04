@@ -1,17 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
-import { Link, useLocation } from "react-router-dom";
-import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, Home, LogOut, User, Users, MessageSquare, Briefcase, LogIn } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const Navbar = () => {
-	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+	const { data: authUser } = useQuery({ 
+		queryKey: ["authUser"],
+		queryFn: async () => {
+			try {
+				const res = await axiosInstance.get("/auth/me");
+				return res.data;
+			} catch (error) {
+				return null;
+			}
+		},
+		retry: false,
+	 });
 	const queryClient = useQueryClient();
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	const { data: notifications } = useQuery({
 		queryKey: ["notifications"],
-		queryFn: async () => axiosInstance.get("/notifications"),
+		queryFn: async () => {
+			const res = await axiosInstance.get("/notifications");
+			return res.data.data;
+		},
 		enabled: !!authUser,
 	});
 
@@ -26,14 +41,17 @@ const Navbar = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["authUser"] });
 			toast.success("Déconnexion réussie");
+			navigate("/login");
 		},
 		onError: () => {
 			toast.error("Erreur lors de la déconnexion");
 		},
 	});
 
-	const unreadNotificationCount = notifications?.data.filter((notif) => !notif.read).length;
-	const unreadConnectionRequestsCount = connectionRequests?.data?.length;
+	const unreadNotificationCount = Array.isArray(notifications)
+		? notifications.filter((notif) => !notif.read).length
+		: 0;
+	const unreadConnectionRequestsCount = connectionRequests?.data?.data?.length || 0;
 
 	const isActive = (path) => {
 		return location.pathname === path;
@@ -42,8 +60,8 @@ const Navbar = () => {
 	const navLinkClass = (path) => {
 		return `flex flex-col items-center transition-colors duration-200 ${
 			isActive(path)
-				? "text-primary"
-				: "text-neutral hover:text-primary"
+				? "text-success"
+				: "text-neutral hover:text-success"
 		}`;
 	};
 
@@ -53,7 +71,11 @@ const Navbar = () => {
 				<div className='flex justify-between items-center py-3'>
 					<div className='flex items-center space-x-4'>
 						<Link to='/'>
-							<img className='h-8 rounded hover:opacity-90 transition-opacity duration-200' src='/small-logo.png' alt='LinkedIn' />
+							<img
+							src="/logo_emsi.png"
+							alt="Portail EMSI"
+							className="h-12 max-h-16 w-auto rounded hover:opacity-90 transition-opacity duration-200 object-contain"
+							/>
 						</Link>
 					</div>
 					<div className='flex items-center gap-2 md:gap-6'>
@@ -68,12 +90,16 @@ const Navbar = () => {
 									<span className='text-xs hidden md:block'>Réseau</span>
 									{unreadConnectionRequestsCount > 0 && (
 										<span
-											className='absolute -top-1 -right-1 md:right-4 bg-primary text-white text-xs 
+											className='absolute -top-1 -right-1 md:right-4 bg-success text-white text-xs 
 											rounded-full size-3 md:size-4 flex items-center justify-center animate-pulse'
 										>
 											{unreadConnectionRequestsCount}
 										</span>
 									)}
+								</Link>
+								<Link to='/job-offers' className={navLinkClass('/job-offers')}>
+									<Briefcase size={20} />
+									<span className='text-xs hidden md:block'>Offres d'emploi</span>
 								</Link>
 								<Link to='/messages' className={navLinkClass("/messages")}>
 									<MessageSquare size={20} />
@@ -84,7 +110,7 @@ const Navbar = () => {
 									<span className='text-xs hidden md:block'>Notifications</span>
 									{unreadNotificationCount > 0 && (
 										<span
-											className='absolute -top-1 -right-1 md:right-4 bg-primary text-white text-xs 
+											className='absolute -top-1 -right-1 md:right-4 bg-success text-white text-xs 
 											rounded-full size-3 md:size-4 flex items-center justify-center animate-pulse'
 										>
 											{unreadNotificationCount}
@@ -98,27 +124,13 @@ const Navbar = () => {
 									<User size={20} />
 									<span className='text-xs hidden md:block'>Profil</span>
 								</Link>
-								<Link to='/job-offers' className={navLinkClass('/job-offers')}>
-									<Briefcase size={20} />
-									<span className='text-xs hidden md:block'>Offres d'emploi</span>
-								</Link>
-								<button
-									className='flex items-center space-x-1 text-sm text-neutral hover:text-primary transition-colors duration-200'
-									onClick={() => logout()}
-								>
-									<LogOut size={20} />
-									<span className='hidden md:inline'>Déconnexion</span>
-								</button>
 							</>
+							
 						) : (
-							<>
-								<Link to='/login' className='btn btn-ghost'>
-									Connexion
-								</Link>
-								<Link to='/signup' className='btn btn-primary'>
-									S'inscrire
-								</Link>
-							</>
+							<Link to='/login' className={navLinkClass('/login')}>
+								<LogIn size={20} />
+								<span className='text-xs hidden md:block'>Connexion</span>
+							</Link>
 						)}
 					</div>
 				</div>

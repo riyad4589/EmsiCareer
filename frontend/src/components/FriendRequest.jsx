@@ -25,7 +25,7 @@ const Avatar = ({ user, className = "" }) => {
 
 	return (
 		<div
-			className={`flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-medium ${className}`}
+			className={`flex items-center justify-center rounded-full bg-green-100 text-green-600 font-medium ${className}`}
 		>
 			{initials || <User size={20} />}
 		</div>

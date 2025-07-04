@@ -24,7 +24,7 @@ const Avatar = ({ user, className = "" }) => {
 
 	return (
 		<div
-			className={`flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-medium ${className}`}
+			className={`flex items-center justify-center rounded-full bg-green-100 text-green-600 font-medium ${className}`}
 		>
 			{initials || <User size={20} />}
 		</div>
@@ -43,7 +43,7 @@ const RecommendedUsers = () => {
 	});
 
 	const connectMutation = useMutation({
-		mutationFn: (userId) => axiosInstance.post(`/connections/${userId}`),
+		mutationFn: (userId) => axiosInstance.post(`/connections/request/${userId}`),
 		onSuccess: (_, userId) => {
 			// Mettre à jour le cache pour marquer l'utilisateur comme en attente
 			queryClient.setQueryData(["suggestions"], (oldData) => {
@@ -99,7 +99,7 @@ const RecommendedUsers = () => {
 						className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
 							user.status === "pending"
 								? "bg-gray-100 text-gray-500 cursor-not-allowed"
-								: "bg-blue-50 text-blue-600 hover:bg-blue-100"
+								: "bg-green-50 text-green-600 hover:bg-green-100"
 						}`}
 					>
 						{connectMutation.isPending && user._id === connectMutation.variables ? (

@@ -12,7 +12,7 @@ const NotificationsPage = () => {
 		queryKey: ["notifications"],
 		queryFn: async () => {
 			const response = await axiosInstance.get("/notifications");
-			return response.data;
+			return response.data.data;
 		},
 	});
 
@@ -72,12 +72,12 @@ const NotificationsPage = () => {
 		<div className="max-w-4xl mx-auto py-8 px-4">
 			<div className="flex justify-between items-center mb-6">
 				<h1 className="text-2xl font-bold">Notifications</h1>
-				{notifications?.data?.length > 0 && (
+				{notifications?.length > 0 && (
 					<div className="flex gap-4">
 						<button
 							onClick={() => markAllAsReadMutation.mutate()}
 							disabled={markAllAsReadMutation.isPending}
-							className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-2"
+							className="text-sm text-green-600 hover:text-green-700 flex items-center gap-2"
 						>
 							{markAllAsReadMutation.isPending ? (
 								<Loader size={16} className="animate-spin" />
@@ -103,14 +103,14 @@ const NotificationsPage = () => {
 			</div>
 
 			<div className="space-y-4">
-				{notifications?.data?.length === 0 ? (
+				{!notifications || notifications?.length === 0 ? (
 					<p className="text-center text-gray-500">Aucune notification</p>
 				) : (
-					notifications.data.map((notification) => (
+					notifications.map((notification) => (
 						<div
 							key={notification._id}
 							className={`p-4 rounded-lg border ${
-								notification.read ? "bg-white" : "bg-blue-50"
+								notification.read ? "bg-white" : "bg-green-50"
 							}`}
 						>
 							<div className="flex justify-between items-start">

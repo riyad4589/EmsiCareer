@@ -6,7 +6,8 @@ import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import { sendValidationSuccessEmail } from "../emails/emailHandlers.js";
 import { sendRejectionEmail } from "../emails/emailHandlers.js";
 import Connection from "../models/connection.model.js";
-
+import { uploadMediaToAzure } from "../utils/azureBlob.js";
+import Offre from "../models/offre.model.js";
 
 // Obtenir tous les utilisateurs
 export const getAllUsers = async (req, res) => {
@@ -270,88 +271,101 @@ export const updateUserPassword = async (req, res) => {
 };
 
 // Créer un nouvel utilisateur
+
+
 export const createUser = async (req, res) => {
 	try {
-		const { name, emailEdu, emailPersonelle, username, password, role, status, companyName, industry, location, description } = req.body;
+		const {
+			name, emailEdu, emailPersonelle, username,
+			password, role, status,
+			companyName, industry, location, description
+		} = req.body;
 
-		// Validation pour le rôle admin ou recruteur et l'email EMSI
+		// ✅ Validation emails selon rôle
 		if (role === "user" && (!emailEdu || !emailEdu.endsWith("@emsi-edu.ma"))) {
-			return res.status(400).json({ message: 'L\'email éducatif doit se terminer par @emsi-edu.ma pour les utilisateurs.' });
+			return res.status(400).json({ message: "L'email éducatif doit se terminer par @emsi-edu.ma pour les utilisateurs." });
 		} else if ((role === "admin" || role === "recruteur") && (!emailEdu || !emailEdu.endsWith("@emsi.ma"))) {
-			return res.status(400).json({ message: 'L\'email éducatif doit se terminer par @emsi.ma pour les administrateurs et recruteurs.' });
+			return res.status(400).json({ message: "L'email éducatif doit se terminer par @emsi.ma pour les administrateurs et recruteurs." });
 		}
 
-		// Simple validation des champs requis
 		if (!name || !emailEdu || !username || !password) {
-			return res.status(400).json({ message: "Veuillez remplir tous les champs requis (Nom, Email Éducatif, Nom d'utilisateur, Mot de passe)." });
+			return res.status(400).json({ message: "Veuillez remplir tous les champs requis." });
 		}
 
-		// Validation des champs requis pour les recruteurs
-		if (role === "recruteur") {
-			if (!companyName || !industry || !location || !description) {
-				return res.status(400).json({ message: "Veuillez remplir tous les champs requis pour un recruteur (Nom de l'entreprise, Secteur d'activité, Localisation, Description)." });
-			}
+		if (role === "recruteur" && (!companyName || !industry || !location || !description)) {
+			return res.status(400).json({ message: "Champs entreprise manquants pour recruteur." });
 		}
 
-		// Vérifier si le nom d'utilisateur est déjà pris
 		const existingUserByUsername = await User.findOne({ username });
 		if (existingUserByUsername) {
 			return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris." });
 		}
 
-		// Vérification de la longueur du mot de passe
-		if (password.length < 6) {
-			return res.status(400).json({ message: "Le mot de passe doit contenir au moins 6 caractères" });
-		}
-
-		// Vérifier si l'email éducatif est déjà utilisé
 		const existingUser = await User.findOne({ emailEdu });
 		if (existingUser) {
-			return res.status(400).json({ message: "Un utilisateur avec cet email éducatif existe déjà." });
+			return res.status(400).json({ message: "Cet email éducatif est déjà utilisé." });
+		}
+
+		if (password.length < 6) {
+			return res.status(400).json({ message: "Mot de passe trop court (min 6 caractères)" });
 		}
 
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
 
+		// 📤 Upload Azure si fichiers présents
+		let profilePicture = "";
+		let banniere = "";
+		let companyLogo = "";
+
+		if (req.files?.profilePicture) {
+			profilePicture = await uploadMediaToAzure(req.files.profilePicture.tempFilePath, req.files.profilePicture.name, "profile");
+		}
+		if (req.files?.banniere) {
+			banniere = await uploadMediaToAzure(req.files.banniere.tempFilePath, req.files.banniere.name, "banniere");
+		}
+		if (role === "recruteur" && req.files?.companyLogo) {
+			companyLogo = await uploadMediaToAzure(req.files.companyLogo.tempFilePath, req.files.companyLogo.name, "logo");
+		}
+
 		const newUser = new User({
 			name,
+			username,
 			emailEdu,
 			emailPersonelle: emailPersonelle || undefined,
-			username,
 			password: hashedPassword,
 			role: role || "user",
 			status: status || "active",
-			// Champs spécifiques aux recruteurs
+			profilePicture,
+			banniere,
 			...(role === "recruteur" && {
 				companyName,
 				industry,
 				location,
-				description
+				description,
+				companyLogo
 			})
 		});
 
 		await newUser.save();
 
-		// Envoyer l'email de bienvenue
-		const profileUrl = process.env.CLIENT_URL + "/profile/" + newUser.username;
+		// 📧 Email de bienvenue
+		const profileUrl = `${process.env.CLIENT_URL}/profile/${newUser.username}`;
 		try {
 			await sendWelcomeEmail(newUser.emailEdu, newUser.name, profileUrl);
-		} catch (emailError) {
-			console.error("Erreur lors de l'envoi de l'email de bienvenue:", emailError);
-			// On continue même si l'envoi de l'email échoue
+		} catch (e) {
+			console.error("Erreur email bienvenue :", e.message);
 		}
 
-		// Retourner l'utilisateur créé sans le mot de passe
 		const userWithoutPassword = await User.findById(newUser._id).select("-password");
-		res.status(201).json({ 
-			message: "Utilisateur créé avec succès",
-			user: userWithoutPassword
-		});
+		res.status(201).json({ message: "Utilisateur créé avec succès", user: userWithoutPassword });
+
 	} catch (error) {
-		console.error("Erreur lors de la création de l'utilisateur:", error);
+		console.error("Erreur création utilisateur admin :", error);
 		res.status(500).json({ message: error.message });
 	}
 };
+
 
 // Supprimer une connexion d'un utilisateur
 export const deleteConnection = async (req, res) => {
@@ -397,29 +411,25 @@ export const getStats = async (req, res) => {
         const totalUsers = await User.countDocuments({ role: "user" });
         const totalRecruiters = await User.countDocuments({ role: "recruteur" });
         const totalPosts = await Post.countDocuments({ author: { $in: await User.find({ role: "user" }).select('_id') } });
-        
-        // Récupérer les IDs des recruteurs et admins
-        const recruiterAndAdminIds = await User.find({ 
-            role: { $in: ["recruteur", "admin"] } 
-        }).select('_id');
-        
-        // Compter les posts de ces utilisateurs
-        const totalOffers = await Post.countDocuments({ 
-            author: { $in: recruiterAndAdminIds.map(user => user._id) } 
-        });
+        const totalOffers = await Offre.countDocuments();
+        // Nombre d'offres créées par des recruteurs
+        const recruiterIds = await User.find({ role: "recruteur" }).select('_id');
+        const totalOffersByRecruiters = await Offre.countDocuments({ author: { $in: recruiterIds.map(u => u._id) } });
 
         console.log("Statistiques calculées:", {
             totalUsers,
             totalRecruiters,
             totalPosts,
-            totalOffers
+            totalOffers,
+            totalOffersByRecruiters
         });
 
         res.json({
-            totalUsers,
-            totalRecruiters,
-            totalPosts,
-            totalOffers
+            totalUsers: totalUsers ?? 0,
+            totalRecruiters: totalRecruiters ?? 0,
+            totalPosts: totalPosts ?? 0,
+            totalOffers: totalOffers ?? 0,
+            totalOffersByRecruiters: totalOffersByRecruiters ?? 0
         });
     } catch (error) {
         console.error("Erreur lors de la récupération des statistiques:", error);

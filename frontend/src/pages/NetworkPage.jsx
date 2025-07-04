@@ -6,6 +6,8 @@ import { toast } from "react-hot-toast";
 import { Check, X, Loader, MessageSquare, UserMinus, UserPlus, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { invalidateConnectionQueries } from "../utils/queryUtils";
+import { useState, useEffect } from "react";
+
 
 const Avatar = ({ user, className = "" }) => {
 	if (user.profilePicture) {
@@ -28,7 +30,7 @@ const Avatar = ({ user, className = "" }) => {
 
 	return (
 		<div
-			className={`flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-medium ${className}`}
+			className={`flex items-center justify-center rounded-full bg-green-100 text-green-600 font-medium ${className}`}
 		>
 			{initials || <User size={20} />}
 		</div>
@@ -39,6 +41,7 @@ const NetworkPage = () => {
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
+	const [localConnectionRequests, setLocalConnectionRequests] = useState([]);
 
 	const { data: connectionsData, isLoading: connectionsLoading } = useQuery({
 		queryKey: ["connections"],
@@ -58,14 +61,19 @@ const NetworkPage = () => {
 		enabled: !!user,
 	});
 
-	const { data: connectionRequestsData, isLoading: requestsLoading } = useQuery({
-		queryKey: ["connectionRequests"],
-		queryFn: async () => {
-			const response = await axiosInstance.get("/connections/requests");
-			return response.data;
-		},
-		enabled: !!user,
-	});
+	const { 
+			data: connectionRequestsData, 
+			isLoading: requestsLoading, 
+			refetch: refetchRequests 
+		} = useQuery({
+			queryKey: ["connectionRequests"],
+			queryFn: async () => {
+				const response = await axiosInstance.get("/connections/requests");
+				return response.data;
+			},
+			enabled: !!user,
+		});
+
 
 	const connectMutation = useMutation({
 		mutationFn: async (userId) => {
@@ -75,6 +83,7 @@ const NetworkPage = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries(["connections"]);
 			queryClient.invalidateQueries(["suggestions"]);
+			queryClient.invalidateQueries(["connectionRequests"]);
 			toast.success("Demande de connexion envoyée avec succès");
 		},
 		onError: (error) => {
@@ -88,15 +97,34 @@ const NetworkPage = () => {
 			const response = await axiosInstance.post(`/connections/accept/${requestId}`);
 			return response.data;
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries(["connections"]);
-			queryClient.invalidateQueries(["connectionRequests"]);
-			queryClient.invalidateQueries(["suggestions"]);
-			toast.success("Demande de connexion acceptée");
+		onMutate: async (requestId) => {
+			console.log("🔄 onMutate - Suppression optimiste de la demande:", requestId);
+			
+			// Supprimer immédiatement de l'état local
+			setLocalConnectionRequests(prev => prev.filter(request => request._id !== requestId));
+			
+			// Annuler les requêtes en cours
+			await queryClient.cancelQueries(["connectionRequests"]);
+			
+			// Sauvegarder l'ancien état
+			const previousRequests = queryClient.getQueryData(["connectionRequests"]);
+			console.log("📦 État précédent:", previousRequests);
+			
+			return { previousRequests };
 		},
-		onError: (error) => {
+		onError: (error, requestId, context) => {
+			// Restaurer l'ancien état en cas d'erreur
+			if (context?.previousRequests) {
+				queryClient.setQueryData(["connectionRequests"], context.previousRequests);
+			}
 			console.error("Erreur lors de l'acceptation:", error);
 			toast.error(error.response?.data?.message || "Erreur lors de l'acceptation de la demande");
+		},
+		onSuccess: () => {
+			// Invalider seulement après succès pour s'assurer de la cohérence
+			queryClient.invalidateQueries(["connections"]);
+			queryClient.invalidateQueries(["suggestions"]);
+			toast.success("Demande de connexion acceptée");
 		},
 	});
 
@@ -105,14 +133,39 @@ const NetworkPage = () => {
 			const response = await axiosInstance.post(`/connections/reject/${requestId}`);
 			return response.data;
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries(["connectionRequests"]);
-			toast.success("Demande de connexion refusée");
+		onMutate: async (requestId) => {
+			console.log("🔄 onMutate - Suppression optimiste de la demande:", requestId);
+			
+			// Supprimer immédiatement de l'état local
+			setLocalConnectionRequests(prev => prev.filter(request => request._id !== requestId));
+			
+			// Annuler les requêtes en cours
+			await queryClient.cancelQueries(["connectionRequests"]);
+			
+			// Sauvegarder l'ancien état
+			const previousRequests = queryClient.getQueryData(["connectionRequests"]);
+			console.log("📦 État précédent:", previousRequests);
+			
+			return { previousRequests };
 		},
-		onError: (error) => {
+		onError: (error, requestId, context) => {
+			// Restaurer l'ancien état en cas d'erreur
+			if (context?.previousRequests) {
+				queryClient.setQueryData(["connectionRequests"], context.previousRequests);
+			}
 			toast.error(error.response?.data?.message || "Erreur lors du refus de la demande");
 		},
+		onSuccess: () => {
+			toast.success("Demande de connexion refusée");
+		},
 	});
+
+	// Synchroniser l'état local avec les données de l'API
+	useEffect(() => {
+		if (connectionRequestsData?.data?.data) {
+			setLocalConnectionRequests(connectionRequestsData.data.data);
+		}
+	}, [connectionRequestsData]);
 
 	const removeConnectionMutation = useMutation({
 		mutationFn: async (userId) => {
@@ -148,7 +201,11 @@ const NetworkPage = () => {
 
 	const connections = connectionsData || [];
 	const suggestions = suggestionsData?.data || [];
-	const connectionRequests = connectionRequestsData?.data || [];
+	const connectionRequests = localConnectionRequests.length > 0 ? localConnectionRequests : (Array.isArray(connectionRequestsData?.data?.data) ? connectionRequestsData.data.data : []);
+	console.log("connectionRequestsData", connectionRequestsData);
+	console.log("localConnectionRequests", localConnectionRequests);
+	console.log("connectionRequests final", connectionRequests);
+	console.log("connections", connections);
 
 	const handleConnect = (userId) => {
 		connectMutation.mutate(userId);
@@ -191,36 +248,16 @@ const NetworkPage = () => {
 											<button
 												onClick={() => acceptMutation.mutate(request._id)}
 												disabled={acceptMutation.isPending}
-												className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+												className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
 											>
-												{acceptMutation.isPending ? (
-													<>
-														<Loader size={16} className="animate-spin" />
-														Acceptation...
-													</>
-												) : (
-													<>
-														<Check size={16} />
-														Accepter
-													</>
-												)}
+												<Check className="inline mr-1" /> Accepter
 											</button>
 											<button
 												onClick={() => rejectMutation.mutate(request._id)}
 												disabled={rejectMutation.isPending}
-												className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+												className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
 											>
-												{rejectMutation.isPending ? (
-													<>
-														<Loader size={16} className="animate-spin" />
-														Refus...
-													</>
-												) : (
-													<>
-														<X size={16} />
-														Refuser
-													</>
-												)}
+												<X className="inline mr-1" /> Refuser
 											</button>
 										</div>
 									</div>
@@ -232,14 +269,14 @@ const NetworkPage = () => {
 
 				{/* Connexions */}
 				<div className="lg:col-span-2">
-					<h2 className="text-2xl font-bold mb-6">Mes connexions</h2>
+					<h2 className="text-2xl font-bold mb-6">Mes connexions ({connections.length})</h2>
 					<div className="bg-white rounded-lg shadow p-6">
 						{connectionsLoading ? (
 							<div className="flex items-center justify-center p-8">
 								<Spinner />
 							</div>
 						) : connections.length === 0 ? (
-							<p className="text-center text-gray-500">Aucune connexion pour le moment</p>
+							<p className="text-center text-gray-500 font-semibold text-lg">Vous n'avez aucune connexion pour le moment.<br/>Acceptez des demandes ou connectez-vous avec d'autres utilisateurs pour les voir ici.</p>
 						) : (
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{connections.map((connection) => (
@@ -259,7 +296,7 @@ const NetworkPage = () => {
 										<div className="flex gap-2">
 											<button
 												onClick={() => navigate(`/messages/${connection._id}`)}
-												className="p-2 text-blue-600 hover:text-blue-700"
+												className="p-2 text-green-600 hover:text-green-700"
 											>
 												<MessageSquare size={20} />
 											</button>
@@ -312,7 +349,7 @@ const NetworkPage = () => {
 												className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
 													suggestion.status === "pending"
 														? "bg-gray-100 text-gray-500 cursor-not-allowed"
-														: "bg-blue-50 text-blue-600 hover:bg-blue-100"
+														: "bg-green-50 text-green-600 hover:bg-green-100"
 												}`}
 											>
 												{connectMutation.isPending && suggestion._id === connectMutation.variables ? (
