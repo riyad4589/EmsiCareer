@@ -163,4 +163,4 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 
 ---
 
-**Projet réalisé dans un but pédagogique.** 
+**Projet réalisé par Majghirou Mohamed Riyad et Mohamed Azzam dans un but pédagogique.** 
