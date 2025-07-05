@@ -14,7 +14,8 @@ Ce projet est une application web complète inspirée de LinkedIn, permettant la
 - **dotenv** (gestion des variables d'environnement)
 - **CORS, cookie-parser, express-fileupload** (middlewares)
 - **@azure/storage-blob** (SDK Azure)
-
+- **bcrypt** (hachage des mots de passe)
+ 
 ### Frontend :
 - **React** (bibliothèque UI)
 - **Vite** (outil de build et dev server)
@@ -28,6 +29,7 @@ Ce projet est une application web complète inspirée de LinkedIn, permettant la
 - **MongoDB Atlas** (ou instance locale)
 - **Azure Blob Storage** (hébergement d'images et de fichiers)
 - **SMTP (Gmail, Mailtrap, etc.)** pour l'envoi d'e-mails
+- **Azure App Service** (hébergement du backend ou frontend)
 
 ## 3. Installation, configuration et commandes d'exécution (de A à Z)
 
@@ -129,7 +131,7 @@ node createLeaureat3.js
 
 ## 6. Acteurs de l'application et leurs fonctionnalités
 
-### 1. Utilisateur (Lauréat)
+### 1. 👩‍🎓 Utilisateur (Lauréat)
 - Créer et gérer son profil (informations, expérience, éducation, compétences, CV)
 - Publier, commenter, aimer des posts
 - Envoyer et accepter des demandes de connexion
@@ -137,14 +139,14 @@ node createLeaureat3.js
 - Messagerie temps réel avec d'autres utilisateurs
 - Recevoir des notifications (nouvelle offre, message, etc.)
 
-### 2. Recruteur
+### 2. 🏢  Recruteur
 - Créer et gérer des offres d'emploi
 - Gérer les candidatures reçues (accepter, refuser)
 - Consulter les profils des candidats
 - Messagerie temps réel avec les candidats
 - Statistiques sur les offres et candidatures
 
-### 3. Administrateur
+### 3. 🛡️ Administrateur
 - Valider ou rejeter les nouveaux comptes utilisateurs
 - Gérer tous les utilisateurs (modification, suppression)
 - Gérer tous les posts (modification, suppression)
