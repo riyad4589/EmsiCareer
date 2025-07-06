@@ -163,7 +163,7 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 - **createLeaureat2.js** : Crée un autre compte lauréat avec des données différentes.
 - **createLeaureat3.js** : Crée un troisième compte lauréat avec des données différentes.
 
-## 8. ## 📸 Aperçu visuel de la plateforme
+## 8. 📸 Aperçu visuel de la plateforme
 
 ### 📝 Page d’inscription
 > Interface claire pour créer un compte lauréat, recruteur ou administrateur.
@@ -221,11 +221,11 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 ---
 
 ## 9. 👥 Contributeurs
-Mohamed Azzam
+**Mohamed Azzam**
 Développeur Backend – Intégration de la base de données, sécurisation des routes API, déploiement sur Azure et gestion du stockage cloud.
 GitHub : @azzammoo10
 
-Majhirou Mohamed Riyad
+**Majhirou Mohamed Riyad**
 Développeur Frontend – Conception de l’interface utilisateur avec React & Tailwind, expérience utilisateur (UI/UX) et intégration des pages dynamiques.
 GitHub : @riyad4589
 
