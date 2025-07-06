@@ -229,7 +229,6 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 - ☁️ Déploiement sur Azure & gestion du stockage cloud  
 - 🧰 GitHub : [@azzammoo10](https://github.com/azzammoo10)
 
----
 
 ### 🎨 Majhirou Mohamed Riyad  
 **Développeur Frontend**  
