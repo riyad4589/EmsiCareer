@@ -163,6 +163,72 @@ Le dossier `backend/script-users/` contient des scripts pour initialiser rapidem
 - **createLeaureat2.js** : Crée un autre compte lauréat avec des données différentes.
 - **createLeaureat3.js** : Crée un troisième compte lauréat avec des données différentes.
 
+## 8. ## 📸 Aperçu visuel de la plateforme
+
+### 📝 Page d’inscription
+> Interface claire pour créer un compte lauréat, recruteur ou administrateur.
+![Page d’inscription](./assets/SignUp_Page.png)
+
+---
+
+### 📧 Email de confirmation
+> Email automatique envoyé après inscription avec message de validation.
+![Email de confirmation](./assets/confirmation_mail.png)
+
+---
+### 🔐 Page de connexion
+> Interface sécurisée pour se connecter avec vérification des rôles et gestion des erreurs.
+![Page de connexion](./assets/Login_Page.png)
+---
+### 👤 Profil lauréat validé
+> Exemple de profil complet avec informations, expériences et réseaux.
+![Profil utilisateur](./assets/profil_valide.png)
+
+---
+### 💬 Assistant virtuel EMSI (Chatbot)
+> Chatbot intelligent intégré à la plateforme pour guider les utilisateurs en temps réel. Il fournit des réponses rapides, des messages de bienvenue, des informations sur la plateforme, et renforce l’aspect interactif du portail.
+![Assistant virtuel EMSI – Chatbot intégré](./assets/chatboot.png)
+
+---
+
+### 💼 Offres d’emploi – Côté Lauréat
+> Liste des offres disponibles avec compétences requises et option de postulation directe.
+![Offres pour le lauréat](./assets/offres_emploi.png)
+
+---
+### 📊 Tableau de bord Recruteur
+> Statistiques et répartition des candidatures reçues.
+![Dashboard Recruteur](./assets/dashboard_recruteur.png)
+
+---
+
+### 🧩 Gestion des offres – Côté Recruteur
+> Interface intuitive pour ajouter, modifier et gérer ses offres d’emploi.
+![Gestion des offres recruteur](./assets/gestion_desOffre_Recruteur.png)
+
+---
+
+### 🛡️ Dashboard Administrateur
+> Vue centralisée de supervision : utilisateurs, recruteurs, offres et validation des comptes.
+![Dashboard Admin](./assets/dashboard_admin.png)
+
+---
+
+### 🗃️ Gestion des Offres – Côté Administrateur
+> Liste complète des offres créées par les recruteurs avec filtres et actions.
+![Gestion offres admin](./assets/gestion_desOffre_admin.png)
+
+---
+
+## 9. 👥 Contributeurs
+Mohamed Azzam
+Développeur Backend – Intégration de la base de données, sécurisation des routes API, déploiement sur Azure et gestion du stockage cloud.
+GitHub : @azzammoo10
+
+Majhirou Mohamed Riyad
+Développeur Frontend – Conception de l’interface utilisateur avec React & Tailwind, expérience utilisateur (UI/UX) et intégration des pages dynamiques.
+GitHub : @riyad4589
+
 ---
 
 ## Documentation
